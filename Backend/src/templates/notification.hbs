@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f6;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .header {
+      background-color: #002b5e;
+      color: #ffffff;
+      padding: 24px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .system {
+      font-size: 14px;
+      color: #b0c4de;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .content {
+      padding: 32px;
+      color: #333333;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 24px;
+      color: #002b5e;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 12px;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .info-row {
+      display: flex;
+      flex-direction: column;
+    }
+    .label {
+      font-size: 12px;
+      color: #666666;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .value {
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .action {
+      background-color: #f8f9fa;
+      padding: 16px;
+      border-left: 4px solid #002b5e;
+      margin-top: 24px;
+      border-radius: 4px;
+    }
+    .action-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: #002b5e;
+      margin-bottom: 8px;
+    }
+    .footer {
+      background-color: #f8f9fa;
+      padding: 24px;
+      text-align: center;
+      color: #888888;
+      font-size: 12px;
+      border-top: 1px solid #eeeeee;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">FORTRESS BANKING</div>
+      <div class="system">Loan Origination System</div>
+    </div>
+    
+    <div class="content">
+      <div class="title">{{title}}</div>
+      
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="label">Customer Name</span>
+          <span class="value">{{customerName}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Application Number</span>
+          <span class="value">{{applicationNumber}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Status</span>
+          <span class="value">{{status}}</span>
+        </div>
+      </div>
+
+      <div class="action">
+        <div class="action-label">Action Taken:</div>
+        <div class="action-text">{{actionTaken}}</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Automated Enterprise Notification<br>
+      © Fortress Banking. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>
