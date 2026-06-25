@@ -78,6 +78,13 @@ export const api = {
       body: JSON.stringify(body),
     }),
     
+  patch: <T = any>(endpoint: string, body: any, options?: RequestInit) =>
+    request<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
+    
   delete: <T = any>(endpoint: string, options?: RequestInit) =>
     request<T>(endpoint, { ...options, method: 'DELETE' }),
 };

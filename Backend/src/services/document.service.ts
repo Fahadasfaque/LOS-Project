@@ -49,7 +49,7 @@ export class DocumentService {
     });
 
     // Audit log the document submission
-    await auditLogService.logAction(
+    await auditLogService.logAction( 
       userId,
       'DOCUMENT_UPLOADED',
       `Uploaded document reference ${doc.originalName} (${doc.documentType}) for loan application ${app.applicationNumber}`
