@@ -57,6 +57,8 @@ model User {
   password         String
   firstName        String
   lastName         String
+  phone            String?
+  department       String?
   role             Role              @default(LOAN_OFFICER)
   isActive         Boolean           @default(true)
   createdAt        DateTime          @default(now())

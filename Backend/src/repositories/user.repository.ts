@@ -39,6 +39,8 @@ export class UserRepository {
         email: true,
         firstName: true,
         lastName: true,
+        phone: true,
+        department: true,
         role: true,
         isActive: true,
         createdAt: true,
@@ -47,6 +49,24 @@ export class UserRepository {
       orderBy: {
         createdAt: 'desc',
       },
+    });
+  }
+  /**
+   * Update a user record
+   */
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+    return prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
+
+  /**
+   * Delete a user record
+   */
+  async delete(id: string): Promise<User> {
+    return prisma.user.delete({
+      where: { id },
     });
   }
 }

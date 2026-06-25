@@ -13,6 +13,7 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table';
+import { UserTableActions } from './UserTableActions';
 import {
   Dialog,
   DialogContent,
@@ -455,6 +456,7 @@ export default function UserManagementPage() {
                   <TableHead className="text-muted-foreground font-semibold text-xs uppercase tracking-wider py-4 px-6">Role</TableHead>
                   <TableHead className="text-muted-foreground font-semibold text-xs uppercase tracking-wider py-4 px-6">Status</TableHead>
                   <TableHead className="text-muted-foreground font-semibold text-xs uppercase tracking-wider py-4 px-6">Created On</TableHead>
+                  <TableHead className="text-right text-muted-foreground font-semibold text-xs uppercase tracking-wider py-4 px-6">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -466,11 +468,12 @@ export default function UserManagementPage() {
                       <TableCell className="py-4 px-6"><div className="h-6 w-24 bg-muted rounded animate-pulse" /></TableCell>
                       <TableCell className="py-4 px-6"><div className="h-6 w-16 bg-muted rounded animate-pulse" /></TableCell>
                       <TableCell className="py-4 px-6"><div className="h-4 w-24 bg-muted rounded animate-pulse" /></TableCell>
+                      <TableCell className="py-4 px-6"><div className="h-8 w-8 ml-auto bg-muted rounded animate-pulse" /></TableCell>
                     </TableRow>
                   ))
                 ) : paginatedUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-20 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="py-20 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center">
                         <UserPlus className="h-10 w-10 text-muted-foreground/30 mb-4" />
                         <h3 className="text-lg font-medium text-foreground">No users found</h3>
@@ -510,6 +513,9 @@ export default function UserManagementPage() {
                       </TableCell>
                       <TableCell className="text-muted-foreground text-xs font-mono py-4 px-6">
                         {new Date(item.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="py-4 px-6 text-right">
+                        <UserTableActions user={item} onActionComplete={fetchUsers} />
                       </TableCell>
                     </TableRow>
                   ))

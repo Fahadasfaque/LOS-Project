@@ -75,3 +75,101 @@ export async function getUserById(
     next(error);
   }
 }
+/**
+ * Updates a user's details.
+ * Allowed: SUPER_ADMIN
+ */
+export async function updateUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = req.params.id as string;
+    const adminId = req.user!.id;
+    const data = req.body;
+    const user = await userService.updateUser(adminId, id, data);
+    sendSuccess(res, 'User updated successfully', user);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Changes a user's role.
+ * Allowed: SUPER_ADMIN
+ */
+export async function changeRole(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = req.params.id as string;
+    const adminId = req.user!.id;
+    const { role } = req.body;
+    const user = await userService.changeRole(adminId, id, role);
+    sendSuccess(res, 'User role updated successfully', user);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Updates a user's active status.
+ * Allowed: SUPER_ADMIN
+ */
+export async function updateStatus(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = req.params.id as string;
+    const adminId = req.user!.id;
+    const { isActive, reason } = req.body;
+    const user = await userService.updateStatus(adminId, id, isActive, reason);
+    sendSuccess(res, `User ${isActive ? 'activated' : 'deactivated'} successfully`, user);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Resets a user's password.
+ * Allowed: SUPER_ADMIN
+ */
+export async function resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = req.params.id as string;
+    const adminId = req.user!.id;
+    const { newPassword } = req.body;
+    await userService.resetPassword(adminId, id, newPassword);
+    sendSuccess(res, 'User password reset successfully');
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Deletes a user.
+ * Allowed: SUPER_ADMIN
+ */
+export async function deleteUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = req.params.id as string;
+    const adminId = req.user!.id;
+    await userService.deleteUser(adminId, id);
+    sendSuccess(res, 'User deleted successfully');
+  } catch (error) {
+    next(error);
+  }
+}

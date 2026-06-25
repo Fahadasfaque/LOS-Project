@@ -54,6 +54,36 @@ router.get(
   authenticate,
   userController.getUserById
 );
+router.put(
+  '/users/:id',
+  authenticate,
+  requireRole([Role.SUPER_ADMIN]),
+  userController.updateUser
+);
+router.patch(
+  '/users/:id/role',
+  authenticate,
+  requireRole([Role.SUPER_ADMIN]),
+  userController.changeRole
+);
+router.patch(
+  '/users/:id/status',
+  authenticate,
+  requireRole([Role.SUPER_ADMIN]),
+  userController.updateStatus
+);
+router.patch(
+  '/users/:id/reset-password',
+  authenticate,
+  requireRole([Role.SUPER_ADMIN]),
+  userController.resetPassword
+);
+router.delete(
+  '/users/:id',
+  authenticate,
+  requireRole([Role.SUPER_ADMIN]),
+  userController.deleteUser
+);
 
 /**
  * Audit Compliance Endpoints
