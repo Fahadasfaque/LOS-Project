@@ -87,7 +87,7 @@ export class LoanApplicationService {
     await auditLogService.logAction(
       userId,
       'LOAN_APPLICATION_CREATE',
-      `Created loan application ${app.applicationNumber} in DRAFT status for ${app.applicantName}`
+      `Created loan application ${app.applicationNumber} in DRAFT status for ${app.applicantName}.`
     );
 
     return app;
@@ -99,11 +99,11 @@ export class LoanApplicationService {
   async updateApplication(userId: string, id: string, data: Partial<CreateAppInput>): Promise<any> {
     const app = await this.repository.findById(id);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
 
     if (app.status !== 'DRAFT') {
-      throw new BadRequestError('Only applications in DRAFT status can be modified');
+      throw new BadRequestError('Only applications in DRAFT status can be modified.');
     }
 
     const updateData: any = {};
@@ -124,7 +124,7 @@ export class LoanApplicationService {
     await auditLogService.logAction(
       userId,
       'LOAN_APPLICATION_UPDATE',
-      `Updated loan application details for ${updated.applicationNumber}`
+      `Updated loan application details for ${updated.applicationNumber}.`
     );
 
     return updated;
@@ -141,7 +141,7 @@ export class LoanApplicationService {
   async getApplicationById(id: string, userId: string, role: Role): Promise<any> {
     const app = await this.repository.findById(id);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
 
     // Role access limits: Loan Officers cannot view details of loans created by others
@@ -163,7 +163,7 @@ export class LoanApplicationService {
     await auditLogService.logAction(
       userId,
       'LOAN_APPLICATION_VIEW',
-      `Viewed details of application ${app.applicationNumber} (PAN masked for role: ${role})`
+      `Viewed details of application ${app.applicationNumber} (PAN masked for role: ${role}).`
     );
 
     return app;
@@ -175,11 +175,11 @@ export class LoanApplicationService {
   async submitApplication(userId: string, id: string): Promise<any> {
     const app = await this.repository.findById(id);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
 
     if (!isValidTransition(app.status, 'SUBMITTED')) {
-      throw new BadRequestError(`Cannot transition application status from ${app.status} to SUBMITTED`);
+      throw new BadRequestError(`Cannot transition application status from ${app.status} to SUBMITTED.`);
     }
 
     const updated = await this.repository.updateStatusWithHistory(
@@ -192,7 +192,7 @@ export class LoanApplicationService {
     await auditLogService.logAction(
       userId,
       'LOAN_APPLICATION_SUBMIT',
-      `Submitted application ${updated.applicationNumber} (Transitioned DRAFT -> SUBMITTED)`
+      `Submitted application ${updated.applicationNumber} (Transitioned DRAFT -> SUBMITTED).`
     );
 
     return updated;
@@ -201,11 +201,11 @@ export class LoanApplicationService {
   async updateStatus(userId: string, role: Role, id: string, newStatus: LoanStatus): Promise<any> {
     const app = await this.repository.findById(id);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
 
     if (!isValidTransition(app.status, newStatus)) {
-      throw new BadRequestError(`Cannot transition application status from ${app.status} to ${newStatus}`);
+      throw new BadRequestError(`Cannot transition application status from ${app.status} to ${newStatus}.`);
     }
 
     // Role-based transition restrictions

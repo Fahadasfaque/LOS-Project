@@ -17,7 +17,7 @@ export async function uploadDocument(
     const userId = req.user!.id;
     const file = req.file;
     if (!file) {
-      throw new Error('File is required');
+      throw new Error('File is required.');
     }
 
     const { applicationId, documentType } = req.body;
@@ -29,7 +29,7 @@ export async function uploadDocument(
       originalFilename: file.originalname,
     });
     
-    sendSuccess(res, 'Document uploaded successfully', result, 201);
+    sendSuccess(res, 'Document uploaded successfully.', result, 201);
   } catch (error) {
     next(error);
   }
@@ -45,7 +45,7 @@ export async function deleteDocument(
     const publicId = req.params.publicId as string;
     
     await documentService.deleteDocument(userId, publicId);
-    sendSuccess(res, 'Document deleted successfully', null);
+    sendSuccess(res, 'Document deleted successfully.', null);
   } catch (error) {
     next(error);
   }
@@ -62,7 +62,7 @@ export async function updateDocumentStatus(
     const { status } = req.body;
     
     const result = await documentService.updateDocumentStatus(userId, id, status);
-    sendSuccess(res, 'Document verification status updated', result);
+    sendSuccess(res, 'Document verification status updated.', result);
   } catch (error) {
     next(error);
   }

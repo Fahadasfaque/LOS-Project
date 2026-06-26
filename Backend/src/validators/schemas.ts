@@ -6,21 +6,21 @@ import { Role, LoanStatus, DocumentStatus, LoanType, EmploymentType, DocumentTyp
  */
 export const loginSchema = z.object({
   body: z.object({
-    email: z.string().email('Must be a valid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters long'),
+    email: z.string().email('Must be a valid email address.'),
+    password: z.string().min(6, 'Password must be at least 6 characters long.'),
   }),
 });
 
 export const requestOtpSchema = z.object({
   body: z.object({
-    email: z.string().email('Must be a valid email address'),
+    email: z.string().email('Must be a valid email address.'),
   }),
 });
 
 export const verifyOtpSchema = z.object({
   body: z.object({
-    email: z.string().email('Must be a valid email address'),
-    code: z.string().length(6, 'OTP must be exactly 6 digits'),
+    email: z.string().email('Must be a valid email address.'),
+    code: z.string().length(6, 'OTP must be exactly 6 digits.'),
   }),
 });
 
@@ -29,12 +29,12 @@ export const verifyOtpSchema = z.object({
  */
 export const createUserSchema = z.object({
   body: z.object({
-    email: z.string().email('Must be a valid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters long'),
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
+    email: z.string().email('Must be a valid email address.'),
+    password: z.string().min(6, 'Password must be at least 6 characters long.'),
+    firstName: z.string().min(1, 'First name is required.'),
+    lastName: z.string().min(1, 'Last name is required.'),
     role: z.nativeEnum(Role, {
-      message: 'Role must be SUPER_ADMIN, LOAN_OFFICER, CREDIT_ANALYST, or APPROVER',
+      message: 'Role must be SUPER_ADMIN, LOAN_OFFICER, CREDIT_ANALYST, or APPROVER.',
     }),
   }),
 });
@@ -44,17 +44,17 @@ export const createUserSchema = z.object({
  */
 export const createApplicationSchema = z.object({
   body: z.object({
-    applicantName: z.string().min(1, 'Applicant name is required'),
-    email: z.string().email('Must be a valid email address'),
-    phone: z.string().min(10, 'Phone number must be at least 10 digits'),
-    pan: z.string().length(10, 'PAN card number must be exactly 10 characters').regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i, 'Invalid PAN card format (expected: ABCDE1234F)'),
+    applicantName: z.string().min(1, 'Applicant name is required.'),
+    email: z.string().email('Must be a valid email address.'),
+    phone: z.string().min(10, 'Phone number must be at least 10 digits.'),
+    pan: z.string().length(10, 'PAN card number must be exactly 10 characters.').regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i, 'Invalid PAN card format (expected: ABCDE1234F).'),
     loanType: z.nativeEnum(LoanType, {
-      message: 'LoanType must be PERSONAL, HOME, AUTO, BUSINESS, or EDUCATION',
+      message: 'LoanType must be PERSONAL, HOME, AUTO, BUSINESS, or EDUCATION.',
     }),
-    loanAmount: z.number().positive('Loan amount must be a positive number'),
-    monthlyIncome: z.number().positive('Monthly income must be a positive number'),
+    loanAmount: z.number().positive('Loan amount must be a positive number.'),
+    monthlyIncome: z.number().positive('Monthly income must be a positive number.'),
     employmentType: z.nativeEnum(EmploymentType, {
-      message: 'EmploymentType must be SALARIED, SELF_EMPLOYED, or BUSINESS_OWNER',
+      message: 'EmploymentType must be SALARIED, SELF_EMPLOYED, or BUSINESS_OWNER.',
     }),
   }),
 });
@@ -81,7 +81,7 @@ export const updateApplicationSchema = z.object({
 export const updateStatusSchema = z.object({
   body: z.object({
     status: z.nativeEnum(LoanStatus, {
-      message: 'Status must be DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, or DISBURSED',
+      message: 'Status must be DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, or DISBURSED.',
     }),
   }),
 });
@@ -91,11 +91,11 @@ export const updateStatusSchema = z.object({
  */
 export const uploadDocumentSchema = z.object({
   body: z.object({
-    applicationId: z.string().uuid('Application ID must be a valid UUID'),
+    applicationId: z.string().uuid('Application ID must be a valid UUID.'),
     documentType: z.nativeEnum(DocumentType, {
-      message: 'DocumentType must be PAN, AADHAAR, SALARY_SLIP, or BANK_STATEMENT',
+      message: 'DocumentType must be PAN, AADHAAR, SALARY_SLIP, or BANK_STATEMENT.',
     }),
-    fileName: z.string().min(1, 'File name is required'),
+    fileName: z.string().min(1, 'File name is required.'),
   }),
 });
 
@@ -105,7 +105,7 @@ export const uploadDocumentSchema = z.object({
 export const updateDocumentStatusSchema = z.object({
   body: z.object({
     status: z.nativeEnum(DocumentStatus, {
-      message: 'Status must be PENDING, VERIFIED, or REJECTED',
+      message: 'Status must be PENDING, VERIFIED, or REJECTED.',
     }),
   }),
 });
@@ -118,8 +118,8 @@ export type CreateAppType = z.infer<typeof createApplicationSchema>['body'];
  */
 export const createAssessmentSchema = z.object({
   body: z.object({
-    applicationId: z.string().uuid('Application ID must be a valid UUID'),
-    assessmentNotes: z.string().min(1, 'Assessment notes are required'),
+    applicationId: z.string().uuid('Application ID must be a valid UUID.'),
+    assessmentNotes: z.string().min(1, 'Assessment notes are required.'),
   }),
 });
 
@@ -128,9 +128,9 @@ export const createAssessmentSchema = z.object({
  */
 export const generateOfferSchema = z.object({
   body: z.object({
-    applicationId: z.string().uuid('Application ID must be a valid UUID'),
-    interestRate: z.number().positive('Interest rate must be a positive number'),
-    tenureMonths: z.number().int().positive('Tenure must be a positive integer'),
+    applicationId: z.string().uuid('Application ID must be a valid UUID.'),
+    interestRate: z.number().positive('Interest rate must be a positive number.'),
+    tenureMonths: z.number().int().positive('Tenure must be a positive integer.'),
   }),
 });
 
@@ -139,7 +139,7 @@ export const generateOfferSchema = z.object({
  */
 export const acceptOfferSchema = z.object({
   body: z.object({
-    applicationId: z.string().uuid('Application ID must be a valid UUID'),
+    applicationId: z.string().uuid('Application ID must be a valid UUID.'),
   }),
 });
 
@@ -148,7 +148,7 @@ export const acceptOfferSchema = z.object({
  */
 export const disburseLoanSchema = z.object({
   body: z.object({
-    applicationId: z.string().uuid('Application ID must be a valid UUID'),
+    applicationId: z.string().uuid('Application ID must be a valid UUID.'),
   }),
 });
 

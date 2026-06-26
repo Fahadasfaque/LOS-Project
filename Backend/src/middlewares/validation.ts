@@ -34,7 +34,7 @@ export function validateRequest(schema: ZodSchema) {
           field: err.path.slice(1).join('.') || 'root', // Remove the outer 'body'/'query'/'params' container
           message: err.message,
         }));
-        next(new BadRequestError('Request validation failed', validationErrors));
+        next(new BadRequestError('Request validation failed.', validationErrors));
       } else {
         next(error);
       }

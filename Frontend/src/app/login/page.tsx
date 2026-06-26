@@ -25,9 +25,9 @@ import {
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().optional().refine(val => !val || val.length >= 6, 'Password must be at least 6 characters'),
-  otp: z.string().optional().refine(val => !val || val.length === 6, 'OTP must be exactly 6 digits'),
+  email: z.string().email('Please enter a valid email address.'),
+  password: z.string().optional().refine(val => !val || val.length >= 6, 'Password must be at least 6 characters.'),
+  otp: z.string().optional().refine(val => !val || val.length === 6, 'OTP must be exactly 6 digits.'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;

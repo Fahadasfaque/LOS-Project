@@ -40,22 +40,22 @@ export default function CreateApplicationPage() {
     const errors: Record<string, string> = {};
     
     if (stepIndex === 0) {
-      if (!applicantName.trim()) errors.applicantName = 'Applicant name is required';
-      if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) errors.email = 'Valid email is required';
-      if (!phone.trim() || !/^\d{10}$/.test(phone)) errors.phone = 'Phone number must be 10 digits';
-      if (!pan.trim() || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(pan)) errors.pan = 'PAN must be 10 characters (e.g. ABCDE1234F)';
+      if (!applicantName.trim()) errors.applicantName = 'Applicant name is required.';
+      if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) errors.email = 'Valid email is required.';
+      if (!phone.trim() || !/^\d{10}$/.test(phone)) errors.phone = 'Phone number must be 10 digits.';
+      if (!pan.trim() || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(pan)) errors.pan = 'PAN must be 10 characters (e.g. ABCDE1234F).';
     }
 
     if (stepIndex === 1) {
-      if (!loanType) errors.loanType = 'Loan type is required';
-      if (!employmentType) errors.employmentType = 'Employment type is required';
+      if (!loanType) errors.loanType = 'Loan type is required.';
+      if (!employmentType) errors.employmentType = 'Employment type is required.';
     }
 
     if (stepIndex === 2) {
       const amt = parseFloat(loanAmount);
-      if (isNaN(amt) || amt <= 0) errors.loanAmount = 'Positive number required';
+      if (isNaN(amt) || amt <= 0) errors.loanAmount = 'Positive number required.';
       const income = parseFloat(monthlyIncome);
-      if (isNaN(income) || income < 0) errors.monthlyIncome = 'Positive number required';
+      if (isNaN(income) || income < 0) errors.monthlyIncome = 'Positive number required.';
     }
 
     setValidationErrors(errors);

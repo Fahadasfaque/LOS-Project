@@ -25,8 +25,8 @@ export async function disburseLoan(
 
     emailService.sendNotification({
       to: app.email, // Notify Customer
-      subject: `Confirmation: Loan Funds Disbursed (Ref: ${result.referenceNumber})`,
-      title: 'Disbursement Completed',
+      subject: `Confirmation: Loan Funds Disbursed (Ref: ${result.referenceNumber}).`,
+      title: 'Disbursement Completed.',
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,
       status: 'DISBURSED',
@@ -35,7 +35,7 @@ export async function disburseLoan(
       userId,
     });
 
-    sendSuccess(res, 'Loan disbursed successfully', result, 201);
+    sendSuccess(res, 'Loan disbursed successfully.', result, 201);
   } catch (error) {
     next(error);
   }

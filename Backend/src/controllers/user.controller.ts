@@ -20,7 +20,7 @@ export async function createUser(
   try {
     const adminId = req.user!.id;
     const user = await userService.createUser(adminId, req.body);
-    sendSuccess(res, 'User profile created successfully', user, 201);
+    sendSuccess(res, 'User profile created successfully.', user, 201);
   } catch (error) {
     next(error);
   }
@@ -41,7 +41,7 @@ export async function getAllUsers(
 ): Promise<void> {
   try {
     const users = await userService.getAllUsers();
-    sendSuccess(res, 'List of users retrieved', users);
+    sendSuccess(res, 'List of users retrieved.', users);
   } catch (error) {
     next(error);
   }
@@ -66,11 +66,11 @@ export async function getUserById(
 
     // Client-level RBAC: Users are only permitted to query their own records, unless they are SUPER_ADMIN
     if (requestor.role !== Role.SUPER_ADMIN && requestor.id !== id) {
-      throw new ForbiddenError('Access denied: You cannot view another user\'s profile');
+      throw new ForbiddenError('Access denied: You cannot view another user\'s profile.');
     }
 
     const user = await userService.getUserById(id);
-    sendSuccess(res, 'User profile details retrieved', user);
+    sendSuccess(res, 'User profile details retrieved.', user);
   } catch (error) {
     next(error);
   }
@@ -89,7 +89,7 @@ export async function updateUser(
     const adminId = req.user!.id;
     const data = req.body;
     const user = await userService.updateUser(adminId, id, data);
-    sendSuccess(res, 'User updated successfully', user);
+    sendSuccess(res, 'User updated successfully.', user);
   } catch (error) {
     next(error);
   }
@@ -109,7 +109,7 @@ export async function changeRole(
     const adminId = req.user!.id;
     const { role } = req.body;
     const user = await userService.changeRole(adminId, id, role);
-    sendSuccess(res, 'User role updated successfully', user);
+    sendSuccess(res, 'User role updated successfully.', user);
   } catch (error) {
     next(error);
   }
@@ -129,7 +129,7 @@ export async function updateStatus(
     const adminId = req.user!.id;
     const { isActive, reason } = req.body;
     const user = await userService.updateStatus(adminId, id, isActive, reason);
-    sendSuccess(res, `User ${isActive ? 'activated' : 'deactivated'} successfully`, user);
+    sendSuccess(res, `User ${isActive ? 'activated' : 'deactivated'} successfully.`, user);
   } catch (error) {
     next(error);
   }
@@ -149,7 +149,7 @@ export async function resetPassword(
     const adminId = req.user!.id;
     const { newPassword } = req.body;
     await userService.resetPassword(adminId, id, newPassword);
-    sendSuccess(res, 'User password reset successfully');
+    sendSuccess(res, 'User password reset successfully.');
   } catch (error) {
     next(error);
   }
@@ -168,7 +168,7 @@ export async function deleteUser(
     const id = req.params.id as string;
     const adminId = req.user!.id;
     await userService.deleteUser(adminId, id);
-    sendSuccess(res, 'User deleted successfully');
+    sendSuccess(res, 'User deleted successfully.');
   } catch (error) {
     next(error);
   }

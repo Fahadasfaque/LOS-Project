@@ -339,7 +339,7 @@ export default function ApplicationDetailsPage() {
   const handleDocumentUpload = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!selectedFile) {
-      toast.error('Please select a file to upload');
+      toast.error('Please select a file to upload.');
       return;
     }
 
@@ -511,20 +511,20 @@ export default function ApplicationDetailsPage() {
       events.push({
         id: `status-${hist.id}`,
         type: 'STATUS_CHANGE',
-        title: hist.newStatus === 'DRAFT' ? 'Application Drafted' :
-          hist.newStatus === 'SUBMITTED' ? 'Application Submitted' :
-            hist.newStatus === 'UNDER_REVIEW' ? 'Under Review Started' :
-              hist.newStatus === 'APPROVED' ? 'Application Approved' :
-                hist.newStatus === 'OFFER_GENERATED' ? 'Lending Offer Generated' :
-                  hist.newStatus === 'OFFER_ACCEPTED' ? 'Customer Acceptance Recorded' :
-                    hist.newStatus === 'REJECTED' ? 'Application Rejected' :
-                      hist.newStatus === 'DISBURSED' ? 'Funds Disbursed' :
+        title: hist.newStatus === 'DRAFT' ? 'Application Drafted.' :
+          hist.newStatus === 'SUBMITTED' ? 'Application Submitted.' :
+            hist.newStatus === 'UNDER_REVIEW' ? 'Under Review Started.':
+              hist.newStatus === 'APPROVED' ? 'Application Approved.' :
+                hist.newStatus === 'OFFER_GENERATED' ? 'Lending Offer Generated.' :
+                  hist.newStatus === 'OFFER_ACCEPTED' ? 'Customer Acceptance Recorded.' :
+                    hist.newStatus === 'REJECTED' ? 'Application Rejected.' :
+                      hist.newStatus === 'DISBURSED' ? 'Funds Disbursed.' :
                         `Status Changed: ${hist.newStatus}`,
         timestamp: hist.changedAt,
         changedBy: hist.changedBy,
         description: hist.oldStatus
-          ? `Workflow status updated from ${hist.oldStatus} to ${hist.newStatus}`
-          : `Application initialized as ${hist.newStatus}`,
+          ? `Workflow status updated from ${hist.oldStatus} to ${hist.newStatus}.`
+          : `Application initialized as ${hist.newStatus}.`,
         badgeColor: hist.newStatus === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
           hist.newStatus === 'REJECTED' ? 'bg-rose-500/10 text-rose-600 border border-rose-500/20' :
             hist.newStatus === 'DISBURSED' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' :
@@ -539,10 +539,10 @@ export default function ApplicationDetailsPage() {
       events.push({
         id: `assessment-${app.assessment.id}`,
         type: 'ASSESSMENT_COMPLETED',
-        title: 'Credit Underwriting Locked',
+        title: 'Credit Underwriting Locked.',
         timestamp: app.assessment.assessedAt,
         changedBy: app.assessment.assessedBy,
-        description: `Credit Score: ${app.assessment.creditScore} (${app.assessment.riskLevel} Risk). Recommendation: ${app.assessment.recommendation}`,
+        description: `Credit Score: ${app.assessment.creditScore} (${app.assessment.riskLevel} Risk). Recommendation: ${app.assessment.recommendation}.`,
         badgeColor: 'bg-muted text-muted-foreground border border-border'
       });
     }
@@ -552,10 +552,10 @@ export default function ApplicationDetailsPage() {
       events.push({
         id: `offer-gen-${app.offer.id}`,
         type: 'OFFER_GENERATED',
-        title: 'Loan Offer Generated',
+        title: 'Loan Offer Generated.',
         timestamp: app.offer.generatedAt,
         changedBy: null,
-        description: `Offer details: ${formatCurrency(app.offer.loanAmount)} at ${app.offer.interestRate}% interest, ${app.offer.tenureMonths} months tenure, Monthly EMI: ${formatCurrency(app.offer.emiAmount)}`,
+        description: `Offer details: ${formatCurrency(app.offer.loanAmount)} at ${app.offer.interestRate}% interest, ${app.offer.tenureMonths} months tenure, Monthly EMI: ${formatCurrency(app.offer.emiAmount)}.`,
         badgeColor: 'bg-blue-500/10 text-blue-600 border border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400'
       });
 
@@ -564,10 +564,10 @@ export default function ApplicationDetailsPage() {
         events.push({
           id: `offer-acc-${app.offer.id}`,
           type: 'CUSTOMER_ACCEPTANCE',
-          title: 'Customer Acceptance Recorded',
+          title: 'Customer Acceptance Recorded.',
           timestamp: app.offer.acceptedAt,
           changedBy: null,
-          description: `Lending terms accepted by client. Monthly EMI: ${formatCurrency(app.offer.emiAmount)}`,
+          description: `Lending terms accepted by client. Monthly EMI: ${formatCurrency(app.offer.emiAmount)}.`,
           badgeColor: 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
         });
       }
@@ -650,7 +650,7 @@ export default function ApplicationDetailsPage() {
                   onClick={() => handleStatusTransition('APPROVED')}
                   disabled={actionLoading || !app.assessment || app.assessment.status !== 'COMPLETED'}
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                  title={(!app.assessment || app.assessment.status !== 'COMPLETED') ? "Assessment must be completed first" : ""}
+                  title={(!app.assessment || app.assessment.status !== 'COMPLETED') ? "Assessment must be completed first." : ""}
                 >
                   Approve Loan
                 </Button>

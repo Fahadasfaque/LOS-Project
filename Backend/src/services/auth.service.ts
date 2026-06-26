@@ -45,10 +45,10 @@ export class AuthService {
       await auditLogService.logAction(
         undefined,
         'USER_LOGIN_FAILED',
-        `Failed login attempt for non-existent email: ${email}`,
+        `Failed login attempt for non-existent email: ${email}.`,
         ipAddress
       );
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError('Invalid email or password.');
     }
 
     if (!user.isActive) {
@@ -56,7 +56,7 @@ export class AuthService {
       await auditLogService.logAction(
         user.id,
         'USER_LOGIN_FAILED',
-        `Failed login attempt for inactive account: ${user.email}`,
+        `Failed login attempt for inactive account: ${user.email}.`,
         ipAddress
       );
       throw new UnauthorizedError('Account is inactive. Please contact administration.');
@@ -69,10 +69,10 @@ export class AuthService {
       await auditLogService.logAction(
         user.id,
         'USER_LOGIN_FAILED',
-        `Failed login attempt (incorrect password) for user: ${user.email}`,
+        `Failed login attempt (incorrect password) for user: ${user.email}.`,
         ipAddress
       );
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError('Invalid email or password.');
     }
 
     // Generate JWT
@@ -87,7 +87,7 @@ export class AuthService {
     await auditLogService.logAction(
       user.id,
       'USER_LOGIN',
-      `User ${user.email} successfully logged in`,
+      `User ${user.email} successfully logged in.`,
       ipAddress
     );
 
@@ -110,7 +110,7 @@ export class AuthService {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
-      throw new NotFoundError('Email not found');
+      throw new NotFoundError('Email not found.');
     }
 
     if (!user.isActive) {
@@ -129,7 +129,7 @@ export class AuthService {
 
     await emailService.sendNotification({
       to: user.email,
-      subject: `${otpCode} is your Fortress Banking verification code`,
+      subject: `${otpCode} is your Fortress Banking verification code.`,
       type: 'OTP',
       otpCode,
       firstName: user.firstName,
@@ -139,7 +139,7 @@ export class AuthService {
     await auditLogService.logAction(
       user.id,
       'OTP_REQUESTED',
-      `OTP requested for user: ${user.email}`,
+      `OTP requested for user: ${user.email}.`,
       ipAddress
     );
   }
@@ -151,7 +151,7 @@ export class AuthService {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user || !user.otpHash || !user.otpExpiry) {
-      throw new UnauthorizedError('Invalid or expired OTP');
+      throw new UnauthorizedError('Invalid or expired OTP.');
     }
 
     if (!user.isActive) {
@@ -159,7 +159,7 @@ export class AuthService {
     }
 
     if (new Date() > user.otpExpiry) {
-      throw new UnauthorizedError('OTP has expired');
+      throw new UnauthorizedError('OTP has expired.');
     }
 
     const isOtpValid = await bcrypt.compare(code, user.otpHash);
@@ -167,10 +167,10 @@ export class AuthService {
       await auditLogService.logAction(
         user.id,
         'OTP_VERIFICATION_FAILED',
-        `Failed OTP verification for user: ${user.email}`,
+        `Failed OTP verification for user: ${user.email}.`,
         ipAddress
       );
-      throw new UnauthorizedError('Invalid or expired OTP');
+      throw new UnauthorizedError('Invalid or expired OTP.');
     }
 
     // Clear OTP
@@ -190,7 +190,7 @@ export class AuthService {
     await auditLogService.logAction(
       user.id,
       'USER_LOGIN_OTP',
-      `User ${user.email} successfully logged in via OTP`,
+      `User ${user.email} successfully logged in via OTP.`,
       ipAddress
     );
 

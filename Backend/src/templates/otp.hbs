@@ -1,163 +1,492 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your OTP Code</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <title>Your Verification Code — Fortress Banking</title>
+
+  <!--[if mso]>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+  <![endif]-->
+
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      line-height: 1.6;
-      color: #000000;
-      margin: 0;
-      padding: 0;
-      background-color: #ffffff;
+    /* ── RESET ─────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
     }
-    .container {
+
+    body,
+    table,
+    td,
+    a {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    table,
+    td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    img {
+      -ms-interpolation-mode: bicubic;
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+    }
+
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      background-color: #EEF0F5;
+    }
+
+    /* ── WRAPPER ────────────────────────────────────────── */
+    .email-wrapper {
+      width: 100%;
+      background-color: #EEF0F5;
+      padding: 32px 16px;
+    }
+
+    .email-container {
       max-width: 600px;
       margin: 0 auto;
-      background: #ffffff;
+      background-color: #FFFFFF;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0, 31, 78, 0.10);
     }
+
+    /* ── HEADER ─────────────────────────────────────────── */
     .header {
-      text-align: center;
-      padding: 40px 20px 20px;
+      background-color: #001F4E;
+      padding: 36px 40px 32px;
+      text-align: left;
     }
-    .logo-container {
-      display: inline-block;
-      text-align: center;
-    }
-    .logo-text {
-      font-size: 24px;
-      font-weight: bold;
-      color: #002b5e;
-      margin: 0;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .logo-subtext {
-      font-size: 8px;
-      color: #666666;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-top: 6px;
-      border-top: 1px solid #eaeaea;
-      padding-top: 6px;
-    }
-    .content {
-      padding: 20px 40px 40px;
-    }
-    .greeting {
-      font-size: 24px;
-      font-weight: normal;
-      margin-bottom: 20px;
-      margin-top: 0;
-    }
-    .instructions {
-      font-size: 16px;
-      margin-bottom: 40px;
-    }
-    .code-block {
-      background-color: #f7ebeb;
-      border-left: 3px solid #000000;
-      padding: 30px 20px;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .code-label {
-      font-size: 18px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 15px;
-    }
-    .code-value {
-      font-size: 40px;
-      font-weight: normal;
-      letter-spacing: 2px;
-    }
-    .warning {
-      text-align: center;
-      font-size: 15px;
-      margin-bottom: 30px;
-    }
-    .security-notice {
-      background-color: #f7ebeb;
-      border-left: 3px solid #000000;
-      padding: 25px 30px;
-      margin-bottom: 40px;
-    }
-    .security-title {
+
+    .logo-wordmark {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       font-size: 22px;
-      font-weight: normal;
-      margin-bottom: 15px;
-      margin-top: 0;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin: 0 0 10px 0;
+      line-height: 1;
     }
-    .security-text {
-      font-size: 15px;
+
+    .logo-wordmark span {
+      color: #C9A84C;
+    }
+
+    .logo-tagline {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 9px;
+      color: #8FA8C8;
+      letter-spacing: 3px;
+      text-transform: uppercase;
       margin: 0;
     }
-    .support-text {
-      text-align: center;
-      font-size: 16px;
-      margin-bottom: 40px;
+
+    /* ── META STRIP ─────────────────────────────────────── */
+    .meta-strip {
+      background-color: #F0F4FA;
+      border-bottom: 1px solid #DDE3EE;
+      padding: 12px 40px;
     }
-    .footer {
-      background-color: #000000;
-      color: #ffffff;
-      text-align: center;
-      padding: 40px 20px;
+
+    .meta-strip-inner {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: #7A8BA0;
+      letter-spacing: 0.5px;
+    }
+
+    .meta-strip-inner strong {
+      color: #001F4E;
+      font-weight: 600;
+    }
+
+    /* ── CONTENT ────────────────────────────────────────── */
+    .content {
+      padding: 40px 40px 32px;
+    }
+
+    .greeting {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 24px;
+      font-weight: 300;
+      color: #0A0F1E;
+      margin: 0 0 8px 0;
+      line-height: 1.25;
+      letter-spacing: -0.3px;
+    }
+
+    .instructions {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       font-size: 15px;
+      color: #4A5568;
+      margin: 0 0 32px 0;
+      line-height: 1.65;
     }
+
+    /* ── OTP CODE BLOCK ─────────────────────────────────── */
+    .otp-block {
+      background-color: #001F4E;
+      border-radius: 6px;
+      padding: 32px 28px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .otp-eyebrow {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: #8FA8C8;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin: 0 0 16px 0;
+    }
+
+    .otp-code {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 44px;
+      font-weight: 700;
+      color: #F8F7F4;
+      letter-spacing: 12px;
+      margin: 0 0 18px 0;
+      line-height: 1;
+      text-indent: 12px;
+    }
+
+    .otp-divider {
+      width: 48px;
+      height: 1px;
+      background-color: #1E3A6E;
+      margin: 0 auto 16px;
+    }
+
+    .otp-expiry {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: #8FA8C8;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+
+    .otp-expiry strong {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    /* ── WARNING PILL ───────────────────────────────────── */
+    .warning-pill {
+      display: block;
+      background-color: #FDF6EC;
+      border: 1px solid #F0D090;
+      border-radius: 100px;
+      text-align: center;
+      padding: 10px 20px;
+      margin-bottom: 28px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #7A5200;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── SECURITY NOTICE ────────────────────────────────── */
+    .security-block {
+      background-color: #F8F7F4;
+      border: 1px solid #E2E8F0;
+      border-left: 4px solid #001F4E;
+      border-radius: 0 4px 4px 0;
+      padding: 22px 28px;
+      margin-bottom: 32px;
+    }
+
+    .security-eyebrow {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: #001F4E;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin: 0 0 8px 0;
+    }
+
+    .security-text {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #2D3748;
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    /* ── SUPPORT BLOCK ──────────────────────────────────── */
+    .support-block {
+      background-color: #F8F7F4;
+      border: 1px solid #E2E8F0;
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .support-block p {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      color: #4A5568;
+      margin: 0 0 6px 0;
+    }
+
+    .support-block a {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #001F4E;
+      text-decoration: none;
+      border-bottom: 1.5px solid #C9A84C;
+      padding-bottom: 1px;
+    }
+
+    /* ── CONFIDENTIALITY STRIP ──────────────────────────── */
+    .confidential-strip {
+      background-color: #F0F4FA;
+      border-top: 1px solid #DDE3EE;
+      padding: 10px 40px;
+      text-align: center;
+    }
+
+    .confidential-strip p {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 9px;
+      color: #9AACBC;
+      margin: 0;
+      letter-spacing: 0.3px;
+      line-height: 1.5;
+    }
+
+    /* ── FOOTER ─────────────────────────────────────────── */
+    .footer {
+      background-color: #0A0F1E;
+      padding: 32px 40px;
+    }
+
+    .footer-logo {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin: 0 0 6px 0;
+    }
+
+    .footer-logo span {
+      color: #C9A84C;
+    }
+
+    .footer-divider {
+      width: 100%;
+      height: 1px;
+      background-color: #1E2A42;
+      margin: 18px 0;
+    }
+
     .footer-powered {
-      margin-bottom: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: #8FA8C8;
+      margin: 0 0 5px 0;
     }
+
+    .footer-powered strong {
+      color: #C9A84C;
+      font-weight: 600;
+    }
+
     .footer-slogan {
-      color: #cccccc;
-      margin-bottom: 15px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: #4A5A72;
+      font-style: italic;
+      margin: 0 0 14px 0;
     }
+
     .footer-copy {
-      color: #aaaaaa;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      color: #3A4A5E;
+      letter-spacing: 0.3px;
+      margin: 0;
     }
-    
+
+    .footer-links {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      margin: 8px 0 0 0;
+    }
+
+    .footer-links a {
+      color: #5A7A9E;
+      text-decoration: none;
+      margin: 0 8px;
+    }
+
+    /* ── RESPONSIVE: MOBILE ─────────────────────────────── */
     @media only screen and (max-width: 600px) {
+      .email-wrapper {
+        padding: 0 !important;
+      }
+
+      .email-container {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+
+      .header {
+        padding: 28px 24px 24px !important;
+      }
+
+      .meta-strip {
+        padding: 10px 24px !important;
+      }
+
       .content {
-        padding: 20px 20px 30px;
+        padding: 28px 24px 24px !important;
+      }
+
+      .otp-block {
+        padding: 26px 16px !important;
+      }
+
+      .otp-code {
+        font-size: 36px !important;
+        letter-spacing: 8px !important;
+        text-indent: 8px !important;
+      }
+
+      .greeting {
+        font-size: 21px !important;
+      }
+
+      .footer {
+        padding: 28px 24px !important;
+      }
+
+      .confidential-strip {
+        padding: 10px 24px !important;
+      }
+    }
+
+    /* ── RESPONSIVE: NARROW ─────────────────────────────── */
+    @media only screen and (max-width: 380px) {
+      .otp-code {
+        font-size: 28px !important;
+        letter-spacing: 5px !important;
+        text-indent: 5px !important;
+      }
+
+      .greeting {
+        font-size: 19px !important;
       }
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="logo-container">
-        <h1 class="logo-text">FORTRESS BANKING</h1>
-        <div class="logo-subtext">TRUST. STRENGTH. SECURITY.</div>
+  <!-- ░░ PREVIEW TEXT (inbox snippet, hidden) ░░ -->
+  <div
+    style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
+    Your Fortress Banking verification code is ready. Valid for 10 minutes. ‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌
+  </div>
+
+  <div class="email-wrapper">
+    <div class="email-container">
+
+      <!-- ══ HEADER ══════════════════════════════════════ -->
+      <div class="header">
+        <p class="logo-wordmark">FORTRESS <span>BANKING</span></p>
+        <p class="logo-tagline">Trust &nbsp;·&nbsp; Strength &nbsp;·&nbsp; Security</p>
       </div>
-    </div>
-    
-    <div class="content">
-      <h1 class="greeting">Hello, {{firstName}}</h1>
-      <p class="instructions">Please use the verification code below to sign into your Fortress Banking Account</p>
-      
-      <div class="code-block">
-        <div class="code-label">VERIFICATION CODE</div>
-        <div class="code-value">{{otpCode}}</div>
+
+      <!-- ══ META STRIP ══════════════════════════════════ -->
+      <div class="meta-strip">
+        <span class="meta-strip-inner">
+          SECURE VERIFICATION &nbsp;|&nbsp; One-Time Password Request
+        </span>
       </div>
-      
-      <div class="warning">This code expires in 10 minutes. Do not share it with anyone</div>
-      
-      <div class="security-notice">
-        <h2 class="security-title">Security Notice</h2>
-        <p class="security-text">If you did not request this verification code, please ignore this email and contact our support team immediately.</p>
+
+      <!-- ══ BODY ════════════════════════════════════════ -->
+      <div class="content">
+
+        <h1 class="greeting">Hello, {{firstName}}</h1>
+        <p class="instructions">Please use the verification code below to sign into your Fortress Banking account. This
+          code is unique to your session and cannot be reused.</p>
+
+        <!-- OTP Block -->
+        <div class="otp-block">
+          <p class="otp-eyebrow">Verification Code</p>
+          <p class="otp-code">{{otpCode}}</p>
+          <div class="otp-divider"></div>
+          <p class="otp-expiry">Expires in &nbsp;<strong>10 minutes</strong></p>
+        </div>
+
+        <!-- Warning Pill -->
+        <span class="warning-pill">
+          ⚠ &nbsp; Do not share this code with anyone, including Fortress Banking staff
+        </span>
+
+        <!-- Security Notice -->
+        <div class="security-block">
+          <p class="security-eyebrow">Security Notice</p>
+          <p class="security-text">If you did not request this verification code, please ignore this email and contact
+            our support team immediately. Your account may be at risk.</p>
+        </div>
+
+        <!-- Support -->
+        <div class="support-block">
+          <p>Need assistance with your account?</p>
+          <a href="mailto:ai-support@fb.com">ai-support@fb.com</a>
+        </div>
+
       </div>
-      
-      <div class="support-text">Need assistance? contact ai-support@fb.com</div>
-    </div>
-    
-    <div class="footer">
-      <div class="footer-powered">Powered By Converiqo.ai</div>
-      <div class="footer-slogan">Empowering business with intelligent automation</div>
-      <div class="footer-copy">&copy; 2026 Fortress Banking. All rights reserved</div>
+
+      <!-- ══ CONFIDENTIALITY ════════════════════════════ -->
+      <div class="confidential-strip">
+        <p>This communication is intended solely for the named recipient and may contain confidential information. If
+          you received this in error, please delete it and notify the sender immediately.</p>
+      </div>
+
+      <!-- ══ FOOTER ══════════════════════════════════════ -->
+      <div class="footer">
+        <p class="footer-logo">FORTRESS <span>BANKING</span></p>
+        <div class="footer-divider"></div>
+        <p class="footer-powered">Powered by <strong>Converiqo.ai</strong></p>
+        <p class="footer-slogan">Empowering business with intelligent automation</p>
+        <p class="footer-copy">&copy; 2026 Fortress Banking Corporation. All rights reserved.</p>
+        <p class="footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Use</a>
+          <a href="#">Unsubscribe</a>
+        </p>
+      </div>
+
     </div>
   </div>
 </body>
+
 </html>

@@ -55,7 +55,7 @@ export function decrypt(encryptedText: string): string {
 
   const parts = encryptedText.split(':');
   if (parts.length !== 3) {
-    throw new Error('Invalid encrypted text format. Expected iv:authTag:ciphertext');
+    throw new Error('Invalid encrypted text format. Expected iv:authTag:ciphertext.');
   }
 
   const [ivHex, authTagHex, encryptedHex] = parts;

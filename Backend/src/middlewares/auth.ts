@@ -51,7 +51,7 @@ export async function authenticate(
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedError('Authentication token required');
+      throw new UnauthorizedError('Authentication token required.');
     }
 
     const token = authHeader.split(' ')[1];
@@ -61,7 +61,7 @@ export async function authenticate(
     try {
       decoded = jwt.verify(token, jwtSecret);
     } catch (err) {
-      throw new UnauthorizedError('Token is invalid or has expired');
+      throw new UnauthorizedError('Token is invalid or has expired.');
     }
 
     // Verify user exists and is active in database
@@ -78,11 +78,11 @@ export async function authenticate(
     });
 
     if (!user) {
-      throw new UnauthorizedError('User profile no longer exists');
+      throw new UnauthorizedError('User profile no longer exists.');
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedError('User profile is currently inactive');
+      throw new UnauthorizedError('User profile is currently inactive.');
     }
 
     req.user = {
@@ -108,12 +108,12 @@ export async function authenticate(
 export function requireRole(allowedRoles: Role[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      next(new UnauthorizedError('User must be authenticated'));
+      next(new UnauthorizedError('User must be authenticated.'));
       return;
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      next(new ForbiddenError('Access denied: Insufficient permissions'));
+      next(new ForbiddenError('Access denied: Insufficient .'));
       return;
     }
 

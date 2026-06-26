@@ -25,16 +25,16 @@ export async function generateOffer(
 
     emailService.sendNotification({
       to: app.email, // Notify Customer
-      subject: `Your loan offer is ready for review - App #${app.applicationNumber}`,
-      title: 'Offer Generated',
+      subject: `Your loan offer is ready for review - App #${app.applicationNumber}.`,
+      title: 'Offer Generated.',
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,
       status: 'OFFER_GENERATED',
-      actionTaken: `A loan offer of $${result.loanAmount} with ${result.interestRate}% interest rate has been generated for you.`,
+      actionTaken: `We are pleased to present a personalized loan offer of $${result.loanAmount} at a fixed interest rate of ${result.interestRate}%. Please Contect you Loan Officer.`,
       userId,
     });
 
-    sendSuccess(res, 'Loan offer generated successfully', result, 201);
+    sendSuccess(res, 'Loan offer generated successfully.', result, 201);
   } catch (error) {
     next(error);
   }
@@ -56,16 +56,16 @@ export async function acceptOffer(
 
     emailService.sendNotification({
       to: 'fahadasfaque@gmail.com', // Notify Approver
-      subject: `[Offer Accepted] Processing Disbursal for ${app.applicantName} (${app.applicationNumber})`,
-      title: 'Offer Accepted',
+      subject: `[Offer Accepted] Processing Disbursal for ${app.applicantName} (${app.applicationNumber}).`,
+      title: 'Offer Accepted.',
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,
       status: 'OFFER_ACCEPTED',
-      actionTaken: 'The customer has accepted the loan offer.',
+      actionTaken: `The customer (${app.applicantName}) has digitally accepted the loan agreement for App #${app.applicationNumber}. This file has been queued for final verification and fund disbursement.`,
       userId,
     });
 
-    sendSuccess(res, 'Customer acceptance recorded successfully', result);
+    sendSuccess(res, 'Customer acceptance recorded successfully.', result);
   } catch (error) {
     next(error);
   }
@@ -87,16 +87,16 @@ export async function declineOffer(
 
     emailService.sendNotification({
       to: 'fahadasfaque@gmail.com', // Notify Approver
-      subject: `[Offer Declined] Application File Closed - App #${app.applicationNumber}`,
-      title: 'Offer Declined',
+      subject: `[Offer Declined] Application File Closed - App #${app.applicationNumber}.`,
+      title: 'Offer Declined.',
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,
       status: 'OFFER_DECLINED',
-      actionTaken: 'The customer has declined the loan offer.',
+      actionTaken: `The loan offer for App #${app.applicationNumber} was declined by the customer. The application file has been closed out in the system automatically.`,
       userId,
     });
 
-    sendSuccess(res, 'Customer declining of offer recorded successfully', result);
+    sendSuccess(res, 'Customer declining of offer recorded successfully.', result);
   } catch (error) {
     next(error);
   }

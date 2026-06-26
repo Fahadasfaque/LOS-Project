@@ -47,11 +47,11 @@ export function UserTableActions({ user, onActionComplete }: { user: any, onActi
     e.preventDefault();
     try {
       await api.put(`/users/${user.id}`, editForm);
-      toast.success('User updated successfully');
+      toast.success('User updated successfully.');
       setActiveDialog(null);
       onActionComplete();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update user');
+      toast.error(err.message || 'Failed to update user.');
     }
   };
 
@@ -59,11 +59,11 @@ export function UserTableActions({ user, onActionComplete }: { user: any, onActi
     e.preventDefault();
     try {
       await api.patch(`/users/${user.id}/role`, { role: newRole });
-      toast.success('User role changed successfully');
+      toast.success('User role changed successfully.');
       setActiveDialog(null);
       onActionComplete();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to change role');
+      toast.error(err.message || 'Failed to change role.');
     }
   };
 
@@ -76,7 +76,7 @@ export function UserTableActions({ user, onActionComplete }: { user: any, onActi
       setNewPassword('');
       onActionComplete();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to reset password');
+      toast.error(err.message || 'Failed to reset password.');
     }
   };
 
@@ -87,18 +87,18 @@ export function UserTableActions({ user, onActionComplete }: { user: any, onActi
       setActiveDialog(null);
       onActionComplete();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update status');
+      toast.error(err.message || 'Failed to update status.');
     }
   };
 
   const handleDelete = async () => {
     try {
       await api.delete(`/users/${user.id}`);
-      toast.success('User deleted successfully');
+      toast.success('User deleted successfully.');
       setActiveDialog(null);
       onActionComplete();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to delete user');
+      toast.error(err.message || 'Failed to delete user.');
     }
   };
 

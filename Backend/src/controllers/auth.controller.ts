@@ -20,7 +20,7 @@ export async function login(
     const ipAddress = req.ip || req.socket.remoteAddress;
 
     const result = await authService.login(email, password, ipAddress);
-    sendSuccess(res, 'Authentication successful', result);
+    sendSuccess(res, 'Authentication successful.', result);
   } catch (error) {
     next(error);
   }
@@ -40,7 +40,7 @@ export async function me(
   next: NextFunction
 ): Promise<void> {
   try {
-    sendSuccess(res, 'Current user profile retrieved', { user: req.user });
+    sendSuccess(res, 'Current user profile retrieved.', { user: req.user });
   } catch (error) {
     next(error);
   }
@@ -56,7 +56,7 @@ export async function requestOtp(
     const ipAddress = req.ip || req.socket.remoteAddress;
 
     await authService.requestOtp(email, ipAddress);
-    sendSuccess(res, 'OTP sent to your email');
+    sendSuccess(res, 'OTP sent to your email.');
   } catch (error) {
     next(error);
   }
@@ -72,7 +72,7 @@ export async function verifyOtp(
     const ipAddress = req.ip || req.socket.remoteAddress;
 
     const result = await authService.verifyOtp(email, code, ipAddress);
-    sendSuccess(res, 'Authentication successful', result);
+    sendSuccess(res, 'Authentication successful.', result);
   } catch (error) {
     next(error);
   }

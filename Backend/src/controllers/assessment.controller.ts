@@ -33,11 +33,11 @@ export async function createAssessment(
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,
       status: 'UNDER_REVIEW',
-      actionTaken: `The credit assessment has been completed. Recommendation: ${result.recommendation}`,
+      actionTaken: `The credit assessment for ${app.applicantName} is complete with a recommendation of: ${result.recommendation}. Please review the risk profile to authorize the decision.`,
       userId,
     });
 
-    sendSuccess(res, 'Credit assessment completed and saved successfully', result, 201);
+    sendSuccess(res, 'Credit assessment completed and saved successfully.', result, 201);
   } catch (error) {
     next(error);
   }

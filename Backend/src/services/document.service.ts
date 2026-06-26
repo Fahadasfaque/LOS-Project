@@ -23,7 +23,7 @@ export class DocumentService {
   ): Promise<Document> {
     const app = await this.appRepository.findById(data.applicationId);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
     
     // First, upload to Cloudinary
@@ -36,7 +36,7 @@ export class DocumentService {
         data.originalFilename
       );
     } catch (error: any) {
-      throw new BadRequestError(`Cloudinary upload failed: ${error.message}`);
+      throw new BadRequestError(`Cloudinary upload failed: ${error.message}.`);
     }
 
     const doc = await this.repository.create({
@@ -52,7 +52,7 @@ export class DocumentService {
     await auditLogService.logAction( 
       userId,
       'DOCUMENT_UPLOADED',
-      `Uploaded document reference ${doc.originalName} (${doc.documentType}) for loan application ${app.applicationNumber}`
+      `Uploaded document reference ${doc.originalName} (${doc.documentType}) for loan application ${app.applicationNumber}.`
     );
 
     return doc;
@@ -67,7 +67,7 @@ export class DocumentService {
   ): Promise<void> {
     const doc = await this.repository.findByPublicId(publicId);
     if (!doc) {
-      throw new NotFoundError('Document record not found');
+      throw new NotFoundError('Document record not found.');
     }
     
     // Delete from Cloudinary
@@ -80,7 +80,7 @@ export class DocumentService {
     await auditLogService.logAction(
       userId,
       'DOCUMENT_DELETED',
-      `Deleted document reference ${doc.originalName} (${doc.documentType}) for loan application ID ${doc.applicationId}`
+      `Deleted document reference ${doc.originalName} (${doc.documentType}) for loan application ID ${doc.applicationId}.`
     );
   }
 
@@ -94,7 +94,7 @@ export class DocumentService {
   ): Promise<Document> {
     const doc = await this.repository.findById(id);
     if (!doc) {
-      throw new NotFoundError('Document record not found');
+      throw new NotFoundError('Document record not found.');
     }
 
     const updated = await this.repository.updateStatus(id, status);
@@ -103,7 +103,7 @@ export class DocumentService {
     await auditLogService.logAction(
       userId,
       'DOCUMENT_VERIFIED',
-      `Updated status of document ${updated.originalName} for application ID ${updated.applicationId} to ${status}`
+      `Updated status of document ${updated.originalName} for application ID ${updated.applicationId} to ${status}.`
     );
 
     return updated;

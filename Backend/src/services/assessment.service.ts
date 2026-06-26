@@ -25,11 +25,11 @@ export class AssessmentService {
   ): Promise<Assessment> {
     const app = await this.appRepository.findById(data.applicationId);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
 
     if (app.status !== 'UNDER_REVIEW') {
-      throw new BadRequestError('Assessments can only be run for applications in UNDER_REVIEW status');
+      throw new BadRequestError('Assessments can only be run for applications in UNDER_REVIEW status.');
     }
 
     // Rule-Based Credit Assessment Engine
@@ -66,7 +66,7 @@ export class AssessmentService {
     await auditLogService.logAction(
       userId,
       'ASSESSMENT_COMPLETED',
-      `Completed credit assessment for ${app.applicationNumber}: Score ${creditScore}, Risk ${riskLevel}, Recommendation ${recommendation}`
+      `Completed credit assessment for ${app.applicationNumber}: Score ${creditScore}, Risk ${riskLevel}, Recommendation ${recommendation}.`
     );
 
     return assessment;
@@ -101,7 +101,7 @@ export class AssessmentService {
     await auditLogService.logAction(
       userId,
       'ASSESSMENT_CREATED',
-      `Initialized pending assessment for application ${app.applicationNumber}`
+      `Initialized pending assessment for application ${app.applicationNumber}.`
     );
 
     return assessment;

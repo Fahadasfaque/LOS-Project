@@ -71,7 +71,7 @@ export class DisbursementService {
     await auditLogService.logAction(
       userId,
       'LOAN_DISBURSED',
-      `Disbursed loan amount ${app.loanAmount} for application ${app.applicationNumber}. Ref: ${referenceNumber}`
+      `Disbursed loan amount ${app.loanAmount} for application ${app.applicationNumber}. Ref: ${referenceNumber}.`
     );
 
     return disbursement;

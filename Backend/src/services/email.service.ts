@@ -56,7 +56,7 @@ class EmailService {
         data: {
           userId: payload.userId,
           action: 'EMAIL_QUEUED',
-          details: `Queued email to ${payload.to} for application ${payload.applicationNumber}`,
+          details: `Queued email to ${payload.to} for application ${payload.applicationNumber}.`,
         }
       });
     }
@@ -104,7 +104,7 @@ class EmailService {
             data: {
               userId: payload.userId,
               action: 'EMAIL_SENT',
-              details: `Sent email to ${payload.to} for application ${payload.applicationNumber}`,
+              details: `Sent email to ${payload.to} for application ${payload.applicationNumber}.`,
             }
           });
         }
@@ -115,7 +115,7 @@ class EmailService {
             data: {
               userId: payload.userId,
               action: 'EMAIL_FAILED',
-              details: `Failed to send email to ${payload.to} for application ${payload.applicationNumber}`,
+              details: `Failed to send email to ${payload.to} for application ${payload.applicationNumber}.`,
             }
           });
         }

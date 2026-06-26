@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const requestOtp = async (email: string) => {
     const response = await api.post('/auth/otp/request', { email });
     if (!response.success) {
-      throw new Error(response.message || 'Failed to request OTP');
+      throw new Error(response.message || 'Failed to request OTP.');
     }
   };
 
@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userProfile);
       router.push('/dashboard');
     } else {
-      throw new Error(response.message || 'Failed to verify OTP');
+      throw new Error(response.message || 'Failed to verify OTP.');
     }
   };
 
@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider.');
   }
   return context;
 }

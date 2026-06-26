@@ -276,49 +276,49 @@ export default function DashboardPage() {
           </div>
           <div className="flex flex-col gap-1">
             <span className="font-bold text-3xl text-foreground leading-none">{userCount}</span>
-            <span className="text-sm font-medium text-emerald-600">All roles registered</span>
+            <span className="text-sm font-medium text-emerald-600">All roles registered.</span>
           </div>
         </div>
 
         {/* KPI 2 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">Audit Logs Recorded</span>
+            <span className="text-muted-foreground text-sm font-medium">Audit Logs Recorded.</span>
             <div className="w-9 h-9 rounded-md bg-cyan-500/10 flex items-center justify-center shrink-0 text-cyan-600">
               <Terminal className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="flex flex-col gap-1">
             <span className="font-bold text-3xl text-foreground leading-none">{logCount}</span>
-            <span className="text-sm font-medium text-blue-600">Audit compliance active</span>
+            <span className="text-sm font-medium text-blue-600">Audit compliance active.</span>
           </div>
         </div>
 
         {/* KPI 3 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">Overall Applications</span>
+            <span className="text-muted-foreground text-sm font-medium">Overall Applications.</span>
             <div className="w-9 h-9 rounded-md bg-amber-500/10 flex items-center justify-center shrink-0 text-amber-600">
               <FileText className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="flex flex-col gap-1">
             <span className="font-bold text-3xl text-foreground leading-none">{totalAppsCount}</span>
-            <span className="text-sm font-medium text-muted-foreground">Total loans in system</span>
+            <span className="text-sm font-medium text-muted-foreground">Total loans in system.</span>
           </div>
         </div>
 
         {/* KPI 4 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">DB Transactions</span>
+            <span className="text-muted-foreground text-sm font-medium">DB Transactions.</span>
             <div className="w-9 h-9 rounded-md bg-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-600">
               <TrendingUp className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="flex flex-col gap-1">
             <span className="font-bold text-3xl text-foreground leading-none">Healthy</span>
-            <span className="text-sm font-medium text-emerald-600">Connection validated</span>
+            <span className="text-sm font-medium text-emerald-600">Connection validated.</span>
           </div>
         </div>
       </div>
@@ -326,7 +326,7 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
           <div className="flex flex-col gap-1 mb-6">
-            <h4 className="text-lg font-bold">Application Status Overview</h4>
+            <h4 className="text-lg font-bold">Application Status Overview.</h4>
             <p className="text-sm text-muted-foreground">Current state of all applications in the system.</p>
           </div>
           <div className="h-[300px] w-full">
@@ -384,56 +384,56 @@ export default function DashboardPage() {
         {/* KPI 1 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">Total Applications</span>
+            <span className="text-muted-foreground text-sm font-medium">Total Applications.</span>
             <div className="w-9 h-9 rounded-md bg-blue-500/10 flex items-center justify-center shrink-0 text-blue-600">
               <FileText className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="flex flex-col gap-1">
             <span className="font-bold text-3xl text-foreground leading-none">{totalAppsCount}</span>
-            <span className="text-sm font-medium text-blue-600">Originated by you</span>
+            <span className="text-sm font-medium text-blue-600">Originated by you.</span>
           </div>
         </div>
 
         {/* KPI 2 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">Pending Submission</span>
+            <span className="text-muted-foreground text-sm font-medium">Pending Submission.</span>
             <div className="w-9 h-9 rounded-md bg-amber-500/10 flex items-center justify-center shrink-0 text-amber-600">
               <Clock className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="flex flex-col gap-1">
             <span className="font-bold text-3xl text-foreground leading-none">{draftCount}</span>
-            <span className="text-sm font-medium text-amber-600">Applications in Draft status</span>
+            <span className="text-sm font-medium text-amber-600">Applications in Draft status.</span>
           </div>
         </div>
 
         {/* KPI 3 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">In Underwriting</span>
+            <span className="text-muted-foreground text-sm font-medium">In Underwriting.</span>
             <div className="w-9 h-9 rounded-md bg-cyan-500/10 flex items-center justify-center shrink-0 text-cyan-600">
               <Activity className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="flex flex-col gap-1">
             <span className="font-bold text-3xl text-foreground leading-none">{submittedCount + underReviewCount}</span>
-            <span className="text-sm font-medium text-cyan-600">Assigned for credit reviews</span>
+            <span className="text-sm font-medium text-cyan-600">Assigned for credit reviews.</span>
           </div>
         </div>
 
         {/* KPI 4 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">Disbursed Successfully</span>
+            <span className="text-muted-foreground text-sm font-medium">Disbursed Successfully.</span>
             <div className="w-9 h-9 rounded-md bg-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-600">
               <CheckCircle className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="flex flex-col gap-1">
             <span className="font-bold text-3xl text-foreground leading-none">{disbursedCount}</span>
-            <span className="text-sm font-medium text-emerald-600">Disbursed to applicant</span>
+            <span className="text-sm font-medium text-emerald-600">Disbursed to applicant.</span>
           </div>
         </div>
       </div>

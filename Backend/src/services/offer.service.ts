@@ -34,7 +34,7 @@ export class OfferService {
     // 2. Fetch Application
     const app = await this.appRepository.findById(data.applicationId);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
 
     // 3. Verify status is APPROVED
@@ -83,7 +83,7 @@ export class OfferService {
     await auditLogService.logAction(
       userId,
       'OFFER_GENERATED',
-      `Generated loan offer for application ${app.applicationNumber}: Amount ${P}, Rate ${data.interestRate}%, Tenure ${n} months, EMI ${emiAmount}`
+      `Generated loan offer for application ${app.applicationNumber}: Amount ${P}, Rate ${data.interestRate}%, Tenure ${n} months, EMI ${emiAmount}.`
     );
 
     return offer;
@@ -104,7 +104,7 @@ export class OfferService {
 
     const app = await this.appRepository.findById(data.applicationId);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
 
     if (app.status !== 'OFFER_GENERATED') {
@@ -139,7 +139,7 @@ export class OfferService {
     await auditLogService.logAction(
       userId,
       'OFFER_ACCEPTED',
-      `Recorded customer acceptance of loan offer for application ${app.applicationNumber}`
+      `Recorded customer acceptance of loan offer for application ${app.applicationNumber}.`
     );
 
     return updatedOffer;
@@ -160,7 +160,7 @@ export class OfferService {
 
     const app = await this.appRepository.findById(data.applicationId);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
 
     if (app.status !== 'OFFER_GENERATED') {

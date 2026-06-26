@@ -13,7 +13,7 @@ dotenv.config();
 const requiredEnv = ['DATABASE_URL', 'JWT_SECRET', 'ENCRYPTION_KEY'];
 for (const key of requiredEnv) {
   if (!process.env[key]) {
-    console.error(`[CRITICAL CONFIG ERROR] Missing environment variable: ${key}`);
+    console.error(`[CRITICAL CONFIG ERROR] Missing environment variable: ${key}.`);
     process.exit(1);
   }
 }

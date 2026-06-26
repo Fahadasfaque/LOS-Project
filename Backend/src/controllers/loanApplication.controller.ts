@@ -23,7 +23,7 @@ export async function createApplication(
   try {
     const userId = req.user!.id;
     const result = await loanApplicationService.createApplication(userId, req.body);
-    sendSuccess(res, 'Loan application initialized in DRAFT status', result, 201);
+    sendSuccess(res, 'Loan application initialized in DRAFT status.', result, 201);
   } catch (error) {
     next(error);
   }
@@ -45,7 +45,7 @@ export async function updateApplication(
     const userId = req.user!.id;
     const id = req.params.id as string;
     const result = await loanApplicationService.updateApplication(userId, id, req.body);
-    sendSuccess(res, 'Loan application details updated', result);
+    sendSuccess(res, 'Loan application details updated.', result);
   } catch (error) {
     next(error);
   }
@@ -69,7 +69,7 @@ export async function getApplicationById(
     const role = req.user!.role;
     const id = req.params.id as string;
     const result = await loanApplicationService.getApplicationById(id, userId, role);
-    sendSuccess(res, 'Loan application details retrieved', result);
+    sendSuccess(res, 'Loan application details retrieved.', result);
   } catch (error) {
     next(error);
   }
@@ -94,27 +94,27 @@ export async function submitApplication(
 
     emailService.sendNotification({
       to: result.email, // Customer notification
-      subject: `We've received your loan application #${result.applicationNumber}`,
-      title: 'Application Submitted',
+      subject: `We've received your loan application #${result.applicationNumber}.`,
+      title: 'Application Submitted.',
       customerName: result.applicantName,
       applicationNumber: result.applicationNumber,
       status: 'SUBMITTED',
-      actionTaken: 'Your application has been successfully submitted and is under review.',
+      actionTaken: 'Thank you for choosing Fortress Banking. Your application has been successfully received. Our credit team is currently reviewing your file, and we will update you shortly.',
       userId,
     });
 
     emailService.sendNotification({
       to: 'cursorgmail01@gmail.com', // Internal notification
-      subject: `New Loan Assessment Assigned - App #${result.applicationNumber}`,
-      title: 'Assessment Assigned',
+      subject: `New Loan Assessment Assigned - App #${result.applicationNumber}.`,
+      title: 'Assessment Assigned.',
       customerName: result.applicantName,
       applicationNumber: result.applicationNumber,
       status: 'SUBMITTED',
-      actionTaken: 'A new loan application requires your credit assessment.',
+      actionTaken: `Loan application #${result.applicationNumber} (${result.applicantName}) has been assigned to your queue. Please complete the credit assessment within your standard SLA.`,
       userId,
     });
 
-    sendSuccess(res, 'Loan application submitted for credit assessment', result);
+    sendSuccess(res, 'Loan application submitted for credit assessment.', result);
   } catch (error) {
     next(error);
   }
@@ -139,39 +139,47 @@ export async function updateStatus(
     const role = req.user!.role;
     const result = await loanApplicationService.updateStatus(userId, role, id, status);
 
-    let notificationTitle = 'Application Status Updated';
-    let actionTaken = `The status of the application was updated to ${status}.`;
+    let notificationTitle = 'Application Status Updated.';
+    let actionTaken = `The status of your loan application has been updated to ${status.replace('_', ' ')}.`;
 
     if (status === 'APPROVED' || status === 'REJECTED') {
-      notificationTitle = `Loan ${status === 'APPROVED' ? 'Approved' : 'Rejected'}`;
-      actionTaken = `The loan application has been ${status.toLowerCase()} by the approver.`;
-      
+      const isApproved = status === 'APPROVED';
+
+      // Set customer-facing title and professional message
+      notificationTitle = isApproved ? 'Application Approved.' : 'Application Status Update.';
+
+      actionTaken = isApproved
+        ? `Great news! Your loan application #${result.applicationNumber} has been approved. Your formal loan offer is now being finalized.`
+        : `Thank you for your interest in Fortress Banking. After careful review of application #${result.applicationNumber}, we regret that we are unable to approve your request at this time. A detailed letter has been sent to your secure portal account.`;
+
       // Notify Customer
       emailService.sendNotification({
         to: result.email,
-        subject: `Loan Application ${status === 'APPROVED' ? 'Approved' : 'Rejected'}`,
+        subject: isApproved
+          ? `Update: Your loan application #${result.applicationNumber} is Approved.`
+          : `Update regarding your loan application #${result.applicationNumber}.`,
         title: notificationTitle,
         customerName: result.applicantName,
         applicationNumber: result.applicationNumber,
         status,
-        actionTaken,
+        actionTaken, 
         userId,
       });
 
       // Notify Loan Officer
       emailService.sendNotification({
         to: 'fahadasfaque7860@gmail.com',
-        subject: `App #${result.applicationNumber} - ${status}`,
+        subject: `App #${result.applicationNumber} - ${status} (${result.applicantName})`,
         title: notificationTitle,
         customerName: result.applicantName,
         applicationNumber: result.applicationNumber,
         status,
-        actionTaken,
+        actionTaken: `Application #${result.applicationNumber} for ${result.applicantName} has moved to terminal status: ${status}. No further manual underwriting is required for this phase.`,
         userId,
       });
     }
 
-    sendSuccess(res, 'Loan application status updated successfully', result);
+    sendSuccess(res, 'Loan application status updated successfully.', result);
   } catch (error) {
     next(error);
   }
@@ -193,7 +201,7 @@ export async function listApplications(
     const userId = req.user!.id;
     const role = req.user!.role;
     const result = await loanApplicationService.listApplications(role, userId, req.query as any);
-    sendSuccess(res, 'Loan applications retrieved', result);
+    sendSuccess(res, 'Loan applications retrieved.', result);
   } catch (error) {
     next(error);
   }

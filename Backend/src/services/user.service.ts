@@ -33,7 +33,7 @@ export class UserService {
     // Check if email already registered
     const existing = await this.userRepository.findByEmail(data.email);
     if (existing) {
-      throw new BadRequestError(`Email address '${data.email}' is already registered`);
+      throw new BadRequestError(`Email address '${data.email}' is already registered.`);
     }
 
     // Hash password before saving
@@ -49,7 +49,7 @@ export class UserService {
     await auditLogService.logAction(
       adminId,
       'USER_CREATION',
-      `Created user account for ${user.email} with role ${user.role}`
+      `Created user account for ${user.email} with role ${user.role}.`
     );
 
     // Exclude password from the returned object
@@ -77,7 +77,7 @@ export class UserService {
   async getUserById(id: string): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>> {
     const user = await this.userRepository.findById(id);
     if (!user) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError('User not found.');
     }
     const { password, otpHash, otpExpiry, ...userWithoutPassword } = user;
     return userWithoutPassword;
@@ -85,11 +85,11 @@ export class UserService {
 
   async updateUser(adminId: string, userId: string, data: Partial<Pick<User, 'firstName' | 'lastName' | 'phone' | 'department'>>): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>> {
     const user = await this.userRepository.findById(userId);
-    if (!user) throw new NotFoundError('User not found');
+    if (!user) throw new NotFoundError('User not found.');
 
     const updated = await this.userRepository.update(userId, data);
     
-    await auditLogService.logAction(adminId, 'USER_UPDATED', `Updated profile for user ${updated.email}`);
+    await auditLogService.logAction(adminId, 'USER_UPDATED', `Updated profile for user ${updated.email}.`);
     
     const { password, otpHash, otpExpiry, ...userWithoutPassword } = updated;
     return userWithoutPassword;
@@ -97,11 +97,11 @@ export class UserService {
 
   async changeRole(adminId: string, userId: string, role: string): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>> {
     const user = await this.userRepository.findById(userId);
-    if (!user) throw new NotFoundError('User not found');
+    if (!user) throw new NotFoundError('User not found.');
 
     const updated = await this.userRepository.update(userId, { role: role as any });
     
-    await auditLogService.logAction(adminId, 'USER_ROLE_CHANGED', `Changed role of ${updated.email} from ${user.role} to ${role}`);
+    await auditLogService.logAction(adminId, 'USER_ROLE_CHANGED', `Changed role of ${updated.email} from ${user.role} to ${role}.`);
     
     const { password, otpHash, otpExpiry, ...userWithoutPassword } = updated;
     return userWithoutPassword;
@@ -109,7 +109,7 @@ export class UserService {
 
   async updateStatus(adminId: string, userId: string, isActive: boolean, reason?: string): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>> {
     const user = await this.userRepository.findById(userId);
-    if (!user) throw new NotFoundError('User not found');
+    if (!user) throw new NotFoundError('User not found.');
 
     const updated = await this.userRepository.update(userId, { isActive });
     
@@ -122,23 +122,23 @@ export class UserService {
 
   async resetPassword(adminId: string, userId: string, newPasswordRaw: string): Promise<void> {
     const user = await this.userRepository.findById(userId);
-    if (!user) throw new NotFoundError('User not found');
+    if (!user) throw new NotFoundError('User not found.');
 
     const hashedPassword = await bcrypt.hash(newPasswordRaw, 10);
     await this.userRepository.update(userId, { password: hashedPassword });
     
-    await auditLogService.logAction(adminId, 'USER_PASSWORD_RESET', `Reset password for user ${user.email}`);
+    await auditLogService.logAction(adminId, 'USER_PASSWORD_RESET', `Reset password for user ${user.email}.`);
   }
 
   async deleteUser(adminId: string, userId: string): Promise<void> {
     const user = await this.userRepository.findById(userId);
-    if (!user) throw new NotFoundError('User not found');
+    if (!user) throw new NotFoundError('User not found.');
 
     // Dependencies checks could go here (e.g. check if user has made assessments)
     // For now we just delete
     await this.userRepository.delete(userId);
     
-    await auditLogService.logAction(adminId, 'USER_DELETED', `Deleted user ${user.email}`);
+    await auditLogService.logAction(adminId, 'USER_DELETED', `Deleted user ${user.email}.`);
   }
 }
 

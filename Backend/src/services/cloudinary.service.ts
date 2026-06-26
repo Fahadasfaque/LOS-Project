@@ -42,7 +42,7 @@ export class CloudinaryService {
         } else if (result) {
           resolve(result);
         } else {
-          reject(new Error('Unknown Cloudinary upload error'));
+          reject(new Error('Unknown Cloudinary upload error.'));
         }
       });
 

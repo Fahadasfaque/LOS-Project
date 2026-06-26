@@ -256,7 +256,7 @@ export default function ApprovalQueuePage() {
                     <TableCell colSpan={8} className="py-20 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center">
                         <FileText className="h-10 w-10 text-muted-foreground/30 mb-4" />
-                        <h3 className="text-lg font-medium text-foreground">No applications in queue</h3>
+                        <h3 className="text-lg font-medium text-foreground">No applications in queue.</h3>
                         <p className="text-sm mt-1 max-w-sm">There are no applications matching your current filter criteria.</p>
                         <Button 
                           variant="outline" 

@@ -46,10 +46,10 @@ import {
 import { toast } from 'sonner';
 
 const createUserSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Please enter a valid email address.'),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
+  firstName: z.string().min(1, 'First name is required.'),
+  lastName: z.string().min(1, 'Last name is required.'),
   role: z.enum(['SUPER_ADMIN', 'LOAN_OFFICER', 'CREDIT_ANALYST', 'APPROVER']),
 });
 
@@ -104,7 +104,7 @@ export default function UserManagementPage() {
       }
     } catch (err: any) {
       console.error(err);
-      const msg = err.message || 'Failed to fetch users';
+      const msg = err.message || 'Failed to fetch users.';
       setError(msg);
       toast.error(msg);
     } finally {
@@ -128,7 +128,7 @@ export default function UserManagementPage() {
       }
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || 'Failed to create user');
+      toast.error(err.message || 'Failed to create user.');
     } finally {
       setSubmitting(false);
     }
