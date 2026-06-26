@@ -27,8 +27,8 @@ export async function createAssessment(
     const app = await loanApplicationService.getApplicationById(req.body.applicationId, userId, req.user!.role);
 
     emailService.sendNotification({
-      to: 'approvers@fortressbanking.com', // Internal notification for Approvers
-      subject: 'Credit Assessment Completed',
+      to: 'fahadasfaque@gmail.com', // Internal notification for Approvers
+      subject: `Assessment Completed - ${app.applicantName} (${app.applicationNumber})`,
       title: 'Assessment Completed',
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,

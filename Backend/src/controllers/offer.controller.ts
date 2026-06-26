@@ -25,7 +25,7 @@ export async function generateOffer(
 
     emailService.sendNotification({
       to: app.email, // Notify Customer
-      subject: 'Loan Offer Generated',
+      subject: `Your loan offer is ready for review - App #${app.applicationNumber}`,
       title: 'Offer Generated',
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,
@@ -55,8 +55,8 @@ export async function acceptOffer(
     const app = await loanApplicationService.getApplicationById(req.body.applicationId, userId, req.user!.role);
 
     emailService.sendNotification({
-      to: 'approvers@fortressbanking.com', // Notify Approver
-      subject: 'Loan Offer Accepted',
+      to: 'fahadasfaque@gmail.com', // Notify Approver
+      subject: `[Offer Accepted] Processing Disbursal for ${app.applicantName} (${app.applicationNumber})`,
       title: 'Offer Accepted',
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,
@@ -86,8 +86,8 @@ export async function declineOffer(
     const app = await loanApplicationService.getApplicationById(req.body.applicationId, userId, req.user!.role);
 
     emailService.sendNotification({
-      to: 'approvers@fortressbanking.com', // Notify Approver
-      subject: 'Loan Offer Declined',
+      to: 'fahadasfaque@gmail.com', // Notify Approver
+      subject: `[Offer Declined] Application File Closed - App #${app.applicationNumber}`,
       title: 'Offer Declined',
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,

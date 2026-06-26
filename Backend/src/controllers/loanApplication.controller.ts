@@ -94,7 +94,7 @@ export async function submitApplication(
 
     emailService.sendNotification({
       to: result.email, // Customer notification
-      subject: 'Loan Application Submitted',
+      subject: `We've received your loan application #${result.applicationNumber}`,
       title: 'Application Submitted',
       customerName: result.applicantName,
       applicationNumber: result.applicationNumber,
@@ -104,8 +104,8 @@ export async function submitApplication(
     });
 
     emailService.sendNotification({
-      to: 'credit-team@fortressbanking.com', // Internal notification
-      subject: 'New Loan Application Assigned',
+      to: 'cursorgmail01@gmail.com', // Internal notification
+      subject: `New Loan Assessment Assigned - App #${result.applicationNumber}`,
       title: 'Assessment Assigned',
       customerName: result.applicantName,
       applicationNumber: result.applicationNumber,
@@ -160,8 +160,8 @@ export async function updateStatus(
 
       // Notify Loan Officer
       emailService.sendNotification({
-        to: 'loan-officers@fortressbanking.com',
-        subject: `Application ${status}`,
+        to: 'fahadasfaque7860@gmail.com',
+        subject: `App #${result.applicationNumber} - ${status}`,
         title: notificationTitle,
         customerName: result.applicantName,
         applicationNumber: result.applicationNumber,

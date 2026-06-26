@@ -1029,7 +1029,7 @@ export default function ApplicationDetailsPage() {
 
             {app.assessment && app.assessment.status === 'COMPLETED' && (
               <Card className="border-border shadow-sm overflow-hidden relative">
-                <div className="absolute top-0 right-0 h-32 w-32 bg-primary/5 rounded-bl-full pointer-events-none border-l border-b border-primary/10"></div>
+                <div className="absolute top-0 right-0 h-32 w-36 bg-primary/5 rounded-bl-full pointer-events-none border-l border-b border-primary/10"></div>
                 <CardHeader className="bg-muted/20 border-b border-border pb-4">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Activity className="h-5 w-5 text-primary" />
@@ -1586,7 +1586,7 @@ export default function ApplicationDetailsPage() {
                     return (
                       <div key={evt.id || idx} className="relative">
                         {/* Node Icon */}
-                        <span className={`absolute left-[-39px] top-1.5 h-6 w-6 rounded-full flex items-center justify-center border-2 ${isNewest
+                        <span className={`absolute left-[-29px] top-1.5 h-6 w-6 rounded-full flex items-center justify-center border-2 ${isNewest
                             ? 'bg-primary border-primary ring-4 ring-primary/20'
                             : 'bg-card border-muted-foreground/30'
                           }`}>

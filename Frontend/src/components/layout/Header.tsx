@@ -57,7 +57,7 @@ export function Header() {
     switch (user.role) {
       case 'LOAN_OFFICER':
         return (
-          <Button onClick={() => router.push('/dashboard/create-application')} size="sm" className="hidden sm:flex gap-2 cursor-pointer">
+          <Button onClick={() => router.push('/dashboard/create-application')} size="lg" className="hidden sm:flex gap-2 cursor-pointer">
             <FilePlus className="h-4 w-4" />
             New Application
           </Button>
@@ -127,18 +127,7 @@ export function Header() {
         {/* Quick Action Button */}
         {getQuickAction()}
 
-        {/* Environment Badge */}
-        <span className="hidden sm:inline-flex items-center rounded-md bg-amber-500/10 px-2 py-1 text-[10px] font-bold text-amber-600 border border-amber-500/20 uppercase tracking-widest">
-          Development
-        </span>
-
         <div className="w-px h-5 bg-border hidden sm:block mx-1"></div>
-
-        {/* Notifications */}
-        <button className="relative p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-full transition-colors cursor-pointer">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive border border-background"></span>
-        </button>
 
         {/* Theme Toggle */}
         <button

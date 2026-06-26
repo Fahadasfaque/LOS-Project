@@ -129,7 +129,7 @@ export class AuthService {
 
     await emailService.sendNotification({
       to: user.email,
-      subject: 'Your Login Verification Code',
+      subject: `${otpCode} is your Fortress Banking verification code`,
       type: 'OTP',
       otpCode,
       firstName: user.firstName,
