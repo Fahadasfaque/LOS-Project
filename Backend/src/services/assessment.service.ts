@@ -85,7 +85,7 @@ export class AssessmentService {
   async createPendingAssessment(userId: string, applicationId: string): Promise<Assessment> {
     const app = await this.appRepository.findById(applicationId);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
 
     const assessment = await this.repository.upsert(applicationId, {

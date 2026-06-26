@@ -34,7 +34,7 @@ export class DisbursementService {
     // 2. Fetch Application
     const app = await this.appRepository.findById(data.applicationId);
     if (!app) {
-      throw new NotFoundError('Loan application not found');
+      throw new NotFoundError('Loan application not found.');
     }
 
     // 3. Verify status is OFFER_ACCEPTED

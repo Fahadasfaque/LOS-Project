@@ -71,7 +71,7 @@ export function UserTableActions({ user, onActionComplete }: { user: any, onActi
     e.preventDefault();
     try {
       await api.patch(`/users/${user.id}/reset-password`, { newPassword });
-      toast.success('Password reset successfully');
+      toast.success('Password reset successfully.');
       setActiveDialog(null);
       setNewPassword('');
       onActionComplete();
@@ -83,7 +83,7 @@ export function UserTableActions({ user, onActionComplete }: { user: any, onActi
   const handleToggleStatus = async () => {
     try {
       await api.patch(`/users/${user.id}/status`, { isActive: !user.isActive });
-      toast.success(`User ${!user.isActive ? 'activated' : 'deactivated'} successfully`);
+      toast.success(`User ${!user.isActive ? 'activated' : 'deactivated'} successfully.`);
       setActiveDialog(null);
       onActionComplete();
     } catch (err: any) {

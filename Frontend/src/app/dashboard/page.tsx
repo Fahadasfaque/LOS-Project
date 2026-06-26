@@ -283,7 +283,7 @@ export default function DashboardPage() {
         {/* KPI 2 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">Audit Logs Recorded.</span>
+            <span className="text-muted-foreground text-sm font-medium">Audit Logs Recorded</span>
             <div className="w-9 h-9 rounded-md bg-cyan-500/10 flex items-center justify-center shrink-0 text-cyan-600">
               <Terminal className="h-4.5 w-4.5" />
             </div>
@@ -297,7 +297,7 @@ export default function DashboardPage() {
         {/* KPI 3 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">Overall Applications.</span>
+            <span className="text-muted-foreground text-sm font-medium">Overall Applications</span>
             <div className="w-9 h-9 rounded-md bg-amber-500/10 flex items-center justify-center shrink-0 text-amber-600">
               <FileText className="h-4.5 w-4.5" />
             </div>
@@ -311,7 +311,7 @@ export default function DashboardPage() {
         {/* KPI 4 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">DB Transactions.</span>
+            <span className="text-muted-foreground text-sm font-medium">DB Transactions</span>
             <div className="w-9 h-9 rounded-md bg-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-600">
               <TrendingUp className="h-4.5 w-4.5" />
             </div>
@@ -326,7 +326,7 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
           <div className="flex flex-col gap-1 mb-6">
-            <h4 className="text-lg font-bold">Application Status Overview.</h4>
+            <h4 className="text-lg font-bold">Application Status Overview</h4>
             <p className="text-sm text-muted-foreground">Current state of all applications in the system.</p>
           </div>
           <div className="h-[300px] w-full">
@@ -384,7 +384,7 @@ export default function DashboardPage() {
         {/* KPI 1 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">Total Applications.</span>
+            <span className="text-muted-foreground text-sm font-medium">Total Applications</span>
             <div className="w-9 h-9 rounded-md bg-blue-500/10 flex items-center justify-center shrink-0 text-blue-600">
               <FileText className="h-4.5 w-4.5" />
             </div>
@@ -398,7 +398,7 @@ export default function DashboardPage() {
         {/* KPI 2 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">Pending Submission.</span>
+            <span className="text-muted-foreground text-sm font-medium">Pending Submission</span>
             <div className="w-9 h-9 rounded-md bg-amber-500/10 flex items-center justify-center shrink-0 text-amber-600">
               <Clock className="h-4.5 w-4.5" />
             </div>
@@ -412,7 +412,7 @@ export default function DashboardPage() {
         {/* KPI 3 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">In Underwriting.</span>
+            <span className="text-muted-foreground text-sm font-medium">In Underwriting</span>
             <div className="w-9 h-9 rounded-md bg-cyan-500/10 flex items-center justify-center shrink-0 text-cyan-600">
               <Activity className="h-4.5 w-4.5" />
             </div>
@@ -426,7 +426,7 @@ export default function DashboardPage() {
         {/* KPI 4 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-sm font-medium">Disbursed Successfully.</span>
+            <span className="text-muted-foreground text-sm font-medium">Disbursed Successfully</span>
             <div className="w-9 h-9 rounded-md bg-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-600">
               <CheckCircle className="h-4.5 w-4.5" />
             </div>

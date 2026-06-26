@@ -169,7 +169,7 @@ export async function updateStatus(
       // Notify Loan Officer
       emailService.sendNotification({
         to: 'fahadasfaque7860@gmail.com',
-        subject: `App #${result.applicationNumber} - ${status} (${result.applicantName})`,
+        subject: `App #${result.applicationNumber} - ${status} (${result.applicantName}).`,
         title: notificationTitle,
         customerName: result.applicantName,
         applicationNumber: result.applicationNumber,

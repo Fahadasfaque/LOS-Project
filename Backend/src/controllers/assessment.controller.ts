@@ -28,8 +28,8 @@ export async function createAssessment(
 
     emailService.sendNotification({
       to: 'fahadasfaque@gmail.com', // Internal notification for Approvers
-      subject: `Assessment Completed - ${app.applicantName} (${app.applicationNumber})`,
-      title: 'Assessment Completed',
+      subject: `Assessment Completed - ${app.applicantName} (${app.applicationNumber}).`,
+      title: 'Assessment Completed.',
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,
       status: 'UNDER_REVIEW',

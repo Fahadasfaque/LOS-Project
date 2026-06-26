@@ -58,25 +58,25 @@ export default function LoginPage() {
     try {
       if (loginMode === 'password') {
         if (!data.password) {
-          toast.error('Password is required');
+          toast.error('Password is required.');
           return;
         }
         await login(data.email, data.password);
         toast.success('Access granted to terminal!');
       } else if (loginMode === 'otp' && otpStep === 'request') {
         await requestOtp(data.email);
-        toast.success('OTP sent to your email');
+        toast.success('OTP sent to your email.');
         setOtpStep('verify');
       } else if (loginMode === 'otp' && otpStep === 'verify') {
         if (!data.otp) {
-          toast.error('OTP is required');
+          toast.error('OTP is required.');
           return;
         }
         await verifyOtpLogin(data.email, data.otp);
         toast.success('Access granted to terminal!');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Authentication failed');
+      toast.error(err.message || 'Authentication failed.');
     } finally {
       setLoading(false);
     }
@@ -184,7 +184,7 @@ export default function LoginPage() {
           <div className="mb-8">
             <h2 className="text-[#0a0f1e] text-3xl font-bold mb-2">Sign in</h2>
             <p className="text-[#6b7a9e] text-sm">
-              {loginMode === 'password' ? 'Enter your credentials to access the credit terminal' : (otpStep === 'request' ? 'Enter your email to receive a secure code' : 'Enter the 6-digit code sent to your email')}
+              {loginMode === 'password' ? 'Enter your credentials to access the credit terminal.' : (otpStep === 'request' ? 'Enter your email to receive a secure code.' : 'Enter the 6-digit code sent to your email.')}
             </p>
           </div>
 
@@ -290,7 +290,7 @@ export default function LoginPage() {
                 {errors.otp && (
                   <p className="text-xs font-medium text-red-500 mt-1">{errors.otp.message}</p>
                 )}
-                <p className="text-[11px] text-[#6b7a9e] mt-2">Code was sent to {getValues('email')}</p>
+                <p className="text-[11px] text-[#6b7a9e] mt-2">Code was sent to {getValues('email')}.</p>
               </div>
             )}
 

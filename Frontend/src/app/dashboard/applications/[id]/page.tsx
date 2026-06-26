@@ -356,7 +356,7 @@ export default function ApplicationDetailsPage() {
       
       if (res.success) {
         setUploadProgress(100);
-        toast.success(`Document uploaded: ${selectedFile.name}`);
+        toast.success(`Document uploaded: ${selectedFile.name}.`);
         setSelectedFile(null);
         setUploadProgress(0);
 
@@ -511,14 +511,14 @@ export default function ApplicationDetailsPage() {
       events.push({
         id: `status-${hist.id}`,
         type: 'STATUS_CHANGE',
-        title: hist.newStatus === 'DRAFT' ? 'Application Drafted.' :
-          hist.newStatus === 'SUBMITTED' ? 'Application Submitted.' :
-            hist.newStatus === 'UNDER_REVIEW' ? 'Under Review Started.':
-              hist.newStatus === 'APPROVED' ? 'Application Approved.' :
-                hist.newStatus === 'OFFER_GENERATED' ? 'Lending Offer Generated.' :
-                  hist.newStatus === 'OFFER_ACCEPTED' ? 'Customer Acceptance Recorded.' :
-                    hist.newStatus === 'REJECTED' ? 'Application Rejected.' :
-                      hist.newStatus === 'DISBURSED' ? 'Funds Disbursed.' :
+        title: hist.newStatus === 'DRAFT' ? 'Application Drafted' :
+          hist.newStatus === 'SUBMITTED' ? 'Application Submitted' :
+            hist.newStatus === 'UNDER_REVIEW' ? 'Under Review Started':
+              hist.newStatus === 'APPROVED' ? 'Application Approved' :
+                hist.newStatus === 'OFFER_GENERATED' ? 'Lending Offer Generated' :
+                  hist.newStatus === 'OFFER_ACCEPTED' ? 'Customer Acceptance Recorded' :
+                    hist.newStatus === 'REJECTED' ? 'Application Rejected' :
+                      hist.newStatus === 'DISBURSED' ? 'Funds Disbursed' :
                         `Status Changed: ${hist.newStatus}`,
         timestamp: hist.changedAt,
         changedBy: hist.changedBy,
@@ -539,7 +539,7 @@ export default function ApplicationDetailsPage() {
       events.push({
         id: `assessment-${app.assessment.id}`,
         type: 'ASSESSMENT_COMPLETED',
-        title: 'Credit Underwriting Locked.',
+        title: 'Credit Underwriting Locked',
         timestamp: app.assessment.assessedAt,
         changedBy: app.assessment.assessedBy,
         description: `Credit Score: ${app.assessment.creditScore} (${app.assessment.riskLevel} Risk). Recommendation: ${app.assessment.recommendation}.`,
@@ -552,7 +552,7 @@ export default function ApplicationDetailsPage() {
       events.push({
         id: `offer-gen-${app.offer.id}`,
         type: 'OFFER_GENERATED',
-        title: 'Loan Offer Generated.',
+        title: 'Loan Offer Generated',
         timestamp: app.offer.generatedAt,
         changedBy: null,
         description: `Offer details: ${formatCurrency(app.offer.loanAmount)} at ${app.offer.interestRate}% interest, ${app.offer.tenureMonths} months tenure, Monthly EMI: ${formatCurrency(app.offer.emiAmount)}.`,
@@ -564,7 +564,7 @@ export default function ApplicationDetailsPage() {
         events.push({
           id: `offer-acc-${app.offer.id}`,
           type: 'CUSTOMER_ACCEPTANCE',
-          title: 'Customer Acceptance Recorded.',
+          title: 'Customer Acceptance Recorded',
           timestamp: app.offer.acceptedAt,
           changedBy: null,
           description: `Lending terms accepted by client. Monthly EMI: ${formatCurrency(app.offer.emiAmount)}.`,
@@ -578,7 +578,7 @@ export default function ApplicationDetailsPage() {
       events.push({
         id: `disbursement-${app.disbursement.id}`,
         type: 'LOAN_DISBURSED',
-        title: 'Loan Disbursed successfully',
+        title: 'Loan Disbursed Successfully',
         timestamp: app.disbursement.disbursedAt,
         changedBy: app.disbursement.disbursedBy,
         description: `Funds released. Transaction Reference: ${app.disbursement.referenceNumber} (${app.disbursement.status})`,

@@ -67,7 +67,7 @@ export const updateApplicationSchema = z.object({
     applicantName: z.string().min(1).optional(),
     email: z.string().email().optional(),
     phone: z.string().min(10).optional(),
-    pan: z.string().length(10).regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i, 'Invalid PAN card format').optional(),
+    pan: z.string().length(10).regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i, 'Invalid PAN card format.').optional(),
     loanType: z.nativeEnum(LoanType).optional(),
     loanAmount: z.number().positive().optional(),
     monthlyIncome: z.number().positive().optional(),

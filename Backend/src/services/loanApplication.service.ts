@@ -241,7 +241,7 @@ export class LoanApplicationService {
     await auditLogService.logAction(
       userId,
       'LOAN_APPLICATION_STATUS_CHANGE',
-      `Transitioned application ${updated.applicationNumber} from ${app.status} to ${newStatus}`
+      `Transitioned application ${updated.applicationNumber} from ${app.status} to ${newStatus}.`
     );
 
     return updated;
