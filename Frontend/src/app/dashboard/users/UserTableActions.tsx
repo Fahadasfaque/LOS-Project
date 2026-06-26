@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -112,7 +113,9 @@ export function UserTableActions({ user, onActionComplete }: { user: any, onActi
           <MoreHorizontal className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          </DropdownMenuGroup>
           <DropdownMenuItem onClick={() => setActiveDialog('view')}>
             <Eye className="mr-2 h-4 w-4" /> View Profile
           </DropdownMenuItem>

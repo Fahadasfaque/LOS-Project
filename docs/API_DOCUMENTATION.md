@@ -63,6 +63,59 @@ Retrieves the logged-in user profile from active JWT session header.
 
 ---
 
+### 1.3 Request OTP
+Sends a 6-digit One Time Password (OTP) to the specified email, valid for 10 minutes. Returns generic success message to prevent user enumeration.
+
+- **URL**: `/api/v1/auth/otp/request`
+- **Method**: `POST`
+- **Payload**:
+  ```json
+  {
+    "email": "loanofficer@fortress.com"
+  }
+  ```
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "If the email exists, an OTP has been sent."
+  }
+  ```
+
+---
+
+### 1.4 Verify OTP
+Validates the provided OTP and issues a JWT session token if correct.
+
+- **URL**: `/api/v1/auth/otp/verify`
+- **Method**: `POST`
+- **Payload**:
+  ```json
+  {
+    "email": "loanofficer@fortress.com",
+    "code": "123456"
+  }
+  ```
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Authentication successful",
+    "data": {
+      "token": "eyJhbGciOiJIUzI1NiIsIn...",
+      "user": {
+        "id": "e44d3208-8e6f-4c8d-8a6e-399d8b746c10",
+        "email": "loanofficer@fortress.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "role": "LOAN_OFFICER"
+      }
+    }
+  }
+  ```
+
+---
+
 ## 2. Loan Application Endpoints
 
 ### 2.1 Create Loan Application (Draft)

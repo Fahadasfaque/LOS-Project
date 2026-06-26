@@ -217,7 +217,7 @@ export default function UserManagementPage() {
           >
             <DialogTrigger
               render={
-                <Button className="bg-primary hover:bg-primary/90 text-white font-semibold flex items-center gap-2 cursor-pointer h-10 px-4 rounded-md transition-all duration-150 shadow-sm">
+                <Button className="bg-card hover:text-white text-foreground font-semibold flex items-center gap-2 cursor-pointer h-10 px-4 rounded-md transition-all duration-150 shadow-sm">
                   <Plus className="h-4 w-4" />
                   Add User
                 </Button>
@@ -515,7 +515,9 @@ export default function UserManagementPage() {
                         {new Date(item.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="py-4 px-6 text-right">
-                        <UserTableActions user={item} onActionComplete={fetchUsers} />
+                        <div className="flex justify-end">
+                          <UserTableActions user={item} onActionComplete={fetchUsers} />
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

@@ -45,3 +45,35 @@ export async function me(
     next(error);
   }
 }
+
+export async function requestOtp(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { email } = req.body;
+    const ipAddress = req.ip || req.socket.remoteAddress;
+
+    await authService.requestOtp(email, ipAddress);
+    sendSuccess(res, 'OTP sent to your email');
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function verifyOtp(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { email, code } = req.body;
+    const ipAddress = req.ip || req.socket.remoteAddress;
+
+    const result = await authService.verifyOtp(email, code, ipAddress);
+    sendSuccess(res, 'Authentication successful', result);
+  } catch (error) {
+    next(error);
+  }
+}

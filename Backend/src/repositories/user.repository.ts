@@ -32,7 +32,7 @@ export class UserRepository {
   /**
    * Retrieve all users, excluding the password field, sorted by creation date
    */
-  async findAll(): Promise<Omit<User, 'password'>[]> {
+  async findAll(): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>[]> {
     return prisma.user.findMany({
       select: {
         id: true,

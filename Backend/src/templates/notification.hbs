@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <style>
@@ -9,35 +10,41 @@
       margin: 0;
       padding: 0;
     }
+
     .container {
       max-width: 600px;
       margin: 40px auto;
       background-color: #ffffff;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       overflow: hidden;
     }
+
     .header {
       background-color: #002b5e;
       color: #ffffff;
       padding: 24px;
       text-align: center;
     }
+
     .logo {
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 8px;
     }
+
     .system {
       font-size: 14px;
       color: #b0c4de;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+
     .content {
       padding: 32px;
       color: #333333;
     }
+
     .title {
       font-size: 20px;
       font-weight: bold;
@@ -46,26 +53,38 @@
       border-bottom: 2px solid #f0f0f0;
       padding-bottom: 12px;
     }
+
     .info-grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
       margin-bottom: 24px;
     }
+
     .info-row {
       display: flex;
       flex-direction: column;
+      background-color: #f8f9fa;
+      padding: 16px;
+      border-radius: 6px;
+      border: 1px solid #e9ecef;
     }
+
     .label {
-      font-size: 12px;
-      color: #666666;
+      font-size: 11px;
+      color: #888888;
       text-transform: uppercase;
-      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
     }
+
     .value {
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 15px;
+      font-weight: 600;
+      color: #002b5e;
+      margin-bottom: 0;
     }
+
     .action {
       background-color: #f8f9fa;
       padding: 16px;
@@ -73,12 +92,14 @@
       margin-top: 24px;
       border-radius: 4px;
     }
+
     .action-label {
       font-size: 14px;
       font-weight: bold;
       color: #002b5e;
       margin-bottom: 8px;
     }
+
     .footer {
       background-color: #f8f9fa;
       padding: 24px;
@@ -89,16 +110,17 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
       <div class="logo">FORTRESS BANKING</div>
       <div class="system">Loan Origination System</div>
     </div>
-    
+
     <div class="content">
       <div class="title">{{title}}</div>
-      
+
       <div class="info-grid">
         <div class="info-row">
           <span class="label">Customer Name</span>
@@ -112,6 +134,12 @@
           <span class="label">Status</span>
           <span class="value">{{status}}</span>
         </div>
+        {{#if transactionId}}
+        <div class="info-row">
+          <span class="label">Transaction ID</span>
+          <span class="value">{{transactionId}}</span>
+        </div>
+        {{/if}}
       </div>
 
       <div class="action">
@@ -126,4 +154,5 @@
     </div>
   </div>
 </body>
+
 </html>

@@ -379,11 +379,7 @@ export default function DashboardPage() {
 
   const renderLoanOfficerKPIs = () => (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h3 className="text-xl font-bold text-foreground">Loan Pipeline Console</h3>
-        <p className="text-sm text-muted-foreground">Overview of active originations and client submissions.</p>
-      </div>
-
+      
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* KPI 1 */}
         <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3 flex-1 shadow-sm transition-all duration-200">

@@ -13,6 +13,8 @@ import { upload } from '../middlewares/upload';
 import { validateRequest } from '../middlewares/validation';
 import {
   loginSchema,
+  requestOtpSchema,
+  verifyOtpSchema,
   createUserSchema,
   createApplicationSchema,
   updateApplicationSchema,
@@ -31,6 +33,8 @@ const router = Router();
  * Authentication Endpoints
  */
 router.post('/auth/login', validateRequest(loginSchema), authController.login);
+router.post('/auth/otp/request', validateRequest(requestOtpSchema), authController.requestOtp);
+router.post('/auth/otp/verify', validateRequest(verifyOtpSchema), authController.verifyOtp);
 router.get('/auth/me', authenticate, authController.me);
 
 /**

@@ -12,7 +12,15 @@ This document describes the security controls, authentication systems, data prot
 - **Expiration**: Tokens are configured with a default validity of **8 hours** to limit the window of session vulnerability.
 - **Frontend Storage**: JWT tokens are securely stored in browser `localStorage` and injected as `Authorization: Bearer <token>` in the HTTP headers of all API client calls.
 
-### 1.2 Password Hashing
+### 1.2 One-Time Password (OTP) Authentication
+- **Mechanism**: Email-based OTP login is available alongside traditional password authentication.
+- **Delivery**: A 6-digit numeric code is sent to the registered email via Nodemailer.
+- **Validation**:
+  - The generated OTP is hashed using `Bcryptjs` before being stored in the database.
+  - The OTP is valid for exactly **10 minutes**.
+  - Rate limiting and email existence checks are obfuscated (returns a generic success message) to prevent user enumeration.
+
+### 1.3 Password Hashing
 - **Algorithm**: `Bcryptjs` is utilized to hash all user password credentials.
 - **Work Factor**: A salt round factor of `10` is enforced to ensure protection against brute-force attacks while preserving server request capacity.
 

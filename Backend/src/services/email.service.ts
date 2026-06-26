@@ -7,17 +7,22 @@ import { prisma } from '../config/db';
 export interface EmailPayload {
   to: string;
   subject: string;
-  title: string;
-  customerName: string;
-  applicationNumber: string;
-  status: string;
-  actionTaken: string;
+  type?: 'NOTIFICATION' | 'OTP';
+  title?: string;
+  customerName?: string;
+  applicationNumber?: string;
+  status?: string;
+  transactionId?: string;
+  actionTaken?: string;
+  otpCode?: string;
+  firstName?: string;
   userId?: string;
 }
 
 class EmailService {
   private transporter: nodemailer.Transporter;
-  private template: handlebars.TemplateDelegate;
+  private notificationTemplate: handlebars.TemplateDelegate;
+  private otpTemplate: handlebars.TemplateDelegate;
   private queue: EmailPayload[] = [];
   private isProcessing = false;
 
@@ -32,9 +37,11 @@ class EmailService {
       },
     });
 
-    const templatePath = path.join(__dirname, '../templates/notification.hbs');
-    const templateSource = fs.readFileSync(templatePath, 'utf8');
-    this.template = handlebars.compile(templateSource);
+    const notifPath = path.join(__dirname, '../templates/notification.hbs');
+    this.notificationTemplate = handlebars.compile(fs.readFileSync(notifPath, 'utf8'));
+
+    const otpPath = path.join(__dirname, '../templates/otp.hbs');
+    this.otpTemplate = handlebars.compile(fs.readFileSync(otpPath, 'utf8'));
   }
 
   /**
@@ -67,13 +74,23 @@ class EmailService {
       if (!payload) continue;
 
       try {
-        const html = this.template({
-          title: payload.title,
-          customerName: payload.customerName,
-          applicationNumber: payload.applicationNumber,
-          status: payload.status,
-          actionTaken: payload.actionTaken,
-        });
+        let html = '';
+        if (payload.type === 'OTP') {
+          html = this.otpTemplate({
+            firstName: payload.firstName,
+            otpCode: payload.otpCode,
+            year: new Date().getFullYear(),
+          });
+        } else {
+          html = this.notificationTemplate({
+            title: payload.title,
+            customerName: payload.customerName,
+            applicationNumber: payload.applicationNumber,
+            status: payload.status,
+            actionTaken: payload.actionTaken,
+            transactionId: payload.transactionId,
+          });
+        }
 
         await this.transporter.sendMail({
           from: process.env.SMTP_FROM || '"Fortress Banking" <noreply@fortressbanking.com>',

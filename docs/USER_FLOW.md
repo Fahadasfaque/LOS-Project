@@ -17,17 +17,25 @@ sequenceDiagram
   User->>FE: Lands on "/" (Unauthenticated)
   FE->>FE: Middleware detects no Token
   FE->>User: Redirects to "/login"
-  User->>FE: Enters Email & Password, clicks Login
-  FE->>FE: Validates inputs locally (Zod)
-  FE->>BE: POST /api/v1/auth/login {email, password}
-  BE->>BE: Checks database & hashes password
-  alt Credentials Match
+  User->>FE: Chooses Password or OTP login mode
+  alt Password Login
+    User->>FE: Enters Email & Password, clicks Login
+    FE->>BE: POST /api/v1/auth/login {email, password}
+  else OTP Login
+    User->>FE: Enters Email, clicks "Send Verification Code"
+    FE->>BE: POST /api/v1/auth/otp/request {email}
+    BE->>User: Email with 6-digit OTP (if email exists)
+    User->>FE: Enters 6-digit OTP, clicks "Access Terminal"
+    FE->>BE: POST /api/v1/auth/otp/verify {email, code}
+  end
+  BE->>BE: Checks database credentials or verifies OTP
+  alt Credentials Match / OTP Valid
     BE->>BE: Write Audit Log (USER_LOGIN)
     BE->>FE: Return 200 OK + JWT Token + User Object
     FE->>FE: Stores JWT Token in localStorage (los_token)
     FE->>FE: Updates AuthContext with User Profile
     FE->>User: Redirects to "/dashboard"
-  else Invalid Credentials
+  else Invalid Credentials / OTP Invalid
     BE->>FE: Return 401 Unauthorized {message}
     FE->>User: Renders validation error on UI
   end

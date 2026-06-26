@@ -11,6 +11,19 @@ export const loginSchema = z.object({
   }),
 });
 
+export const requestOtpSchema = z.object({
+  body: z.object({
+    email: z.string().email('Must be a valid email address'),
+  }),
+});
+
+export const verifyOtpSchema = z.object({
+  body: z.object({
+    email: z.string().email('Must be a valid email address'),
+    code: z.string().length(6, 'OTP must be exactly 6 digits'),
+  }),
+});
+
 /**
  * Zod schema for validating new user registration requests
  */

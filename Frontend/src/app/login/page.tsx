@@ -18,41 +18,65 @@ import {
   Mail,
   Eye,
   EyeOff,
-  Loader2
+  Loader2,
+  KeyRound,
+  ArrowLeft
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().optional().refine(val => !val || val.length >= 6, 'Password must be at least 6 characters'),
+  otp: z.string().optional().refine(val => !val || val.length === 6, 'OTP must be exactly 6 digits'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, requestOtp, verifyOtpLogin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginMode, setLoginMode] = useState<'password' | 'otp'>('password');
+  const [otpStep, setOtpStep] = useState<'request' | 'verify'>('request');
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
       password: '',
+      otp: '',
     },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
     try {
-      await login(data.email, data.password);
-      toast.success('Access granted to terminal!');
+      if (loginMode === 'password') {
+        if (!data.password) {
+          toast.error('Password is required');
+          return;
+        }
+        await login(data.email, data.password);
+        toast.success('Access granted to terminal!');
+      } else if (loginMode === 'otp' && otpStep === 'request') {
+        await requestOtp(data.email);
+        toast.success('OTP sent to your email');
+        setOtpStep('verify');
+      } else if (loginMode === 'otp' && otpStep === 'verify') {
+        if (!data.otp) {
+          toast.error('OTP is required');
+          return;
+        }
+        await verifyOtpLogin(data.email, data.otp);
+        toast.success('Access granted to terminal!');
+      }
     } catch (err: any) {
-      toast.error(err.message || 'Invalid email or password');
+      toast.error(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -160,74 +184,129 @@ export default function LoginPage() {
           <div className="mb-8">
             <h2 className="text-[#0a0f1e] text-3xl font-bold mb-2">Sign in</h2>
             <p className="text-[#6b7a9e] text-sm">
-              Enter your credentials to access the credit terminal
+              {loginMode === 'password' ? 'Enter your credentials to access the credit terminal' : (otpStep === 'request' ? 'Enter your email to receive a secure code' : 'Enter the 6-digit code sent to your email')}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Email Address */}
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-semibold text-[#0a0f1e]">
-                Email Address
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b7a9e]" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@company.com"
-                  className="pl-10 bg-[#f4f6fb] border-[#e2e6ef] text-[#0a0f1e] placeholder-[#6b7a9e] focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb] h-11 rounded-lg font-medium"
-                  {...register('email')}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-xs font-medium text-red-500 mt-1">{errors.email.message}</p>
-              )}
+          {/* Mode Toggles */}
+          {otpStep === 'request' && (
+            <div className="flex p-1 bg-[#f1f5f9] rounded-lg mb-6">
+              <button
+                type="button"
+                onClick={() => setLoginMode('password')}
+                className={`flex-1 text-sm font-medium py-2 rounded-md transition-colors ${loginMode === 'password' ? 'bg-white text-[#0a0f1e] shadow-sm' : 'text-[#6b7a9e] hover:text-[#0a0f1e]'}`}
+              >
+                Password
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginMode('otp')}
+                className={`flex-1 text-sm font-medium py-2 rounded-md transition-colors ${loginMode === 'otp' ? 'bg-white text-[#0a0f1e] shadow-sm' : 'text-[#6b7a9e] hover:text-[#0a0f1e]'}`}
+              >
+                Email OTP
+              </button>
             </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Email Address - Always show except in OTP verify step */}
+            {!(loginMode === 'otp' && otpStep === 'verify') && (
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-sm font-semibold text-[#0a0f1e]">
+                  Email Address
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b7a9e]" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@company.com"
+                    className="pl-10 bg-[#f4f6fb] border-[#e2e6ef] text-[#0a0f1e] placeholder-[#6b7a9e] focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb] h-11 rounded-lg font-medium"
+                    {...register('email')}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-xs font-medium text-red-500 mt-1">{errors.email.message}</p>
+                )}
+              </div>
+            )}
 
             {/* Password */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="password" className="text-sm font-semibold text-[#0a0f1e]">
-                  Password
-                </Label>
-                <a href="#" onClick={(e) => { e.preventDefault(); toast.info("Please contact your IT administrator to reset your password."); }} className="text-xs text-[#2563eb] font-semibold hover:underline">
-                  Forgot password?
-                </a>
+            {loginMode === 'password' && (
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="password" className="text-sm font-semibold text-[#0a0f1e]">
+                    Password
+                  </Label>
+                  <a href="#" onClick={(e) => { e.preventDefault(); toast.info("Please contact your IT administrator to reset your password."); }} className="text-xs text-[#2563eb] font-semibold hover:underline">
+                    Forgot password?
+                  </a>
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b7a9e]" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    className="pl-10 pr-10 bg-[#f4f6fb] border-[#e2e6ef] text-[#0a0f1e] placeholder-[#6b7a9e] focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb] h-11 rounded-lg font-medium"
+                    {...register('password')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6b7a9e] hover:text-[#0a0f1e] transition-colors cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-xs font-medium text-red-500 mt-1">{errors.password.message}</p>
+                )}
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b7a9e]" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  className="pl-10 pr-10 bg-[#f4f6fb] border-[#e2e6ef] text-[#0a0f1e] placeholder-[#6b7a9e] focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb] h-11 rounded-lg font-medium"
-                  {...register('password')}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6b7a9e] hover:text-[#0a0f1e] transition-colors cursor-pointer"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-xs font-medium text-red-500 mt-1">{errors.password.message}</p>
-              )}
-            </div>
+            )}
 
-            {/* Remember me checkbox */}
-            <div className="flex items-center gap-2 py-1">
-              <input
-                type="checkbox"
-                id="remember"
-                className="w-4 h-4 rounded border-[#e2e6ef] text-[#2563eb] focus:ring-[#2563eb] cursor-pointer"
-              />
-              <label htmlFor="remember" className="text-xs text-[#6b7a9e] cursor-pointer select-none font-medium">
-                Keep me signed in on this device
-              </label>
-            </div>
+            {/* OTP Code */}
+            {loginMode === 'otp' && otpStep === 'verify' && (
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center mb-1">
+                  <Label htmlFor="otp" className="text-sm font-semibold text-[#0a0f1e]">
+                    Verification Code
+                  </Label>
+                  <button type="button" onClick={() => setOtpStep('request')} className="text-xs text-[#2563eb] font-semibold hover:underline flex items-center gap-1">
+                    <ArrowLeft className="h-3 w-3" /> Back
+                  </button>
+                </div>
+                <div className="relative">
+                  <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b7a9e]" />
+                  <Input
+                    id="otp"
+                    type="text"
+                    placeholder="123456"
+                    className="pl-10 bg-[#f4f6fb] border-[#e2e6ef] text-[#0a0f1e] placeholder-[#6b7a9e] focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb] h-11 rounded-lg font-medium tracking-widest"
+                    maxLength={6}
+                    {...register('otp')}
+                  />
+                </div>
+                {errors.otp && (
+                  <p className="text-xs font-medium text-red-500 mt-1">{errors.otp.message}</p>
+                )}
+                <p className="text-[11px] text-[#6b7a9e] mt-2">Code was sent to {getValues('email')}</p>
+              </div>
+            )}
+
+            {/* Remember me checkbox - Only for Password mode */}
+            {loginMode === 'password' && (
+              <div className="flex items-center gap-2 py-1">
+                <input
+                  type="checkbox"
+                  id="remember"
+                  className="w-4 h-4 rounded border-[#e2e6ef] text-[#2563eb] focus:ring-[#2563eb] cursor-pointer"
+                />
+                <label htmlFor="remember" className="text-xs text-[#6b7a9e] cursor-pointer select-none font-medium">
+                  Keep me signed in on this device
+                </label>
+              </div>
+            )}
 
             {/* Submit Button */}
             <Button
@@ -240,8 +319,10 @@ export default function LoginPage() {
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Connecting...
                 </>
-              ) : (
+              ) : loginMode === 'password' || otpStep === 'verify' ? (
                 'Access Terminal'
+              ) : (
+                'Send Verification Code'
               )}
             </Button>
           </form>
@@ -249,7 +330,7 @@ export default function LoginPage() {
 
         {/* Footer copyright */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-[#6b7a9e] border-t border-[#e2e6ef] pt-6 font-medium">
-          <div>© 2026 Fortress Lending Technologies Inc.</div>
+          <div>© {new Date().getFullYear()} Fortress Lending Technologies Inc.</div>
           <div className="flex gap-4">
             <a href="#" onClick={(e) => { e.preventDefault(); toast.info("Privacy Policy is governed by corporate compliance."); }} className="hover:underline">Privacy Policy</a>
             <a href="#" onClick={(e) => { e.preventDefault(); toast.info("Terms of Service is governed by corporate compliance."); }} className="hover:underline">Terms of Service</a>

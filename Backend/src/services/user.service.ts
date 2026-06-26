@@ -29,7 +29,7 @@ export class UserService {
   async createUser(
     adminId: string,
     data: Prisma.UserCreateInput
-  ): Promise<Omit<User, 'password'>> {
+  ): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>> {
     // Check if email already registered
     const existing = await this.userRepository.findByEmail(data.email);
     if (existing) {
@@ -53,7 +53,7 @@ export class UserService {
     );
 
     // Exclude password from the returned object
-    const { password, ...userWithoutPassword } = user;
+    const { password, otpHash, otpExpiry, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
@@ -63,7 +63,7 @@ export class UserService {
    * 
    * @returns Array of user profile details (excluding password hashes)
    */
-  async getAllUsers(): Promise<Omit<User, 'password'>[]> {
+  async getAllUsers(): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>[]> {
     return this.userRepository.findAll();
   }
 
@@ -74,16 +74,16 @@ export class UserService {
    * @returns User profile details (excluding password hash)
    * @throws NotFoundError if user not found
    */
-  async getUserById(id: string): Promise<Omit<User, 'password'>> {
+  async getUserById(id: string): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>> {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundError('User not found');
     }
-    const { password, ...userWithoutPassword } = user;
+    const { password, otpHash, otpExpiry, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
-  async updateUser(adminId: string, userId: string, data: Partial<Pick<User, 'firstName' | 'lastName' | 'phone' | 'department'>>): Promise<Omit<User, 'password'>> {
+  async updateUser(adminId: string, userId: string, data: Partial<Pick<User, 'firstName' | 'lastName' | 'phone' | 'department'>>): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>> {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundError('User not found');
 
@@ -91,11 +91,11 @@ export class UserService {
     
     await auditLogService.logAction(adminId, 'USER_UPDATED', `Updated profile for user ${updated.email}`);
     
-    const { password, ...userWithoutPassword } = updated;
+    const { password, otpHash, otpExpiry, ...userWithoutPassword } = updated;
     return userWithoutPassword;
   }
 
-  async changeRole(adminId: string, userId: string, role: string): Promise<Omit<User, 'password'>> {
+  async changeRole(adminId: string, userId: string, role: string): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>> {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundError('User not found');
 
@@ -103,11 +103,11 @@ export class UserService {
     
     await auditLogService.logAction(adminId, 'USER_ROLE_CHANGED', `Changed role of ${updated.email} from ${user.role} to ${role}`);
     
-    const { password, ...userWithoutPassword } = updated;
+    const { password, otpHash, otpExpiry, ...userWithoutPassword } = updated;
     return userWithoutPassword;
   }
 
-  async updateStatus(adminId: string, userId: string, isActive: boolean, reason?: string): Promise<Omit<User, 'password'>> {
+  async updateStatus(adminId: string, userId: string, isActive: boolean, reason?: string): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>> {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundError('User not found');
 
@@ -116,7 +116,7 @@ export class UserService {
     const action = isActive ? 'USER_ACTIVATED' : 'USER_DEACTIVATED';
     await auditLogService.logAction(adminId, action as any, `${action} ${updated.email}${reason ? `: ${reason}` : ''}`);
     
-    const { password, ...userWithoutPassword } = updated;
+    const { password, otpHash, otpExpiry, ...userWithoutPassword } = updated;
     return userWithoutPassword;
   }
 

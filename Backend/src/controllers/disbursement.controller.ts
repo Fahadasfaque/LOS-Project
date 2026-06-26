@@ -30,6 +30,7 @@ export async function disburseLoan(
       customerName: app.applicantName,
       applicationNumber: app.applicationNumber,
       status: 'DISBURSED',
+      transactionId: result.referenceNumber,
       actionTaken: `Your loan of $${result.amount} has been successfully disbursed.`,
       userId,
     });

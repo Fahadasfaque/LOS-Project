@@ -16,11 +16,37 @@ An enterprise-grade, secure, and role-based Loan Origination System (LOS) MVP de
 ### Frontend
 - **Core Framework**: Next.js (v15.5 App Router) with React 19
 - **Aesthetic Styling**: Tailwind CSS, Vanilla CSS transitions, and Lucide React icons
-- **Security & Session**: React Context Auth provider восстанавливающий JWT-session state
+- **Security & Session**: React Context Auth provider maintaining JWT-session state
 
 ---
 
-## 2. Configuration & Boot Verification
+## 2. Key Features
+
+- **Role-Based Access Control (RBAC)**: Secure access tailored for SUPER_ADMIN, LOAN_OFFICER, CREDIT_ANALYST, and APPROVER.
+- **AES-256-GCM Data Encryption**: High security for Personally Identifiable Information (PII) at rest.
+- **Comprehensive Audit Logging**: Immutable chronological tracking of all state transitions and system actions.
+- **Automated Credit Underwriting**: Rule-based engine assigning credit scores and risk levels based on applicant income.
+- **Interactive Dashboards**: Role-aware analytics showcasing KPIs across the loan lifecycle.
+
+---
+
+## 3. Project Structure
+
+```text
+LOS/
+├── Backend/               # Express.js REST API Server
+│   ├── prisma/            # Database schema & migrations
+│   └── src/               # Backend source code (Controllers, Services, Routes)
+├── Frontend/              # Next.js Web Client
+│   ├── public/            # Static assets
+│   └── src/               # Frontend source code (App Router, Components, Context)
+├── docs/                  # Project specifications and architecture guides
+└── README.md              # Project overview (this file)
+```
+
+---
+
+## 4. Configuration & Boot Verification
 
 ### Backend Environment Variables (`Backend/.env`)
 Create a `.env` file inside the `Backend/` directory with the following variables:
@@ -41,7 +67,7 @@ NEXT_PUBLIC_API_URL="http://localhost:5000/api/v1"
 
 ---
 
-## 3. Installation & Getting Started
+## 5. Installation & Getting Started
 
 ### 3.1 Setup Backend
 1. Navigate to the backend folder:
@@ -85,7 +111,7 @@ NEXT_PUBLIC_API_URL="http://localhost:5000/api/v1"
 
 ---
 
-## 4. Default Seed Authentication Credentials
+## 6. Default Seed Authentication Credentials
 
 The seed script creates the following active profiles for workflow simulation:
 
@@ -98,7 +124,7 @@ The seed script creates the following active profiles for workflow simulation:
 
 ---
 
-## 5. Documentation Directory
+## 7. Documentation Directory
 
 All architectural blueprints, entity relation guides, security constraints, and walkthroughs are archived in the `docs/` folder:
 - **Product Specifications**: [PRD.md](file:///c:/Users/Admin/Desktop/LOS/docs/PRD.md)

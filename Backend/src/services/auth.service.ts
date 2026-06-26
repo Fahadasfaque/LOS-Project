@@ -13,8 +13,10 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/user.repository';
-import { UnauthorizedError } from '../utils/errors';
+import { UnauthorizedError, NotFoundError } from '../utils/errors';
 import { auditLogService } from './auditLog.service';
+import { emailService } from './email.service';
+import { prisma } from '../config/db';
 
 export class AuthService {
   private userRepository = new UserRepository();
@@ -86,6 +88,109 @@ export class AuthService {
       user.id,
       'USER_LOGIN',
       `User ${user.email} successfully logged in`,
+      ipAddress
+    );
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    };
+  }
+
+  /**
+   * Requests an OTP for a user.
+   */
+  async requestOtp(email: string, ipAddress?: string): Promise<void> {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      throw new NotFoundError('Email not found');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedError('Account is inactive. Please contact administration.');
+    }
+
+    // Generate 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await bcrypt.hash(otpCode, 10);
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { otpHash, otpExpiry },
+    });
+
+    await emailService.sendNotification({
+      to: user.email,
+      subject: 'Your Login Verification Code',
+      type: 'OTP',
+      otpCode,
+      firstName: user.firstName,
+      userId: user.id,
+    });
+
+    await auditLogService.logAction(
+      user.id,
+      'OTP_REQUESTED',
+      `OTP requested for user: ${user.email}`,
+      ipAddress
+    );
+  }
+
+  /**
+   * Verifies an OTP for a user and logs them in.
+   */
+  async verifyOtp(email: string, code: string, ipAddress?: string): Promise<{ token: string; user: any }> {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user || !user.otpHash || !user.otpExpiry) {
+      throw new UnauthorizedError('Invalid or expired OTP');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedError('Account is inactive. Please contact administration.');
+    }
+
+    if (new Date() > user.otpExpiry) {
+      throw new UnauthorizedError('OTP has expired');
+    }
+
+    const isOtpValid = await bcrypt.compare(code, user.otpHash);
+    if (!isOtpValid) {
+      await auditLogService.logAction(
+        user.id,
+        'OTP_VERIFICATION_FAILED',
+        `Failed OTP verification for user: ${user.email}`,
+        ipAddress
+      );
+      throw new UnauthorizedError('Invalid or expired OTP');
+    }
+
+    // Clear OTP
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { otpHash: null, otpExpiry: null },
+    });
+
+    // Generate JWT
+    const jwtSecret = process.env.JWT_SECRET!;
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      jwtSecret,
+      { expiresIn: '8h' }
+    );
+
+    await auditLogService.logAction(
+      user.id,
+      'USER_LOGIN_OTP',
+      `User ${user.email} successfully logged in via OTP`,
       ipAddress
     );
 

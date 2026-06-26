@@ -9,29 +9,42 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  ArrowLeft,
   FileText,
   Clock,
   AlertTriangle,
-  UploadCloud,
+  Users,
+  Terminal,
+  Activity,
+  DollarSign,
+  TrendingUp,
+  RefreshCw,
+  Plus,
+  ShieldCheck,
+  BarChart2,
   Check,
   X,
-  FileCheck,
-  Shield,
-  User,
   History,
+  Shield,
   Percent,
-  DollarSign,
-  Activity,
-  Briefcase,
-  Download,
-  Trash2,
-  Image as ImageIcon,
-  FileDigit,
   Eye,
-  RefreshCw
+  Trash2,
+  ArrowLeft,
+  User,
+  MoreVertical,
+  CheckCircle2,
+  ChevronRight,
+  Calculator,
+  Calendar,
+  AlertCircle,
+  UploadCloud,
+  Briefcase,
+  FileCheck,
+  FileDigit,
+  Image as ImageIcon
 } from 'lucide-react';
+import { PdfViewer } from '@/components/ui/PdfViewer';
 import { toast } from 'sonner';
 
 interface DocumentItem {
@@ -138,6 +151,10 @@ export default function ApplicationDetailsPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  
+  // Document preview state
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewTitle, setPreviewTitle] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
 
   // Assessment workflow state
@@ -362,7 +379,7 @@ export default function ApplicationDetailsPage() {
     if (!confirm('Are you sure you want to delete this document?')) return;
     
     try {
-      await api.delete(`/documents/${publicId}`);
+      await api.delete(`/documents/${encodeURIComponent(publicId)}`);
       toast.success('Document deleted successfully.');
       await fetchDetails();
     } catch (err: any) {
@@ -411,7 +428,7 @@ export default function ApplicationDetailsPage() {
     }
   };
 
-  if (loading) {
+  if (loading && !app) {
     return (
       <div className="flex min-h-[400px] items-center justify-center text-muted-foreground">
         <div className="flex flex-col items-center gap-3">
@@ -804,7 +821,10 @@ export default function ApplicationDetailsPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => window.open(doc.secureUrl, '_blank')}
+                                  onClick={() => {
+                                    setPreviewUrl(doc.secureUrl);
+                                    setPreviewTitle(doc.originalName);
+                                  }}
                                   className="h-8 shadow-sm cursor-pointer"
                                   title="View/Download"
                                 >
@@ -1610,6 +1630,27 @@ export default function ApplicationDetailsPage() {
           </TabsContent>
         </div>
       </Tabs>
+
+      <Dialog open={!!previewUrl} onOpenChange={(open) => !open && setPreviewUrl(null)}>
+        <DialogContent className="max-w-4xl w-[90vw] h-[85vh] p-0 flex flex-col overflow-hidden">
+          <DialogHeader className="px-4 py-3 border-b shrink-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-10">
+            <DialogTitle className="text-lg font-semibold truncate pr-6">{previewTitle}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 w-full h-full bg-muted/20 relative overflow-hidden">
+            {previewUrl && (
+              previewUrl.toLowerCase().endsWith('.pdf') ? (
+                <PdfViewer url={previewUrl} />
+              ) : (
+                <iframe 
+                  src={previewUrl} 
+                  className="absolute inset-0 w-full h-full border-0" 
+                  title={previewTitle}
+                />
+              )
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -32,6 +32,8 @@ interface AuthContextType {
   loading: boolean;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
+  requestOtp: (email: string) => Promise<void>;
+  verifyOtpLogin: (email: string, code: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -58,8 +60,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(null);
             setToken(null);
           }
-        } catch (e) {
-          console.error('Session restore failed:', e);
+        } catch (e: any) {
+          if (e.status !== 401) {
+            console.error('Session restore failed:', e);
+          }
           localStorage.removeItem('los_token');
           setUser(null);
           setToken(null);
@@ -81,6 +85,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const requestOtp = async (email: string) => {
+    const response = await api.post('/auth/otp/request', { email });
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to request OTP');
+    }
+  };
+
+  const verifyOtpLogin = async (email: string, code: string) => {
+    const response = await api.post('/auth/otp/verify', { email, code });
+    if (response.success && response.data) {
+      const { token: userToken, user: userProfile } = response.data;
+      localStorage.setItem('los_token', userToken);
+      setToken(userToken);
+      setUser(userProfile);
+      router.push('/dashboard');
+    } else {
+      throw new Error(response.message || 'Failed to verify OTP');
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('los_token');
     setToken(null);
@@ -89,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, token, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, token, login, requestOtp, verifyOtpLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );

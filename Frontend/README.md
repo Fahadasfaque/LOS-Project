@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LOS Frontend
+
+This is the Next.js frontend client for the Loan Origination System (LOS). It provides a secure, role-based web interface for SUPER_ADMIN, LOAN_OFFICER, CREDIT_ANALYST, and APPROVER roles to interact with the LOS backend API.
+
+## Tech Stack
+
+- **Core Framework**: Next.js 15 (App Router) with React 19
+- **Styling**: Tailwind CSS
+- **UI Components**: ShadCN UI (with Lucide React icons)
+- **State Management**: React Context (`AuthContext` for session management)
 
 ## Getting Started
 
-First, run the development server:
+### 1. Configure Environment Variables
+
+Create a `.env.local` file in the root of the `Frontend` directory with the following variable, pointing to your backend server instance:
+
+```env
+NEXT_PUBLIC_API_URL="http://localhost:5000/api/v1"
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to access the login page.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/`: Next.js App Router pages (Dashboard, Login, etc.)
+- `src/components/`: Reusable React components (Layouts, UI primitives)
+- `src/context/`: React Context providers (AuthContext)
+- `src/lib/`: Utility functions and helpers
+- `src/services/`: API integration services
+- `public/`: Static assets (images, icons)
 
-## Learn More
+## Architecture Notes
 
-To learn more about Next.js, take a look at the following resources:
+- **Authentication**: Stateless JWT tokens are stored and attached to all API requests via the `api.ts` service wrapper. Unauthenticated access is routed back to `/login`.
+- **Role-Based Navigation**: The layout sidebar dynamically renders navigation links based on the authenticated user's role.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

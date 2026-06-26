@@ -5,29 +5,29 @@ import { prisma } from '../src/config/db';
 async function main() {
   const defaultUsers = [
     {
-      email: 'admin@los.com',
-      firstName: 'System',
+      email: 'fahadasfaque0786@gmail.com',
+      firstName: 'Mr',
       lastName: 'Admin',
       role: Role.SUPER_ADMIN,
       password: 'admin123',
     },
     {
-      email: 'officer@los.com',
-      firstName: 'John',
+      email: 'fahadasfaque7860@gmail.com',
+      firstName: 'Adnan',
       lastName: 'Officer',
       role: Role.LOAN_OFFICER,
       password: 'officer123',
     },
     {
-      email: 'analyst@los.com',
-      firstName: 'Sarah',
+      email: 'cursorgmail01@gmail.com',
+      firstName: 'Khalid',
       lastName: 'Analyst',
       role: Role.CREDIT_ANALYST,
       password: 'analyst123',
     },
     {
-      email: 'approver@los.com',
-      firstName: 'David',
+      email: 'fahadasfaque@gmail.com',
+      firstName: 'Fahad',
       lastName: 'Approver',
       role: Role.APPROVER,
       password: 'approver123',
