@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Eye, Edit, ShieldAlert, Key, Power, PowerOff, Trash, AlertTriangle } from 'lucide-react';
+import { DotsThree, Eye, PencilSimple, ShieldWarning, Key, Power, Trash, Warning } from '@phosphor-icons/react';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import api from '@/services/api';
+import { api } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 
 export function UserTableActions({ user, onActionComplete }: { user: any, onActionComplete: () => void }) {
@@ -108,35 +108,35 @@ export function UserTableActions({ user, onActionComplete }: { user: any, onActi
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger className="h-8 w-8 p-0 flex items-center justify-center rounded-md hover:bg-muted text-muted-foreground outline-none">
+        <DropdownMenuTrigger className="h-8 w-8 p-0 flex items-center justify-center rounded-md hover:bg-muted text-muted-foreground outline-none cursor-pointer">
           <span className="sr-only">Open menu</span>
-          <MoreHorizontal className="h-4 w-4" />
+          <DotsThree className="h-5 w-5" weight="bold" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="w-48 shadow-lg ring-1 ring-border rounded-md">
           <DropdownMenuGroup>
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
           </DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => setActiveDialog('view')}>
-            <Eye className="mr-2 h-4 w-4" /> View Profile
+          <DropdownMenuItem onClick={() => setActiveDialog('view')} className="cursor-pointer">
+            <Eye className="mr-2 h-4 w-4 text-muted-foreground" /> View Profile
           </DropdownMenuItem>
           {isSuperAdmin && (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setActiveDialog('edit')}>
-                <Edit className="mr-2 h-4 w-4" /> Edit User
+              <DropdownMenuItem onClick={() => setActiveDialog('edit')} className="cursor-pointer">
+                <PencilSimple className="mr-2 h-4 w-4 text-muted-foreground" /> Edit User
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveDialog('role')}>
-                <ShieldAlert className="mr-2 h-4 w-4" /> Change Role
+              <DropdownMenuItem onClick={() => setActiveDialog('role')} className="cursor-pointer">
+                <ShieldWarning className="mr-2 h-4 w-4 text-muted-foreground" /> Change Role
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveDialog('password')}>
-                <Key className="mr-2 h-4 w-4" /> Reset Password
+              <DropdownMenuItem onClick={() => setActiveDialog('password')} className="cursor-pointer">
+                <Key className="mr-2 h-4 w-4 text-muted-foreground" /> Reset Password
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveDialog('status')}>
-                {user.isActive ? <PowerOff className="mr-2 h-4 w-4 text-rose-500" /> : <Power className="mr-2 h-4 w-4 text-emerald-500" />} 
+              <DropdownMenuItem onClick={() => setActiveDialog('status')} className="cursor-pointer">
+                <Power className={`mr-2 h-4 w-4 ${user.isActive ? 'text-rose-500' : 'text-emerald-500'}`} weight="bold" />
                 {user.isActive ? 'Deactivate' : 'Activate'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setActiveDialog('delete')} className="text-rose-600 focus:text-rose-600">
+              <DropdownMenuItem onClick={() => setActiveDialog('delete')} className="text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 cursor-pointer">
                 <Trash className="mr-2 h-4 w-4" /> Delete User
               </DropdownMenuItem>
             </>
@@ -303,7 +303,7 @@ export function UserTableActions({ user, onActionComplete }: { user: any, onActi
             </DialogDescription>
           </DialogHeader>
           <div className="bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 p-3 rounded-md text-sm flex items-start gap-2">
-            <AlertTriangle className="h-5 w-5 shrink-0" />
+            <Warning className="h-5 w-5 shrink-0" />
             <p>Ensure the user has no active dependencies (like pending loan applications) before deleting.</p>
           </div>
           <DialogFooter className="mt-4">

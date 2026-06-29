@@ -13,7 +13,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/user.repository';
-import { UnauthorizedError, NotFoundError } from '../utils/errors';
+import { UnauthorizedError, NotFoundError, BadRequestError } from '../utils/errors';
 import { auditLogService } from './auditLog.service';
 import { emailService } from './email.service';
 import { prisma } from '../config/db';
@@ -103,10 +103,7 @@ export class AuthService {
     };
   }
 
-  /**
-   * Requests an OTP for a user.
-   */
-  async requestOtp(email: string, ipAddress?: string): Promise<void> {
+  async requestOtp(email: string, ipAddress?: string, forceNew = false): Promise<void> {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
@@ -115,6 +112,24 @@ export class AuthService {
 
     if (!user.isActive) {
       throw new UnauthorizedError('Account is inactive. Please contact administration.');
+    }
+
+    // Enforce 60-second OTP cooldown request rate limiting
+    if (user.otpExpiry) {
+      const isInvited = user.inviteStatus === 'INVITED';
+      const expectedLifetimeMs = isInvited ? 48 * 60 * 60 * 1000 : 10 * 60 * 1000;
+      const lastGeneratedAt = new Date(user.otpExpiry.getTime() - expectedLifetimeMs);
+      const secondsSinceGeneration = (Date.now() - lastGeneratedAt.getTime()) / 1000;
+
+      if (secondsSinceGeneration > 0 && secondsSinceGeneration < 60) {
+        const secondsToWait = Math.ceil(60 - secondsSinceGeneration);
+        throw new BadRequestError(`Please wait ${secondsToWait} seconds before requesting a new code.`);
+      }
+    }
+
+    // Skip sending new OTP if user is INVITED and has a valid, non-expired OTP hash
+    if (!forceNew && user.inviteStatus === 'INVITED' && user.otpHash && user.otpExpiry && user.otpExpiry > new Date()) {
+      return;
     }
 
     // Generate 6-digit OTP

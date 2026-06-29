@@ -66,6 +66,18 @@ Strict state transitions enforced by workflow rules:
 - **Approval Guard**:
   - Applications cannot transition to `APPROVED` unless a completed assessment exists in the system.
 
+### 3.6 Customer Self-Service Portal (Phase 6)
+- **Account Provisioning**: When a Loan Officer creates a loan application, a corresponding Customer account is automatically provisioned in an `INVITED` state. An email invitation is dispatched with a temporary OTP code for password setup.
+- **Dedicated Portal Workspace**: A completely separate `/customer/*` namespace is introduced, completely isolating customer screens and data from internal banking employee dashboards.
+- **Authentication**: Password + OTP verification login. Upon first login (or after a Forgot Password flow), the customer is prompted to set/reset a secure 8+ character password, transitioning their status to `ACTIVE`.
+- **Action Center**: A dashboard component prompting the customer with context-aware next steps based on their application status (e.g., uploading documents or reviewing an active offer).
+- **Linear Progress Tracker**: Translates internal workflow statuses (like `UNDER_REVIEW`, `OFFER_GENERATED`) into clear, user-friendly customer labels, rendered as a linear step-by-step progress tracker.
+- **Document Vault**: Enables customers to view required documents, upload PDF/JPG/PNG files (up to 5MB), and replace pending or rejected items. Uploading triggers email alerts to the assigned Loan Officer and unread notification badges.
+- **Lending Offer Response**: Customers directly review interest rates, tenure, monthly EMI, and accept or decline their sanction letter online. Accepting records a timestamp and triggers a success timeline with estimated disbursement schedules.
+- **Sanction Letter Download**: Allows customers to download their generated offer letter in text/PDF format directly.
+- **Repayment Preview**: Renders an illustrative amortization schedule showing the first 5 monthly EMI installments (due date, principal, interest, outstanding balance) once the loan status changes to `DISBURSED`.
+- **Grouped Notifications**: Customer notifications (bell icon / Activity log) are grouped by `Today`, `Yesterday`, and `Earlier` for a modern, clean inbox experience.
+
 ---
 
 ## 4. Out of Scope for MVP

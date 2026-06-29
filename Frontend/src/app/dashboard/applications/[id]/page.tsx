@@ -8,42 +8,37 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   FileText,
   Clock,
-  AlertTriangle,
+  Warning,
   Users,
-  Terminal,
-  Activity,
-  DollarSign,
-  TrendingUp,
-  RefreshCw,
+  TerminalWindow,
+  Pulse,
+  CurrencyInr,
+  TrendUp,
+  ArrowsCounterClockwise,
   Plus,
   ShieldCheck,
-  BarChart2,
   Check,
   X,
-  History,
+  ClockCounterClockwise,
   Shield,
   Percent,
   Eye,
-  Trash2,
+  Trash,
   ArrowLeft,
   User,
-  MoreVertical,
-  CheckCircle2,
-  ChevronRight,
+  CheckCircle,
+  CaretRight,
   Calculator,
   Calendar,
-  AlertCircle,
-  UploadCloud,
+  WarningCircle,
+  UploadSimple,
   Briefcase,
-  FileCheck,
-  FileDigit,
   Image as ImageIcon
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { PdfViewer } from '@/components/ui/PdfViewer';
 import { toast } from 'sonner';
 
@@ -135,7 +130,6 @@ interface ApplicationDetails {
   disbursement?: DisbursementDetails | null;
 }
 
-
 export default function ApplicationDetailsPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
@@ -198,7 +192,7 @@ export default function ApplicationDetailsPage() {
     }
 
     setPreviewAssessment({ creditScore, riskLevel, recommendation });
-    setAssessmentStep(1); // Move to preview step
+    setAssessmentStep(1);
   };
 
   const handleSaveAssessment = async () => {
@@ -319,11 +313,9 @@ export default function ApplicationDetailsPage() {
     setActionLoading(true);
     try {
       if (targetStatus === 'SUBMITTED') {
-        // Loan officer submit application endpoint
         await api.post(`/applications/${id}/submit`, {});
         toast.success('Application submitted successfully.');
       } else {
-        // General status transition endpoint
         await api.put(`/applications/${id}/status`, { status: targetStatus });
         toast.success(`Application transitioned to ${targetStatus}.`);
       }
@@ -360,7 +352,6 @@ export default function ApplicationDetailsPage() {
         setSelectedFile(null);
         setUploadProgress(0);
 
-        // Clear input element
         const fileInput = document.getElementById('file-upload-input') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
 
@@ -441,20 +432,22 @@ export default function ApplicationDetailsPage() {
 
   if (error && !app) {
     return (
-      <div className="max-w-md mx-auto mt-10 p-6 bg-surface border border-border rounded-lg text-center space-y-4 transition-colors duration-200">
-        <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
+      <div className="max-w-md mx-auto mt-10 p-6 bg-card border border-border rounded text-center space-y-4 shadow-sm transition-colors duration-200 text-card-foreground">
+        <Warning className="h-12 w-12 text-destructive mx-auto" weight="fill" />
         <h3 className="text-lg font-bold text-foreground">Error Retrieving Data</h3>
         <p className="text-sm text-muted-foreground">{error}</p>
-        <Button onClick={() => router.back()} className="bg-muted hover:bg-muted/80 text-foreground border border-border cursor-pointer">
+        <Button onClick={() => router.back()} className="bg-muted hover:bg-muted/80 text-foreground border border-border cursor-pointer font-bold">
           Go Back
         </Button>
       </div>
     );
   }
 
+  if (!user) return null;
+
   if (!app) {
     return (
-      <div className="text-center text-muted-foreground mt-10">
+      <div className="text-center text-muted-foreground mt-10 font-bold">
         Application not found.
       </div>
     );
@@ -471,19 +464,23 @@ export default function ApplicationDetailsPage() {
   const getStatusBadge = (statusStr: string) => {
     switch (statusStr) {
       case 'DRAFT':
-        return <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground border border-border">Draft</span>;
+        return <span className="inline-flex items-center rounded bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground border border-border uppercase font-mono">Draft</span>;
       case 'SUBMITTED':
-        return <span className="inline-flex items-center rounded-full bg-blue-500/10 text-blue-600 px-3 py-1 text-sm font-semibold border border-blue-500/20 animate-pulse dark:bg-blue-500/20 dark:text-blue-400">Submitted</span>;
+        return <span className="inline-flex items-center rounded bg-primary/10 text-primary px-2.5 py-1 text-xs font-bold border border-primary/20 animate-pulse uppercase font-mono">Submitted</span>;
       case 'UNDER_REVIEW':
-        return <span className="inline-flex items-center rounded-full bg-amber-500/10 text-amber-600 px-3 py-1 text-sm font-semibold border border-amber-500/20 font-mono dark:text-amber-500">Under Review</span>;
+        return <span className="inline-flex items-center rounded bg-amber-500/10 text-amber-600 px-2.5 py-1 text-xs font-bold border border-amber-500/20 uppercase font-mono">Under Review</span>;
       case 'APPROVED':
-        return <span className="inline-flex items-center rounded-full bg-emerald-500/10 text-emerald-600 px-3 py-1 text-sm font-semibold border border-emerald-500/20 font-mono dark:text-emerald-500">Approved</span>;
+        return <span className="inline-flex items-center rounded bg-emerald-500/10 text-emerald-600 px-2.5 py-1 text-xs font-bold border border-emerald-500/20 uppercase font-mono">Approved</span>;
+      case 'OFFER_GENERATED':
+        return <span className="inline-flex items-center rounded bg-purple-500/10 text-purple-600 px-2.5 py-1 text-xs font-bold border border-purple-500/20 animate-pulse uppercase font-mono">Awaiting Customer Response</span>;
+      case 'OFFER_ACCEPTED':
+        return <span className="inline-flex items-center rounded bg-emerald-500/10 text-emerald-600 px-2.5 py-1 text-xs font-bold border border-emerald-500/20 uppercase font-mono">Offer Accepted</span>;
       case 'REJECTED':
-        return <span className="inline-flex items-center rounded-full bg-rose-500/10 text-rose-600 px-3 py-1 text-sm font-semibold border border-rose-500/20 font-mono dark:text-rose-500">Rejected</span>;
+        return <span className="inline-flex items-center rounded bg-destructive/10 text-destructive px-2.5 py-1 text-xs font-bold border border-destructive/20 uppercase font-mono">Rejected</span>;
       case 'DISBURSED':
-        return <span className="inline-flex items-center rounded-full bg-purple-500/10 text-purple-600 px-3 py-1 text-sm font-semibold border border-purple-500/20 font-mono dark:text-purple-400">Disbursed</span>;
+        return <span className="inline-flex items-center rounded bg-violet-500/10 text-violet-600 px-2.5 py-1 text-xs font-bold border border-violet-500/20 uppercase font-mono">Disbursed</span>;
       default:
-        return <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground border border-border">{statusStr}</span>;
+        return <span className="inline-flex items-center rounded bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground border border-border uppercase font-mono">{statusStr}</span>;
     }
   };
 
@@ -497,7 +494,7 @@ export default function ApplicationDetailsPage() {
     if (!P || !n) return 0;
     if (r === 0) return P / n;
     const emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-    return Math.round(emi * 100) / 100; // round to 2 decimal places
+    return Math.round(emi * 100) / 100;
   })();
 
   const calculatedTotalRepayment = calculatedEmi * tenureMonths;
@@ -506,7 +503,6 @@ export default function ApplicationDetailsPage() {
     if (!app) return [];
     const events: any[] = [];
 
-    // 1. Add StatusHistory entries
     app.statusHistory.forEach((hist) => {
       events.push({
         id: `status-${hist.id}`,
@@ -526,15 +522,14 @@ export default function ApplicationDetailsPage() {
           ? `Workflow status updated from ${hist.oldStatus} to ${hist.newStatus}.`
           : `Application initialized as ${hist.newStatus}.`,
         badgeColor: hist.newStatus === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
-          hist.newStatus === 'REJECTED' ? 'bg-rose-500/10 text-rose-600 border border-rose-500/20' :
-            hist.newStatus === 'DISBURSED' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' :
+          hist.newStatus === 'REJECTED' ? 'bg-destructive/10 text-destructive border border-destructive/20' :
+            hist.newStatus === 'DISBURSED' ? 'bg-violet-500/10 text-violet-600 border border-violet-500/20' :
               hist.newStatus === 'OFFER_ACCEPTED' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
-                hist.newStatus === 'OFFER_GENERATED' ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400' :
+                hist.newStatus === 'OFFER_GENERATED' ? 'bg-primary/10 text-primary border border-primary/20' :
                   'bg-muted text-muted-foreground border border-border'
       });
     });
 
-    // 2. Add Assessment Audit Events (Assessment Completed)
     if (app.assessment && app.assessment.status === 'COMPLETED') {
       events.push({
         id: `assessment-${app.assessment.id}`,
@@ -547,7 +542,6 @@ export default function ApplicationDetailsPage() {
       });
     }
 
-    // 3. Add Offer Generated Event
     if (app.offer) {
       events.push({
         id: `offer-gen-${app.offer.id}`,
@@ -556,10 +550,9 @@ export default function ApplicationDetailsPage() {
         timestamp: app.offer.generatedAt,
         changedBy: null,
         description: `Offer details: ${formatCurrency(app.offer.loanAmount)} at ${app.offer.interestRate}% interest, ${app.offer.tenureMonths} months tenure, Monthly EMI: ${formatCurrency(app.offer.emiAmount)}.`,
-        badgeColor: 'bg-blue-500/10 text-blue-600 border border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400'
+        badgeColor: 'bg-primary/10 text-primary border border-primary/20'
       });
 
-      // 4. Add Customer Acceptance Recorded Event
       if (app.offer.acceptedAt) {
         events.push({
           id: `offer-acc-${app.offer.id}`,
@@ -573,7 +566,6 @@ export default function ApplicationDetailsPage() {
       }
     }
 
-    // 5. Add Loan Disbursed Event
     if (app.disbursement) {
       events.push({
         id: `disbursement-${app.disbursement.id}`,
@@ -582,1069 +574,826 @@ export default function ApplicationDetailsPage() {
         timestamp: app.disbursement.disbursedAt,
         changedBy: app.disbursement.disbursedBy,
         description: `Funds released. Transaction Reference: ${app.disbursement.referenceNumber} (${app.disbursement.status})`,
-        badgeColor: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20'
+        badgeColor: 'bg-violet-500/10 text-violet-600 border border-violet-500/20'
       });
     }
 
-    // Sort events descending by timestamp (newest first)
     return events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   };
 
   const combinedTimeline = getCombinedTimeline();
 
+  // Custom components for roles
+
+  const renderApplicantProfileCard = () => (
+    <Card className="border-border shadow-sm">
+      <CardHeader className="bg-muted/20 border-b border-border pb-4">
+        <CardTitle className="text-base font-extrabold flex items-center gap-2 text-foreground">
+          <Briefcase className="h-5 w-5 text-primary" weight="bold" />
+          Applicant Profile
+        </CardTitle>
+        <CardDescription className="text-xs font-medium">Personal and financial profile details.</CardDescription>
+      </CardHeader>
+      <CardContent className="pt-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm">
+          <div>
+            <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Applicant Name</span>
+            <p className="font-bold text-foreground mt-0.5 capitalize">{app.applicantName}</p>
+          </div>
+          <div>
+            <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider">PAN Card Number</span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="font-mono font-bold tracking-wider text-xs bg-muted px-2 py-0.5 rounded border border-border text-foreground">
+                {app.pan}
+              </span>
+              <span className="text-[9px] text-muted-foreground border border-border px-1.5 py-0.5 rounded font-mono font-bold">
+                {user?.role === 'SUPER_ADMIN' || user?.role === 'LOAN_OFFICER' ? 'Unmasked' : 'Masked (RBAC)'}
+              </span>
+            </div>
+          </div>
+          <div>
+            <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Email Address</span>
+            <p className="mt-0.5 font-medium text-foreground">{app.email}</p>
+          </div>
+          <div>
+            <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Phone Number</span>
+            <p className="mt-0.5 font-semibold font-mono text-foreground">{app.phone}</p>
+          </div>
+          <div className="col-span-2 border-t border-border my-1"></div>
+          <div>
+            <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Loan Type</span>
+            <p className="font-bold text-primary mt-0.5">{app.loanType}</p>
+          </div>
+          <div>
+            <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Employment Nature</span>
+            <p className="font-bold text-foreground mt-0.5">{app.employmentType}</p>
+          </div>
+          <div>
+            <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Requested Amount</span>
+            <p className="text-base font-extrabold text-emerald-600 mt-0.5">{formatCurrency(app.loanAmount)}</p>
+          </div>
+          <div>
+            <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Net Monthly Income</span>
+            <p className="text-base font-extrabold text-foreground mt-0.5">{formatCurrency(app.monthlyIncome)}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderTimelineCard = () => (
+    <Card className="border-border shadow-sm">
+      <CardHeader className="bg-muted/20 border-b border-border pb-4">
+        <CardTitle className="text-base font-extrabold flex items-center gap-2 text-foreground">
+          <ClockCounterClockwise className="h-5 w-5 text-primary" weight="bold" />
+          Audit Timeline Log
+        </CardTitle>
+        <CardDescription className="text-xs font-medium">Lifecycle tracking logs for compliance.</CardDescription>
+      </CardHeader>
+      <CardContent className="pt-6 max-h-[360px] overflow-y-auto pr-2">
+        <div className="relative pl-6 space-y-6 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border select-none">
+          {combinedTimeline.map((evt, idx) => {
+            const isNewest = idx === 0;
+            return (
+              <div key={evt.id || idx} className="relative text-xs">
+                <span className={`absolute left-[-20px] top-1 h-3.5 w-3.5 rounded-full flex items-center justify-center border ${isNewest
+                    ? 'bg-primary border-primary ring-2 ring-primary/20'
+                    : 'bg-card border-muted-foreground/30'
+                  }`}>
+                  {isNewest && <span className="h-1 w-1 rounded-full bg-primary-foreground"></span>}
+                </span>
+
+                <div className="space-y-1 bg-muted/20 border border-border rounded p-2.5 shadow-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded ${evt.badgeColor}`}>
+                      {evt.title}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {new Date(evt.timestamp).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-foreground/90 font-semibold leading-relaxed mt-1.5">{evt.description}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderDocumentsList = (readOnly: boolean) => (
+    <Card className="border-border shadow-sm">
+      <CardHeader className="bg-muted/20 border-b border-border pb-4">
+        <CardTitle className="text-base font-extrabold flex items-center gap-2 text-foreground">
+          <FileText className="h-5 w-5 text-primary" weight="bold" />
+          Verification Documents
+        </CardTitle>
+        <CardDescription className="text-xs font-medium">Uploaded verification checks.</CardDescription>
+      </CardHeader>
+      <CardContent className="pt-5 space-y-4">
+        {app.documents.length === 0 ? (
+          <div className="p-8 text-center bg-muted/10 rounded border border-dashed border-border flex flex-col items-center justify-center gap-2 select-none">
+            <FileText className="h-8 w-8 text-muted-foreground/30" />
+            <p className="text-xs text-muted-foreground font-semibold">No documents uploaded yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {app.documents.map((doc) => (
+              <div
+                key={doc.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded border border-border bg-card hover:bg-muted/30 transition-colors gap-3 shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 p-2 rounded text-primary">
+                    <FileText className="h-5 w-5" weight="bold" />
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <p className="font-bold text-sm truncate max-w-[150px] sm:max-w-xs text-foreground leading-normal">{doc.originalName || doc.publicId}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
+                      {doc.documentType} • {new Date(doc.uploadedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 justify-end shrink-0">
+                  <div className="flex gap-1.5">
+                    {doc.secureUrl && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setPreviewUrl(doc.secureUrl);
+                          setPreviewTitle(doc.originalName);
+                        }}
+                        className="h-8 shadow-sm cursor-pointer font-bold text-xs"
+                      >
+                        <Eye className="h-3.5 w-3.5 mr-1" />
+                        View
+                      </Button>
+                    )}
+                    
+                    {!readOnly && app.status === 'DRAFT' && isRoleOfficer && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDeleteDocument(doc.publicId)}
+                        className="h-8 border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/20 text-rose-600 cursor-pointer shadow-sm font-bold text-xs"
+                      >
+                        <Trash className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {doc.status === 'VERIFIED' && (
+                    <span className="inline-flex items-center rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-500/20 uppercase font-mono">
+                      Verified
+                    </span>
+                  )}
+                  {doc.status === 'REJECTED' && (
+                    <span className="inline-flex items-center rounded bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive border border-destructive/20 uppercase font-mono">
+                      Rejected
+                    </span>
+                  )}
+                  {doc.status === 'PENDING' && (
+                    <span className="inline-flex items-center rounded bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600 border border-amber-500/20 uppercase font-mono">
+                      Pending
+                    </span>
+                  )}
+
+                  {!readOnly && app.status === 'UNDER_REVIEW' && doc.status === 'PENDING' && user && ['CREDIT_ANALYST', 'SUPER_ADMIN'].includes(user.role) && (
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleVerifyDocument(doc.id, 'VERIFIED')}
+                        className="h-7 text-[10px] border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/20 text-emerald-600 cursor-pointer shadow-sm font-bold"
+                      >
+                        Verify
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleVerifyDocument(doc.id, 'REJECTED')}
+                        className="h-7 text-[10px] border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/20 text-rose-600 cursor-pointer shadow-sm font-bold"
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderOfficerWorkspace = () => (
+    <div className="space-y-6">
+      {/* Upload document card */}
+      {app.status === 'DRAFT' && (
+        <Card className="border-border shadow-sm">
+          <CardHeader className="bg-muted/20 border-b border-border pb-4">
+            <CardTitle className="text-base font-extrabold flex items-center gap-2 text-foreground">
+              <UploadSimple className="h-5 w-5 text-primary" weight="bold" />
+              Upload Required Document
+            </CardTitle>
+            <CardDescription className="text-xs font-medium">Add applicant verification documents.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-5 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="docType" className="text-xs font-bold text-foreground">Document Type</Label>
+              <select
+                id="docType"
+                value={selectedDocType}
+                onChange={(e) => setSelectedDocType(e.target.value as any)}
+                disabled={uploadLoading}
+                className="w-full h-10 px-3 rounded border border-border bg-background text-sm font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-sm cursor-pointer"
+              >
+                <option value="PAN">PAN Card Scan</option>
+                <option value="AADHAAR">Aadhaar Card Scan</option>
+                <option value="SALARY_SLIP">Salary Slip Statement</option>
+                <option value="BANK_STATEMENT">Bank Statement</option>
+              </select>
+            </div>
+
+            <div className="space-y-2.5">
+              <Label className="text-xs font-bold text-foreground">Select File</Label>
+              <div
+                className={`relative flex flex-col items-center justify-center p-6 border-2 border-dashed rounded transition-colors ${
+                  isDragging ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-primary/50 hover:bg-muted/20'
+                } ${uploadLoading ? 'opacity-50 pointer-events-none' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <Input
+                  id="file-upload-input"
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error('File size exceeds 10MB limit.');
+                        return;
+                      }
+                      setSelectedFile(file);
+                    }
+                  }}
+                  disabled={uploadLoading}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                />
+                <div className="flex flex-col items-center text-center space-y-1.5 pointer-events-none">
+                  <div className="p-2 bg-muted rounded-full text-muted-foreground">
+                    <UploadSimple className="h-5 w-5" weight="bold" />
+                  </div>
+                  <div className="text-xs font-bold text-foreground">
+                    <span className="text-primary hover:underline">Click to upload</span> or drag files
+                  </div>
+                  <p className="text-[10px] text-muted-foreground font-medium">PDF, JPG, PNG up to 10MB</p>
+                </div>
+              </div>
+
+              {selectedFile && (
+                <div className="flex items-center justify-between p-2.5 border border-border rounded bg-muted/20">
+                  <div className="flex items-center gap-2 truncate">
+                    <FileText className="h-4 w-4 text-primary shrink-0" />
+                    <span className="text-xs truncate font-bold">{selectedFile.name}</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 w-6 p-0 shrink-0 cursor-pointer" 
+                    onClick={() => {
+                      setSelectedFile(null);
+                      const fileInput = document.getElementById('file-upload-input') as HTMLInputElement;
+                      if (fileInput) fileInput.value = '';
+                    }}
+                    disabled={uploadLoading}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
+              
+              {uploadLoading && uploadProgress > 0 && (
+                <div className="space-y-1 pt-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-bold">
+                    <span>Uploading...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-muted rounded overflow-hidden">
+                    <div 
+                      className="h-full bg-primary transition-all duration-300" 
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Button
+              onClick={handleDocumentUpload}
+              disabled={uploadLoading || !selectedFile}
+              className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-bold flex items-center justify-center gap-1.5 shadow h-10 rounded cursor-pointer mt-2"
+            >
+              {uploadLoading ? (
+                <>
+                  <ArrowsCounterClockwise className="h-4 w-4 animate-spin" weight="bold" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <UploadSimple className="h-4 w-4" weight="bold" />
+                  Upload Document
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Render active offer if any */}
+      {app.offer && (
+        <Card className="border-border shadow-sm">
+          <CardHeader className="bg-muted/20 border-b border-border pb-4">
+            <CardTitle className="text-base font-extrabold flex items-center gap-2 text-foreground">
+              <Percent className="h-5 w-5 text-primary" weight="bold" />
+              Active Loan Offer
+            </CardTitle>
+            <CardDescription className="text-xs font-medium">Offered terms sent to customer.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-5 space-y-4 text-sm font-semibold select-none">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-muted/10 border border-border p-3 rounded">
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Interest Rate</span>
+                <p className="text-base font-bold text-foreground mt-1">{app.offer.interestRate}% p.a.</p>
+              </div>
+              <div className="bg-muted/10 border border-border p-3 rounded">
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Tenure</span>
+                <p className="text-base font-bold text-foreground mt-1">{app.offer.tenureMonths} Months</p>
+              </div>
+            </div>
+            <div className="bg-primary/5 border border-primary/20 p-4 rounded text-center">
+              <span className="text-xs text-primary font-bold uppercase tracking-wider">Monthly EMI</span>
+              <p className="text-2xl font-extrabold text-primary mt-1">{formatCurrency(app.offer.emiAmount)}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
+  const renderAnalystWorkspace = () => (
+    <div className="space-y-6">
+      {/* Credit Risk assessment workspace */}
+      {app.status === 'UNDER_REVIEW' && (!app.assessment || app.assessment.status === 'PENDING') && (
+        <Card className="border-border border-amber-500/30 shadow-sm">
+          <CardHeader className="bg-amber-500/5 border-b border-amber-500/25 pb-4">
+            <CardTitle className="text-base font-extrabold flex items-center gap-2 text-amber-700 dark:text-amber-500">
+              <Pulse className="h-5 w-5 animate-pulse" weight="bold" />
+              Underwriting Assessment Workspace
+            </CardTitle>
+            <CardDescription className="text-xs font-medium">Evaluate credit rules and submit recommendations.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-5">
+            {assessmentStep === 0 ? (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="notes" className="text-xs font-bold text-foreground">Analysis Decision Notes</Label>
+                  <textarea
+                    id="notes"
+                    rows={4}
+                    placeholder="Enter analytical decision notes, risk arguments, or credit history findings..."
+                    value={assessmentNotes}
+                    onChange={(e) => setAssessmentNotes(e.target.value)}
+                    className="w-full p-3 rounded border border-border bg-background text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-sm resize-y"
+                  />
+                </div>
+                <Button
+                  onClick={handleRunAssessment}
+                  disabled={!assessmentNotes.trim()}
+                  className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-bold h-10 rounded cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Calculator className="h-4.5 w-4.5" />
+                  Evaluate Credit Scoring Engine
+                </Button>
+              </div>
+            ) : (
+              previewAssessment && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="p-3.5 bg-muted/20 border border-border rounded space-y-3 font-semibold text-xs">
+                    <div className="flex justify-between border-b border-border pb-2.5">
+                      <span className="text-muted-foreground">Calculated Credit Score</span>
+                      <span className="text-foreground font-extrabold">{previewAssessment.creditScore} / 900</span>
+                    </div>
+                    <div className="flex justify-between border-b border-border pb-2.5">
+                      <span className="text-muted-foreground">Risk Category Classification</span>
+                      <span className={`font-bold ${previewAssessment.riskLevel === 'LOW' ? 'text-emerald-600' : previewAssessment.riskLevel === 'MEDIUM' ? 'text-amber-600' : 'text-rose-600'}`}>
+                        {previewAssessment.riskLevel} RISK
+                      </span>
+                    </div>
+                    <div className="flex justify-between pb-1">
+                      <span className="text-muted-foreground">System Recommendation</span>
+                      <span className="text-primary font-bold">{previewAssessment.recommendation}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setAssessmentStep(0)}
+                      disabled={saveLoading}
+                      className="flex-1 border-border bg-card text-foreground hover:bg-muted font-bold h-10 cursor-pointer shadow-sm"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      onClick={handleSaveAssessment}
+                      disabled={saveLoading}
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-10 cursor-pointer shadow"
+                    >
+                      {saveLoading ? 'Locking...' : 'Lock Decision Report'}
+                    </Button>
+                  </div>
+                </div>
+              )
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Locked Assessment summary */}
+      {app.assessment && app.assessment.status === 'COMPLETED' && (
+        <Card className="border-border shadow-sm">
+          <CardHeader className="bg-muted/20 border-b border-border pb-4">
+            <CardTitle className="text-base font-extrabold flex items-center gap-2 text-foreground">
+              <ShieldCheck className="h-5 w-5 text-primary" weight="fill" />
+              Underwriting Audit Locked
+            </CardTitle>
+            <CardDescription className="text-xs font-medium">Locked assessment criteria.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-5 space-y-4 text-xs font-semibold select-none">
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="bg-muted/10 border border-border p-2.5 rounded">
+                <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Score</span>
+                <p className="text-sm font-bold text-foreground mt-1">{app.assessment.creditScore}</p>
+              </div>
+              <div className="bg-muted/10 border border-border p-2.5 rounded">
+                <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Risk Level</span>
+                <p className="text-sm font-bold text-foreground mt-1">{app.assessment.riskLevel}</p>
+              </div>
+              <div className="bg-muted/10 border border-border p-2.5 rounded">
+                <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Rec</span>
+                <p className="text-sm font-bold text-foreground mt-1">{app.assessment.recommendation}</p>
+              </div>
+            </div>
+
+            <div className="space-y-1 text-left">
+              <span className="text-muted-foreground font-bold text-[10px] uppercase">Decision Notes</span>
+              <p className="p-3 bg-muted/20 border border-border rounded italic text-foreground/80 font-medium">
+                "{app.assessment.assessmentNotes}"
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
+  const renderApproverWorkspace = () => (
+    <div className="space-y-6">
+      {/* Credit underwriting locked report (Approver needs to see this) */}
+      {app.assessment && (
+        <Card className="border-border shadow-sm">
+          <CardHeader className="bg-muted/20 border-b border-border pb-4">
+            <CardTitle className="text-base font-extrabold flex items-center gap-2 text-foreground">
+              <ShieldCheck className="h-5 w-5 text-primary" weight="fill" />
+              Locked Risk Report
+            </CardTitle>
+            <CardDescription className="text-xs font-medium">Underwriter credit analysis findings.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-5 space-y-3.5 text-xs font-semibold">
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="bg-muted/10 border border-border p-2 rounded">
+                <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Score</span>
+                <p className="text-sm font-bold text-foreground mt-0.5">{app.assessment.creditScore}</p>
+              </div>
+              <div className="bg-muted/10 border border-border p-2 rounded">
+                <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Risk</span>
+                <p className="text-sm font-bold text-foreground mt-0.5">{app.assessment.riskLevel}</p>
+              </div>
+              <div className="bg-muted/10 border border-border p-2 rounded">
+                <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Rec</span>
+                <p className="text-sm font-bold text-foreground mt-0.5">{app.assessment.recommendation}</p>
+              </div>
+            </div>
+            <div className="text-left space-y-1">
+              <span className="text-[9px] text-muted-foreground font-bold uppercase">Decision Notes</span>
+              <div className="p-3 bg-muted/20 border border-border rounded italic font-medium">"{app.assessment.assessmentNotes}"</div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Offer generated card / Workspace */}
+      {app.status === 'APPROVED' && !app.offer && (
+        <Card className="border-border border-primary/30 shadow-sm">
+          <CardHeader className="bg-primary/5 border-b border-primary/20 pb-4">
+            <CardTitle className="text-base font-extrabold flex items-center gap-2 text-primary">
+              <Percent className="h-5 w-5" weight="bold" />
+              Configure Offer Terms
+            </CardTitle>
+            <CardDescription className="text-xs font-medium">Step {offerStep + 1} of 2: Define and review interest rate parameters.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-5">
+            <form onSubmit={handleGenerateOffer} className="space-y-4">
+              {offerStep === 0 ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="interestRate" className="text-xs font-bold text-foreground">Interest Rate (% p.a.)</Label>
+                      <Input
+                        id="interestRate"
+                        type="number"
+                        step="0.01"
+                        min="1"
+                        max="50"
+                        value={interestRate}
+                        onChange={(e) => setInterestRate(parseFloat(e.target.value) || 0)}
+                        className="bg-background border-border focus-visible:ring-primary text-foreground h-10 font-semibold"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="tenureMonths" className="text-xs font-bold text-foreground">Tenure (Months)</Label>
+                      <Input
+                        id="tenureMonths"
+                        type="number"
+                        min="1"
+                        max="360"
+                        value={tenureMonths}
+                        onChange={(e) => setTenureMonths(parseInt(e.target.value) || 0)}
+                        className="bg-background border-border focus-visible:ring-primary text-foreground h-10 font-semibold"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (interestRate > 0 && tenureMonths > 0) setOfferStep(1);
+                      else toast.error('Rate and tenure must be positive numbers');
+                    }}
+                    className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-bold h-10 rounded cursor-pointer"
+                  >
+                    Calculate EMI &gt;
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="p-3 bg-muted/20 border border-border rounded space-y-2.5 font-semibold text-xs">
+                    <div className="flex justify-between border-b border-border pb-2">
+                      <span className="text-muted-foreground">Calculated EMI</span>
+                      <span className="text-primary font-bold">{formatCurrency(calculatedEmi)} / mo</span>
+                    </div>
+                    <div className="flex justify-between pb-0.5">
+                      <span className="text-muted-foreground">Total Repayments</span>
+                      <span className="text-foreground font-bold">{formatCurrency(calculatedTotalRepayment)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setOfferStep(0)}
+                      disabled={offerLoading}
+                      className="flex-1 border-border bg-card text-foreground hover:bg-muted font-bold h-10 cursor-pointer shadow-sm"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={offerLoading}
+                      className="flex-1 bg-primary hover:bg-primary/95 text-primary-foreground font-bold h-10 cursor-pointer shadow"
+                    >
+                      {offerLoading ? 'Generating...' : 'Generate Offer'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Offer Display (Acceptance check) */}
+      {app.offer && !app.disbursement && (
+        <Card className="border-border shadow-sm">
+          <CardHeader className="bg-muted/20 border-b border-border pb-4 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-extrabold flex items-center gap-2 text-foreground">
+                <Percent className="h-5 w-5 text-primary" weight="bold" />
+                Lending Offer Terms
+              </CardTitle>
+              <CardDescription className="text-xs font-medium">Terms approved and issued.</CardDescription>
+            </div>
+            <span className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded border ${
+              app.offer.offerStatus === 'ACCEPTED' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-primary/10 text-primary border-primary/20'
+            }`}>
+              {app.offer.offerStatus}
+            </span>
+          </CardHeader>
+          <CardContent className="pt-5 space-y-4 text-xs font-semibold select-none">
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div className="bg-muted/10 border border-border p-2 rounded">
+                <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Interest Rate</span>
+                <p className="text-sm font-bold text-foreground mt-0.5">{app.offer.interestRate}% p.a.</p>
+              </div>
+              <div className="bg-muted/10 border border-border p-2 rounded">
+                <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Tenure</span>
+                <p className="text-sm font-bold text-foreground mt-0.5">{app.offer.tenureMonths} Months</p>
+              </div>
+            </div>
+            <div className="bg-primary/5 border border-primary/20 p-3 rounded text-center">
+              <span className="text-[10px] text-primary font-bold uppercase tracking-wider">EMI Release Amount</span>
+              <p className="text-xl font-extrabold text-primary mt-0.5">{formatCurrency(app.offer.emiAmount)} / mo</p>
+            </div>
+
+            {/* Release disbursement payout funds if offer accepted */}
+            {app.status === 'OFFER_ACCEPTED' && (
+              <div className="pt-2">
+                <Button
+                  onClick={handleDisburseLoan}
+                  disabled={disburseLoading}
+                  className="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold h-11 rounded cursor-pointer shadow flex items-center justify-center gap-1.5"
+                >
+                  <CurrencyInr className="h-4.5 w-4.5" weight="bold" />
+                  {disburseLoading ? 'Executing Transfer...' : 'Authorize Disbursement Release'}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Disbursement Record display */}
+      {app.disbursement && (
+        <Card className="border-border shadow-sm">
+          <CardHeader className="bg-muted/20 border-b border-border pb-4 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-extrabold flex items-center gap-2 text-foreground">
+                <CurrencyInr className="h-5 w-5 text-primary" weight="bold" />
+                Disbursement Cleared
+              </CardTitle>
+              <CardDescription className="text-xs font-medium">Funds successfully dispatched.</CardDescription>
+            </div>
+            <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-violet-500/10 text-violet-600 border border-violet-500/20 uppercase">
+              {app.disbursement.status}
+            </span>
+          </CardHeader>
+          <CardContent className="pt-5 space-y-3.5 text-xs font-semibold select-none">
+            <div className="flex justify-between border-b border-border pb-2.5">
+              <span className="text-muted-foreground">Cleared Payout</span>
+              <span className="text-foreground font-extrabold">{formatCurrency(app.disbursement.amount)}</span>
+            </div>
+            <div className="flex justify-between border-b border-border pb-2.5">
+              <span className="text-muted-foreground">Transaction ID Token</span>
+              <span className="font-mono text-primary font-bold bg-muted px-2 py-0.5 border border-border rounded">{app.disbursement.referenceNumber}</span>
+            </div>
+            <div className="flex justify-between pb-0.5">
+              <span className="text-muted-foreground">Cleared On</span>
+              <span className="text-foreground font-bold">{new Date(app.disbursement.disbursedAt).toLocaleString()}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-border pb-4">
+      {/* Top Details Header */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-border pb-5">
         <div className="flex items-start gap-4">
           <Button
             size="sm"
             variant="outline"
             onClick={() => router.back()}
-            className="mt-1 shadow-sm h-8 w-8 p-0 shrink-0 border-border bg-card hover:bg-muted"
+            className="mt-1 shadow-sm h-8 w-8 p-0 shrink-0 border-border bg-card hover:bg-muted cursor-pointer"
           >
-            <ArrowLeft className="h-4 w-4 text-foreground" />
+            <ArrowLeft className="h-4.5 w-4.5 text-foreground" weight="bold" />
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <span className="font-mono text-sm text-primary font-bold tracking-wider">{app.applicationNumber}</span>
+              <span className="font-mono text-sm text-primary font-extrabold tracking-wider">{app.applicationNumber}</span>
               {getStatusBadge(app.status)}
             </div>
-            <h2 className="text-2xl font-bold text-foreground tracking-tight mt-1">{app.applicantName}</h2>
-            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground font-medium">
-              <span>{app.loanType} Loan</span>
-              <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-border" />
+            <h2 className="text-2xl font-extrabold text-foreground tracking-tight mt-1 capitalize leading-snug">{app.applicantName}</h2>
+            <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground font-bold">
+              <span>{app.loanType} LOAN</span>
+              <span className="w-1 h-1 rounded-full bg-border" />
               <span>{formatCurrency(app.loanAmount)}</span>
-              <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-border" />
+              <span className="w-1 h-1 rounded-full bg-border" />
               <span className="font-mono text-xs">{new Date(app.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
 
-        {/* Workflow actions at the top */}
+        {/* Global actions based on current states */}
         <div className="flex flex-wrap gap-2 justify-end">
           {app.status === 'DRAFT' && isRoleOfficer && (
             <Button
               onClick={() => handleStatusTransition('SUBMITTED')}
               disabled={actionLoading}
-              className="bg-primary hover:bg-primary/90 text-white font-semibold cursor-pointer shadow-sm"
+              className="bg-primary hover:bg-primary/95 text-primary-foreground font-bold cursor-pointer shadow h-10"
             >
               Submit Application
             </Button>
           )}
 
-          {app.status === 'SUBMITTED' && user && (user.role === 'CREDIT_ANALYST' || user.role === 'SUPER_ADMIN') && (
+          {app.status === 'SUBMITTED' && user && ['CREDIT_ANALYST', 'SUPER_ADMIN'].includes(user.role) && (
             <Button
               onClick={() => handleStatusTransition('UNDER_REVIEW')}
               disabled={actionLoading}
-              className="bg-amber-600 hover:bg-amber-500 text-white font-semibold cursor-pointer shadow-sm"
+              className="bg-amber-600 hover:bg-amber-500 text-white font-bold cursor-pointer shadow h-10"
             >
               Start Credit Review
             </Button>
           )}
 
           {app.status === 'UNDER_REVIEW' && isRoleAllowedToChangeStatus && (
-            <>
+            <div className="flex gap-2">
               {user && ['APPROVER', 'SUPER_ADMIN'].includes(user.role) && (
                 <Button
                   onClick={() => handleStatusTransition('APPROVED')}
                   disabled={actionLoading || !app.assessment || app.assessment.status !== 'COMPLETED'}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                  title={(!app.assessment || app.assessment.status !== 'COMPLETED') ? "Assessment must be completed first." : ""}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow h-10"
+                  title={(!app.assessment || app.assessment.status !== 'COMPLETED') ? "Assessment must be locked first." : ""}
                 >
                   Approve Loan
+                  {!app.assessment && ' (Assessment Pending)'}
                 </Button>
               )}
-              {user && ['CREDIT_ANALYST', 'APPROVER', 'SUPER_ADMIN'].includes(user.role) && (
-                <Button
-                  onClick={() => handleStatusTransition('REJECTED')}
-                  disabled={actionLoading}
-                  variant="destructive"
-                  className="font-semibold cursor-pointer shadow-sm"
-                >
-                  Reject Loan
-                </Button>
-              )}
-            </>
-          )}
-
-          {app.status === 'OFFER_GENERATED' && user && (user.role === 'LOAN_OFFICER' || user.role === 'SUPER_ADMIN') && (
-            <Button
-              onClick={handleRecordCustomerAcceptance}
-              disabled={actionLoading}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold cursor-pointer shadow-sm"
-            >
-              Record Customer Acceptance
-            </Button>
-          )}
-
-          {app.status === 'OFFER_ACCEPTED' && user && (user.role === 'APPROVER' || user.role === 'SUPER_ADMIN') && (
-            <Button
-              onClick={handleDisburseLoan}
-              disabled={disburseLoading}
-              className="bg-purple-600 hover:bg-purple-500 text-white font-semibold cursor-pointer shadow-sm"
-            >
-              {disburseLoading ? 'Executing...' : 'Disburse Funds'}
-            </Button>
+              <Button
+                onClick={() => handleStatusTransition('REJECTED')}
+                disabled={actionLoading}
+                variant="destructive"
+                className="font-bold cursor-pointer shadow h-10"
+              >
+                Reject Loan
+              </Button>
+            </div>
           )}
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="inline-flex h-20 items-center justify-start rounded-xl bg-muted/40 p-1.5 text-muted-foreground overflow-x-auto w-full xl:w-fit border border-border/50 shadow-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-none">
-          <TabsTrigger value="overview" className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-5 py-2.5 text-sm font-semibold transition-all data-active:bg-black data-active:text-white data-active:shadow hover:text-foreground hover:bg-muted/60 data-active:hover:bg-black">
-            <User className="h-4 w-4 mr-2.5" /> Overview
-          </TabsTrigger>
-          <TabsTrigger value="documents" className="inline-flex items-center justify-center whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold transition-all data-active:bg-black data-active:text-white data-active:shadow hover:text-foreground hover:bg-muted/60 data-active:hover:bg-black">
-            <FileText className="h-4 w-4 mr-2.5" /> Documents
-          </TabsTrigger>
-          <TabsTrigger value="assessment" className="inline-flex items-center justify-center whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold transition-all data-active:bg-black data-active:text-white data-active:shadow hover:text-foreground hover:bg-muted/60 data-active:hover:bg-black">
-            <Shield className="h-4 w-4 mr-2.5" /> Assessment
-          </TabsTrigger>
-          <TabsTrigger value="offer" className="inline-flex items-center justify-center whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold transition-all data-active:bg-black data-active:text-white data-active:shadow hover:text-foreground hover:bg-muted/60 data-active:hover:bg-black">
-            <Percent className="h-4 w-4 mr-2.5" /> Offer
-          </TabsTrigger>
-          <TabsTrigger value="disbursement" className="inline-flex items-center justify-center whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold transition-all data-active:bg-black data-active:text-white data-active:shadow hover:text-foreground hover:bg-muted/60 data-active:hover:bg-black">
-            <DollarSign className="h-4 w-4 mr-2.5" /> Disbursement
-          </TabsTrigger>
-          <TabsTrigger value="audit" className="inline-flex items-center justify-center whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold transition-all data-active:bg-black data-active:text-white data-active:shadow hover:text-foreground hover:bg-muted/60 data-active:hover:bg-black">
-            <History className="h-4 w-4 mr-2.5" /> Audit Timeline
-          </TabsTrigger>
-        </TabsList>
-
-        <div className="mt-6">
-          {/* OVERVIEW TAB */}
-          <TabsContent value="overview" className="m-0 space-y-6">
-            <Card className="border-border shadow-sm">
-              <CardHeader className="bg-muted/20 border-b border-border pb-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Briefcase className="h-5 w-5 text-primary" />
-                  Applicant Profile
-                </CardTitle>
-                <CardDescription>Personal and financial details provided during application.</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-8">
-                  <div>
-                    <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Applicant Name</span>
-                    <p className="font-semibold text-sm mt-1 text-foreground">{app.applicantName}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">PAN Card Number</span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="font-mono font-semibold tracking-wider text-sm bg-muted px-2 py-0.5 rounded border border-border text-foreground">
-                        {app.pan}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground border border-border px-1.5 py-0.5 rounded font-mono">
-                        {user?.role === 'SUPER_ADMIN' || user?.role === 'LOAN_OFFICER' ? 'Unmasked' : 'Masked (RBAC)'}
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Email Address</span>
-                    <p className="text-sm mt-1 text-foreground">{app.email}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Phone Number</span>
-                    <p className="text-sm mt-1 font-mono text-foreground">{app.phone}</p>
-                  </div>
-                  <div className="col-span-1 md:col-span-4 border-t border-border my-2"></div>
-                  <div>
-                    <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Loan Type</span>
-                    <p className="text-sm mt-1 font-bold text-primary">{app.loanType}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Employment Nature</span>
-                    <p className="text-sm mt-1 font-medium text-foreground">{app.employmentType}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Requested Amount</span>
-                    <p className="text-lg font-bold text-emerald-600 mt-1">{formatCurrency(app.loanAmount)}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Net Monthly Income</span>
-                    <p className="text-lg font-bold text-foreground mt-1">{formatCurrency(app.monthlyIncome)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* DOCUMENTS TAB */}
-          <TabsContent value="documents" className="m-0 space-y-6">
-            <Card className="border-border shadow-sm">
-              <CardHeader className="bg-muted/20 border-b border-border pb-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <FileCheck className="h-5 w-5 text-primary" />
-                  Verification Documents
-                </CardTitle>
-                <CardDescription>KYC and income proofs associated with this application.</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6 space-y-6">
-                <div className="space-y-4">
-                  {app.documents.length === 0 ? (
-                    <div className="p-8 text-center bg-muted/20 rounded-lg border border-dashed border-border flex flex-col items-center justify-center gap-3">
-                      <FileText className="h-10 w-10 text-muted-foreground/30" />
-                      <p className="text-sm text-muted-foreground font-medium">No documents uploaded yet.</p>
-                    </div>
-                  ) : (
-                    <div className="grid gap-3">
-                      {app.documents.map((doc) => (
-                        <div
-                          key={doc.id}
-                          className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg border border-border bg-card hover:bg-muted/30 transition-colors gap-4 shadow-sm"
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className="bg-primary/10 p-2 rounded-md shrink-0">
-                              {doc.secureUrl?.endsWith('.pdf') ? (
-                                <FileDigit className="h-6 w-6 text-primary" />
-                              ) : (
-                                <ImageIcon className="h-6 w-6 text-primary" />
-                              )}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-semibold truncate max-w-[200px] sm:max-w-md text-foreground">{doc.originalName || doc.publicId}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs font-mono font-medium tracking-wider uppercase text-muted-foreground bg-muted px-2 py-0.5 rounded border border-border">
-                                  {doc.documentType}
-                                </span>
-                                <span className="text-xs text-muted-foreground font-medium">
-                                  {new Date(doc.uploadedAt).toLocaleDateString()}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center flex-wrap gap-3 md:ml-auto">
-                            <div className="flex gap-2 mr-2">
-                              {doc.secureUrl && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setPreviewUrl(doc.secureUrl);
-                                    setPreviewTitle(doc.originalName);
-                                  }}
-                                  className="h-8 shadow-sm cursor-pointer"
-                                  title="View/Download"
-                                >
-                                  <Eye className="h-3.5 w-3.5 sm:mr-1" />
-                                  <span className="hidden sm:inline">View</span>
-                                </Button>
-                              )}
-                              
-                              {app.status === 'DRAFT' && isRoleOfficer && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleDeleteDocument(doc.publicId)}
-                                  className="h-8 border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/20 text-rose-600 cursor-pointer shadow-sm"
-                                  title="Delete Document"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5 sm:mr-1" />
-                                  <span className="hidden sm:inline">Delete</span>
-                                </Button>
-                              )}
-                            </div>
-
-                            {/* Verification status label */}
-                            {doc.status === 'VERIFIED' && (
-                              <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600 border border-emerald-500/20">
-                                <Check className="h-3.5 w-3.5 mr-1" /> Verified
-                              </span>
-                            )}
-                            {doc.status === 'REJECTED' && (
-                              <span className="inline-flex items-center rounded-md bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-600 border border-rose-500/20">
-                                <X className="h-3.5 w-3.5 mr-1" /> Rejected
-                              </span>
-                            )}
-                            {doc.status === 'PENDING' && (
-                              <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600 border border-amber-500/20">
-                                Pending Review
-                              </span>
-                            )}
-
-                            {/* Verifier Actions (Only for Credit Analyst / Super Admin in UNDER_REVIEW status) */}
-                            {app.status === 'UNDER_REVIEW' && doc.status === 'PENDING' && user && (user.role === 'CREDIT_ANALYST' || user.role === 'SUPER_ADMIN') && (
-                              <div className="flex gap-2 shrink-0">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleVerifyDocument(doc.id, 'VERIFIED')}
-                                  className="h-8 border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/20 text-emerald-600 cursor-pointer shadow-sm"
-                                >
-                                  Verify
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleVerifyDocument(doc.id, 'REJECTED')}
-                                  className="h-8 border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/20 text-rose-600 cursor-pointer shadow-sm"
-                                >
-                                  Reject
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Upload Form - Only visible to Loan Officer or Super Admin if status is DRAFT */}
-                {app.status === 'DRAFT' && isRoleOfficer && (
-                  <div className="border-t border-border pt-6 mt-6 space-y-4">
-                    <h4 className="text-sm font-semibold text-foreground">Upload New Document</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="docType">Document Category</Label>
-                        <select
-                          id="docType"
-                          value={selectedDocType}
-                          onChange={(e) => setSelectedDocType(e.target.value as any)}
-                          disabled={uploadLoading}
-                          className="w-full h-10 px-3 rounded-md border border-border bg-card text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-sm cursor-pointer"
-                        >
-                          <option value="PAN">PAN Card Scan</option>
-                          <option value="AADHAAR">Aadhaar Card Scan</option>
-                          <option value="SALARY_SLIP">Salary Slip Statement</option>
-                          <option value="BANK_STATEMENT">Bank Statement</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-3">
-                        <Label>Select File</Label>
-                        <div
-                          className={`relative flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg transition-colors ${
-                            isDragging
-                              ? 'border-primary bg-primary/5'
-                              : 'border-border bg-card hover:bg-muted/30'
-                          } ${uploadLoading ? 'opacity-50 pointer-events-none' : ''}`}
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={handleDrop}
-                        >
-                          <Input
-                            id="file-upload-input"
-                            type="file"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0] || null;
-                              if (file) {
-                                if (file.size > 10 * 1024 * 1024) {
-                                  toast.error('File size exceeds 10MB limit.');
-                                  return;
-                                }
-                                setSelectedFile(file);
-                              }
-                            }}
-                            disabled={uploadLoading}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                          />
-                          <div className="flex flex-col items-center text-center space-y-2 pointer-events-none">
-                            <div className="p-3 bg-muted rounded-full">
-                              <UploadCloud className="h-6 w-6 text-muted-foreground" />
-                            </div>
-                            <div className="text-sm">
-                              <span className="font-semibold text-primary">Click to upload</span> or drag and drop
-                            </div>
-                            <p className="text-xs text-muted-foreground">PDF, JPG or PNG (max. 10MB)</p>
-                          </div>
-                        </div>
-
-                        {selectedFile && (
-                          <div className="flex items-center justify-between p-3 border border-border rounded-md bg-muted/20">
-                            <div className="flex items-center gap-2 truncate">
-                              <FileText className="h-4 w-4 text-primary shrink-0" />
-                              <span className="text-sm truncate font-medium">{selectedFile.name}</span>
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-6 w-6 p-0 shrink-0" 
-                              onClick={() => {
-                                setSelectedFile(null);
-                                const fileInput = document.getElementById('file-upload-input') as HTMLInputElement;
-                                if (fileInput) fileInput.value = '';
-                              }}
-                              disabled={uploadLoading}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                        
-                        {uploadLoading && uploadProgress > 0 && (
-                          <div className="space-y-1.5 pt-2">
-                            <div className="flex items-center justify-between text-xs font-medium">
-                              <span>Uploading...</span>
-                              <span>{uploadProgress}%</span>
-                            </div>
-                            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-primary transition-all duration-300 ease-in-out" 
-                                style={{ width: `${uploadProgress}%` }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={handleDocumentUpload}
-                      disabled={uploadLoading || !selectedFile}
-                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold flex items-center justify-center gap-2 shadow-sm mt-4"
-                    >
-                      {uploadLoading ? (
-                        <>
-                          <RefreshCw className="h-4 w-4 animate-spin" />
-                          Uploading Document...
-                        </>
-                      ) : (
-                        <>
-                          <UploadCloud className="h-4 w-4" />
-                          Upload Document
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ASSESSMENT TAB */}
-          <TabsContent value="assessment" className="m-0 space-y-6">
-            {!app.assessment && app.status !== 'UNDER_REVIEW' && (
-              <Card className="border-border shadow-sm border-dashed">
-                <CardContent className="p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
-                  <Shield className="h-12 w-12 text-muted-foreground/30 mb-4" />
-                  <p className="text-lg font-medium text-foreground mb-1">Assessment Not Started</p>
-                  <p className="text-sm max-w-md mx-auto">The credit assessment phase has not been initiated for this application yet. Move the application to "Under Review" to begin.</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {app.assessment && app.assessment.status === 'COMPLETED' && (
-              <Card className="border-border shadow-sm overflow-hidden relative">
-                <div className="absolute top-0 right-0 h-32 w-36 bg-primary/5 rounded-bl-full pointer-events-none border-l border-b border-primary/10"></div>
-                <CardHeader className="bg-muted/20 border-b border-border pb-4">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-primary" />
-                    Credit Underwriting Summary
-                  </CardTitle>
-                  <CardDescription>Official risk profiling audit locked in system.</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Credit Score */}
-                    <div className="p-5 bg-card rounded-xl border border-border flex flex-col justify-center shadow-sm items-center text-center">
-                      <span className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Credit Score</span>
-                      <div className="mt-3 flex items-baseline justify-center gap-2">
-                        <span className="text-5xl font-extrabold text-foreground tracking-tight">{app.assessment.creditScore}</span>
-                        <span className="text-sm text-muted-foreground font-mono">/ 900</span>
-                      </div>
-                    </div>
-
-                    {/* Risk Level */}
-                    <div className="p-5 bg-card rounded-xl border border-border flex flex-col justify-center shadow-sm items-center text-center">
-                      <span className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Risk Profile</span>
-                      <div className="mt-4">
-                        {app.assessment.riskLevel === 'LOW' && (
-                          <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-4 py-1.5 text-sm font-bold text-emerald-600 border border-emerald-500/20">
-                            Low Risk
-                          </span>
-                        )}
-                        {app.assessment.riskLevel === 'MEDIUM' && (
-                          <span className="inline-flex items-center rounded-full bg-amber-500/10 px-4 py-1.5 text-sm font-bold text-amber-600 border border-amber-500/20">
-                            Medium Risk
-                          </span>
-                        )}
-                        {app.assessment.riskLevel === 'HIGH' && (
-                          <span className="inline-flex items-center rounded-full bg-rose-500/10 px-4 py-1.5 text-sm font-bold text-rose-600 border border-rose-500/20">
-                            High Risk
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Recommendation */}
-                    <div className="p-5 bg-card rounded-xl border border-border flex flex-col justify-center shadow-sm items-center text-center">
-                      <span className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">System Recommendation</span>
-                      <div className="mt-4">
-                        {app.assessment.recommendation === 'APPROVE' && (
-                          <span className="inline-flex items-center rounded bg-emerald-500/10 px-3 py-1.5 text-sm font-bold text-emerald-600 border border-emerald-500/20 uppercase tracking-wider">
-                            Approve
-                          </span>
-                        )}
-                        {app.assessment.recommendation === 'MANUAL_REVIEW' && (
-                          <span className="inline-flex items-center rounded bg-amber-500/10 px-3 py-1.5 text-sm font-bold text-amber-600 border border-amber-500/20 uppercase tracking-wider">
-                            Manual Review
-                          </span>
-                        )}
-                        {app.assessment.recommendation === 'REJECT' && (
-                          <span className="inline-flex items-center rounded bg-rose-500/10 px-3 py-1.5 text-sm font-bold text-rose-600 border border-rose-500/20 uppercase tracking-wider">
-                            Reject
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Assessment Notes */}
-                  <div className="space-y-2 pt-2 border-t border-border">
-                    <span className="text-muted-foreground text-sm font-semibold">Underwriter Notes</span>
-                    <div className="p-4 bg-muted/30 rounded-lg border border-border text-sm text-foreground italic leading-relaxed min-h-[80px]">
-                      "{app.assessment.assessmentNotes}"
-                    </div>
-                  </div>
-
-                  {/* Assessor Details */}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-muted-foreground bg-muted/20 p-4 rounded-lg border border-border">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-primary" />
-                      <span>Assessed by:</span>
-                      <span className="font-semibold text-foreground">
-                        {app.assessment.assessedBy ? `${app.assessment.assessedBy.firstName} ${app.assessment.assessedBy.lastName}` : 'System'}
-                      </span>
-                      {app.assessment.assessedBy && (
-                        <span className="text-xs text-muted-foreground border border-border bg-card px-2 py-0.5 rounded uppercase font-mono tracking-wider ml-1">
-                          {app.assessment.assessedBy.role.replace('_', ' ')}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                      <Clock className="h-4 w-4 text-primary" />
-                      <span className="font-mono text-foreground">
-                        {new Date(app.assessment.assessedAt).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Assessment Form Area */}
-            {app.status === 'UNDER_REVIEW' && user && ['CREDIT_ANALYST', 'SUPER_ADMIN'].includes(user.role) && (!app.assessment || app.assessment.status === 'PENDING') && (
-              <Card className="shadow-sm border-amber-500/30">
-                <CardHeader className="bg-amber-500/5 border-b border-amber-500/20 pb-4">
-                  <CardTitle className="text-lg flex items-center gap-2 text-amber-700 dark:text-amber-500">
-                    <Activity className="h-5 w-5 animate-pulse" />
-                    Perform Credit Underwriting
-                  </CardTitle>
-                  <CardDescription>Step {assessmentStep + 1} of 2: {assessmentStep === 0 ? 'Analyze applicant profile and log findings.' : 'Review rule engine outputs and confirm.'}</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-6">
-                  {assessmentStep === 0 && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="notes" className="text-base">Decision Notes</Label>
-                        <textarea
-                          id="notes"
-                          rows={4}
-                          placeholder="Enter analytical decision notes, risk mitigation arguments, or policy exceptions..."
-                          value={assessmentNotes}
-                          onChange={(e) => setAssessmentNotes(e.target.value)}
-                          disabled={saveLoading}
-                          className="w-full p-4 rounded-md border border-border bg-card text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-sm resize-y"
-                        />
-                      </div>
-                      <div className="flex justify-end pt-4 border-t border-border">
-                        <Button
-                          type="button"
-                          onClick={handleRunAssessment}
-                          disabled={saveLoading || !assessmentNotes.trim()}
-                          className="bg-primary hover:bg-primary/90 text-white font-semibold cursor-pointer shadow-sm h-11 px-8"
-                        >
-                          Continue to Rule Engine &gt;
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Preview Calculation Panel */}
-                  {assessmentStep === 1 && previewAssessment && (
-                    <div className="p-5 bg-card rounded-lg border border-border shadow-sm animate-in fade-in slide-in-from-right-4 space-y-6">
-                      <div className="flex items-center gap-2 pb-3 border-b border-border">
-                        <Shield className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-semibold text-foreground uppercase tracking-wider">Rule Engine Outputs</span>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                          <Label className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Calculated Score</Label>
-                          <p className="text-2xl font-bold mt-1 text-foreground">{previewAssessment.creditScore} <span className="text-sm text-muted-foreground font-mono font-normal">/ 900</span></p>
-                        </div>
-                        <div>
-                          <Label className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Risk Profile</Label>
-                          <div className="mt-2">
-                            {previewAssessment.riskLevel === 'LOW' && (
-                              <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2.5 py-1 text-sm font-semibold text-emerald-600 border border-emerald-500/20">
-                                Low Risk
-                              </span>
-                            )}
-                            {previewAssessment.riskLevel === 'MEDIUM' && (
-                              <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2.5 py-1 text-sm font-semibold text-amber-600 border border-amber-500/20">
-                                Medium Risk
-                              </span>
-                            )}
-                            {previewAssessment.riskLevel === 'HIGH' && (
-                              <span className="inline-flex items-center rounded-md bg-rose-500/10 px-2.5 py-1 text-sm font-semibold text-rose-600 border border-rose-500/20">
-                                High Risk
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <Label className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Recommendation</Label>
-                          <div className="mt-2">
-                            {previewAssessment.recommendation === 'APPROVE' && (
-                              <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2.5 py-1 text-sm font-semibold text-emerald-600 border border-emerald-500/20 uppercase tracking-wider">
-                                Approve
-                              </span>
-                            )}
-                            {previewAssessment.recommendation === 'MANUAL_REVIEW' && (
-                              <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2.5 py-1 text-sm font-semibold text-amber-600 border border-amber-500/20 uppercase tracking-wider">
-                                Manual Review
-                              </span>
-                            )}
-                            {previewAssessment.recommendation === 'REJECT' && (
-                              <span className="inline-flex items-center rounded-md bg-rose-500/10 px-2.5 py-1 text-sm font-semibold text-rose-600 border border-rose-500/20 uppercase tracking-wider">
-                                Reject
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
-                        <Button
-                          type="button"
-                          onClick={() => setAssessmentStep(0)}
-                          disabled={saveLoading}
-                          variant="outline"
-                          className="flex-1 shadow-sm border-border bg-card hover:bg-muted text-foreground cursor-pointer h-12"
-                        >
-                          &lt; Back to Notes
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={handleSaveAssessment}
-                          disabled={saveLoading || !previewAssessment || !assessmentNotes.trim()}
-                          className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold cursor-pointer shadow-sm h-12"
-                        >
-                          {saveLoading ? (
-                            <><Clock className="mr-2 h-4 w-4 animate-spin" /> Locking Decisions...</>
-                          ) : (
-                            'Save & Lock Assessment'
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* OFFER TAB */}
-          <TabsContent value="offer" className="m-0 space-y-6">
-            {!app.offer && app.status !== 'APPROVED' && (
-              <Card className="border-border shadow-sm border-dashed">
-                <CardContent className="p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
-                  <Percent className="h-12 w-12 text-muted-foreground/30 mb-4" />
-                  <p className="text-lg font-medium text-foreground mb-1">No Active Offer</p>
-                  <p className="text-sm max-w-md mx-auto">Loan must be Approved before terms can be generated and an offer can be made.</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Offer Generation Workspace */}
-            {app.status === 'APPROVED' && user && (user.role === 'APPROVER' || user.role === 'SUPER_ADMIN') && (
-              <Card className="shadow-sm border-blue-500/30">
-                <CardHeader className="bg-blue-500/5 border-b border-blue-500/20 pb-4">
-                  <CardTitle className="text-lg flex items-center gap-2 text-blue-700 dark:text-blue-500">
-                    <Percent className="h-5 w-5" />
-                    Configure Loan Terms
-                  </CardTitle>
-                  <CardDescription>Step {offerStep + 1} of 2: {offerStep === 0 ? 'Define interest rate and tenure.' : 'Review estimated EMI and confirm.'}</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <form onSubmit={handleGenerateOffer} className="space-y-6">
-                    {offerStep === 0 && (
-                      <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <Label htmlFor="interestRate" className="text-base font-medium">Annual Interest Rate (%)</Label>
-                            <div className="relative">
-                              <Input
-                                id="interestRate"
-                                type="number"
-                                step="0.01"
-                                min="1"
-                                max="50"
-                                value={interestRate}
-                                onChange={(e) => setInterestRate(parseFloat(e.target.value) || 0)}
-                                disabled={offerLoading}
-                                className="bg-card border-border focus-visible:ring-primary text-foreground pl-10 h-12 text-lg shadow-sm"
-                              />
-                              <Percent className="absolute left-3.5 top-3.5 h-5 w-5 text-muted-foreground" />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="tenureMonths" className="text-base font-medium">Tenure (Months)</Label>
-                            <div className="relative">
-                              <Input
-                                id="tenureMonths"
-                                type="number"
-                                min="1"
-                                max="360"
-                                value={tenureMonths}
-                                onChange={(e) => setTenureMonths(parseInt(e.target.value) || 0)}
-                                disabled={offerLoading}
-                                className="bg-card border-border focus-visible:ring-primary text-foreground pl-10 h-12 text-lg shadow-sm"
-                              />
-                              <Clock className="absolute left-3.5 top-3.5 h-5 w-5 text-muted-foreground" />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex justify-end pt-4 border-t border-border">
-                          <Button
-                            type="button"
-                            onClick={() => {
-                              if (interestRate > 0 && tenureMonths > 0) setOfferStep(1);
-                              else toast.error('Interest rate and tenure must be positive numbers');
-                            }}
-                            className="bg-primary hover:bg-primary/90 text-white font-semibold cursor-pointer shadow-sm h-11 px-8"
-                          >
-                            Calculate Estimations &gt;
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {offerStep === 1 && (
-                      <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                        {/* Real-time EMI Calculator Panel */}
-                        <div className="p-6 bg-card rounded-xl border border-border shadow-sm space-y-4">
-                          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider font-mono border-b border-border pb-3">Estimation Review</div>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            <div>
-                              <span className="text-muted-foreground text-sm font-medium">Principal Amount</span>
-                              <p className="font-bold text-xl text-foreground mt-1">{formatCurrency(app.loanAmount)}</p>
-                            </div>
-                            <div className="sm:border-l sm:border-border sm:pl-6">
-                              <span className="text-muted-foreground text-sm font-medium">Estimated EMI</span>
-                              <p className="font-extrabold text-primary mt-1 text-2xl">{formatCurrency(calculatedEmi)} <span className="text-xs text-muted-foreground font-mono font-normal tracking-wide">/ mo</span></p>
-                            </div>
-                            <div className="sm:border-l sm:border-border sm:pl-6">
-                              <span className="text-muted-foreground text-sm font-medium">Total Repayment</span>
-                              <p className="font-bold text-xl text-foreground mt-1">{formatCurrency(calculatedTotalRepayment)}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
-                          <Button
-                            type="button"
-                            onClick={() => setOfferStep(0)}
-                            disabled={offerLoading}
-                            variant="outline"
-                            className="flex-1 shadow-sm border-border bg-card hover:bg-muted text-foreground cursor-pointer h-12"
-                          >
-                            &lt; Back to Terms
-                          </Button>
-                          <Button
-                            type="submit"
-                            disabled={offerLoading || interestRate <= 0 || tenureMonths <= 0}
-                            className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold cursor-pointer h-12 text-base shadow-sm"
-                          >
-                            {offerLoading ? (
-                              <>
-                                <Clock className="h-5 w-5 mr-2 animate-spin" />
-                                Generating Official Offer...
-                              </>
-                            ) : (
-                              'Generate & Send Lending Offer'
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </form>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Existing Offer Display */}
-            {app.offer && (
-              <Card className="border-border shadow-sm overflow-hidden relative">
-                <div className="absolute top-0 right-0 h-32 w-32 bg-primary/5 rounded-bl-full pointer-events-none border-l border-b border-primary/10"></div>
-                <CardHeader className="bg-muted/20 border-b border-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      Active Lending Offer
-                    </CardTitle>
-                    <CardDescription>Formal lending offer terms and schedule breakdown.</CardDescription>
-                  </div>
-                  <div>
-                    {app.offer.offerStatus === 'GENERATED' && (
-                      <span className="inline-flex items-center rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600 border border-blue-500/20 uppercase tracking-wider animate-pulse dark:bg-blue-500/20 dark:text-blue-400">
-                        Generated & Pending Acceptance
-                      </span>
-                    )}
-                    {app.offer.offerStatus === 'ACCEPTED' && (
-                      <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20 uppercase tracking-wider">
-                        Offer Accepted by Client
-                      </span>
-                    )}
-                    {app.offer.offerStatus === 'DECLINED' && (
-                      <span className="inline-flex items-center rounded-full bg-rose-500/10 px-3 py-1 text-xs font-bold text-rose-600 border border-rose-500/20 uppercase tracking-wider">
-                        Offer Declined
-                      </span>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="p-4 bg-card rounded-lg border border-border shadow-sm">
-                      <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Principal Amount</span>
-                      <p className="text-2xl font-bold text-foreground mt-2">{formatCurrency(app.offer.loanAmount)}</p>
-                    </div>
-                    <div className="p-4 bg-card rounded-lg border border-border shadow-sm">
-                      <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Interest Rate</span>
-                      <p className="text-2xl font-bold text-foreground mt-2">{app.offer.interestRate}% <span className="text-xs text-muted-foreground font-mono font-normal">p.a.</span></p>
-                    </div>
-                    <div className="p-4 bg-card rounded-lg border border-border shadow-sm">
-                      <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Tenure</span>
-                      <p className="text-2xl font-bold text-foreground mt-2">{app.offer.tenureMonths} <span className="text-xs text-muted-foreground font-mono font-normal">Months</span></p>
-                    </div>
-                    <div className="p-4 rounded-lg border shadow-sm bg-primary/5 border-primary/20">
-                      <span className="text-primary text-xs uppercase tracking-wider font-bold">Monthly EMI</span>
-                      <p className="text-2xl font-extrabold text-primary mt-2">{formatCurrency(app.offer.emiAmount)}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-sm bg-muted/30 p-4 rounded-lg border border-border">
-                    <div className="flex-1">
-                      <span className="text-muted-foreground">Total Repayment Amount: </span>
-                      <span className="font-bold text-foreground ml-1">{formatCurrency(app.offer.emiAmount * app.offer.tenureMonths)}</span>
-                    </div>
-                    <div className="hidden sm:block w-px h-6 bg-border"></div>
-                    <div className="flex items-center gap-4 text-muted-foreground font-mono text-xs">
-                      <div>Gen: {new Date(app.offer.generatedAt).toLocaleDateString()}</div>
-                      <div className={new Date() > new Date(app.offer.expiresAt) ? 'text-rose-500 font-bold' : ''}>
-                        Exp: {new Date(app.offer.expiresAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Record customer acceptance workflow inside the card for Loan Officers / Super Admins */}
-                  {app.status === 'OFFER_GENERATED' && user && (user.role === 'LOAN_OFFICER' || user.role === 'SUPER_ADMIN') && (
-                    <div className="border-t border-border pt-6">
-                      <Button
-                        onClick={handleRecordCustomerAcceptance}
-                        disabled={actionLoading || new Date() > new Date(app.offer.expiresAt)}
-                        className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm h-12 px-8"
-                      >
-                        {actionLoading ? 'Recording...' : 'Acknowledge Customer Acceptance'}
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* DISBURSEMENT TAB */}
-          <TabsContent value="disbursement" className="m-0 space-y-6">
-            {!app.disbursement && app.status !== 'OFFER_ACCEPTED' && (
-              <Card className="border-border shadow-sm border-dashed">
-                <CardContent className="p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
-                  <DollarSign className="h-12 w-12 text-muted-foreground/30 mb-4" />
-                  <p className="text-lg font-medium text-foreground mb-1">Disbursement Not Available</p>
-                  <p className="text-sm max-w-md mx-auto">The loan offer must be generated and accepted by the applicant before funds can be disbursed.</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Pending Disbursement Action */}
-            {app.status === 'OFFER_ACCEPTED' && !app.disbursement && user && (user.role === 'APPROVER' || user.role === 'SUPER_ADMIN') && (
-              <Card className="shadow-sm border-purple-500/30">
-                <CardHeader className="bg-purple-500/5 border-b border-purple-500/20 pb-4">
-                  <CardTitle className="text-lg flex items-center gap-2 text-purple-700 dark:text-purple-400">
-                    <DollarSign className="h-5 w-5" />
-                    Fund Disbursement Workspace
-                  </CardTitle>
-                  <CardDescription>Review final details and execute payout transaction.</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-card border border-border p-6 rounded-xl shadow-sm">
-                    <div>
-                      <span className="text-muted-foreground text-sm font-medium">Approved Payout Amount</span>
-                      <p className="font-extrabold text-3xl text-emerald-600 mt-2">{formatCurrency(app.loanAmount)}</p>
-                    </div>
-                    <div className="md:border-l md:border-border md:pl-6">
-                      <span className="text-muted-foreground text-sm font-medium">Beneficiary Account Name</span>
-                      <p className="font-bold text-xl text-foreground mt-2">{app.applicantName}</p>
-                      <p className="text-sm text-muted-foreground font-mono mt-1">Application: {app.applicationNumber}</p>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={handleDisburseLoan}
-                    disabled={disburseLoading}
-                    className="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold cursor-pointer h-14 text-lg shadow-md"
-                  >
-                    {disburseLoading ? (
-                      <>
-                        <Clock className="h-6 w-6 mr-3 animate-spin" />
-                        Processing Secure Transfer...
-                      </>
-                    ) : (
-                      <>
-                        <DollarSign className="h-6 w-6 mr-2" />
-                        Confirm & Release Funds
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Disbursed State */}
-            {app.disbursement && (
-              <Card className="border-border shadow-sm overflow-hidden relative">
-                <div className="absolute top-0 right-0 h-40 w-40 bg-purple-500/5 rounded-bl-full pointer-events-none border-l border-b border-purple-500/10"></div>
-                <CardHeader className="bg-muted/20 border-b border-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Check className="h-5 w-5 text-purple-600 dark:text-purple-400 bg-purple-500/10 rounded-full p-0.5" />
-                      Disbursement Record
-                    </CardTitle>
-                    <CardDescription>Transaction clearance reference and payout details.</CardDescription>
-                  </div>
-                  <div>
-                    <span className="inline-flex items-center rounded-full bg-purple-500/10 px-3 py-1 text-xs font-bold text-purple-600 border border-purple-500/20 font-mono uppercase tracking-wider dark:text-purple-400">
-                      {app.disbursement.status}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-5 bg-card rounded-xl border border-border shadow-sm">
-                      <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Cleared Amount</span>
-                      <p className="font-extrabold text-3xl text-foreground mt-2">{formatCurrency(app.disbursement.amount)}</p>
-                    </div>
-                    <div className="p-5 rounded-xl border border-border shadow-sm bg-muted/10">
-                      <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Transaction Reference ID</span>
-                      <div className="mt-3 flex items-center">
-                        <span className="font-mono font-bold text-lg text-primary tracking-widest bg-card px-3 py-1.5 border border-border rounded-md shadow-sm select-all">
-                          {app.disbursement.referenceNumber}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-muted-foreground bg-muted/30 p-4 rounded-lg border border-border">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-purple-500" />
-                      <span>Authorized by:</span>
-                      <span className="font-semibold text-foreground">
-                        {app.disbursement.disbursedBy ? `${app.disbursement.disbursedBy.firstName} ${app.disbursement.disbursedBy.lastName}` : 'System'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                      <Clock className="h-4 w-4 text-purple-500" />
-                      <span className="font-mono text-foreground font-medium">
-                        {new Date(app.disbursement.disbursedAt).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* AUDIT TIMELINE TAB */}
-          <TabsContent value="audit" className="m-0 space-y-6">
-            <Card className="border-border shadow-sm">
-              <CardHeader className="bg-muted/20 border-b border-border pb-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <History className="h-5 w-5 text-primary" />
-                  Application Lifecycle Audit
-                </CardTitle>
-                <CardDescription>Immutable record of status changes and key actions.</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-8 pb-10 px-8">
-                <div className="relative pl-8 space-y-10 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
-                  {combinedTimeline.map((evt, idx) => {
-                    const isNewest = idx === 0;
-                    return (
-                      <div key={evt.id || idx} className="relative">
-                        {/* Node Icon */}
-                        <span className={`absolute left-[-29px] top-1.5 h-6 w-6 rounded-full flex items-center justify-center border-2 ${isNewest
-                            ? 'bg-primary border-primary ring-4 ring-primary/20'
-                            : 'bg-card border-muted-foreground/30'
-                          }`}>
-                          {isNewest && <span className="h-2 w-2 rounded-full bg-primary-foreground"></span>}
-                        </span>
-
-                        {/* Content */}
-                        <div className="space-y-2 bg-card border border-border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
-                            <span className={`text-xs font-bold font-mono px-2.5 py-1 rounded-md tracking-wider ${evt.badgeColor}`}>
-                              {evt.title}
-                            </span>
-                            <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded border border-border">
-                              {new Date(evt.timestamp).toLocaleString()}
-                            </span>
-                          </div>
-
-                          <div className="pt-1 space-y-3">
-                            <p className="text-sm text-foreground font-medium">{evt.description}</p>
-
-                            {evt.changedBy && (
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 w-fit px-3 py-1.5 rounded-full border border-border/50">
-                                <User className="h-3.5 w-3.5 text-muted-foreground" />
-                                <span className="font-semibold text-foreground">
-                                  {evt.changedBy.firstName} {evt.changedBy.lastName}
-                                </span>
-                                <span className="mx-1 opacity-50">•</span>
-                                <span className="font-mono uppercase tracking-wider">
-                                  {evt.changedBy.role.replace('_', ' ')}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+      {/* Main double column dashboard (No Tabs) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column: Profiles & Timeline Logs */}
+        <div className="lg:col-span-2 space-y-6">
+          {renderApplicantProfileCard()}
+          {renderDocumentsList(user?.role !== 'SUPER_ADMIN' && user?.role !== 'LOAN_OFFICER' && user?.role !== 'CREDIT_ANALYST')}
         </div>
-      </Tabs>
 
+        {/* Right Column: Dynamic workspace specific to user role */}
+        <div className="space-y-6">
+          {/* Timeline Audit Log */}
+          {renderTimelineCard()}
+
+          {/* Dynamic workflows */}
+          {user  .role === 'LOAN_OFFICER' && renderOfficerWorkspace()}
+          {user.role === 'CREDIT_ANALYST' && renderAnalystWorkspace()}
+          {user.role === 'APPROVER' && renderApproverWorkspace()}
+
+          {/* Super Admin sees all workspace actions sequentially */}
+          {user.role === 'SUPER_ADMIN' && (
+            <div className="space-y-6">
+              {renderOfficerWorkspace()}
+              {renderAnalystWorkspace()}
+              {renderApproverWorkspace()}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* PDF / Image preview dialog */}
       <Dialog open={!!previewUrl} onOpenChange={(open) => !open && setPreviewUrl(null)}>
-        <DialogContent className="max-w-4xl w-[90vw] h-[85vh] p-0 flex flex-col overflow-hidden">
-          <DialogHeader className="px-4 py-3 border-b shrink-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-10">
-            <DialogTitle className="text-lg font-semibold truncate pr-6">{previewTitle}</DialogTitle>
+        <DialogContent className="max-w-4xl w-[90vw] h-[85vh] p-0 flex flex-col overflow-hidden bg-card text-card-foreground border-border rounded-lg shadow-2xl">
+          <DialogHeader className="px-4 py-3 border-b shrink-0 bg-background/95 backdrop-blur z-10">
+            <DialogTitle className="text-base font-bold truncate pr-6 text-foreground">{previewTitle}</DialogTitle>
           </DialogHeader>
           <div className="flex-1 w-full h-full bg-muted/20 relative overflow-hidden">
             {previewUrl && (
               previewUrl.toLowerCase().endsWith('.pdf') ? (
                 <PdfViewer url={previewUrl} />
               ) : (
-                <iframe 
+                // eslint-disable-next-line @next/next/no-img-element
+                <img 
                   src={previewUrl} 
-                  className="absolute inset-0 w-full h-full border-0" 
-                  title={previewTitle}
+                  className="absolute inset-0 w-full h-full object-contain border-0 p-4" 
+                  alt={previewTitle}
                 />
               )
             )}

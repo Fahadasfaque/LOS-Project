@@ -13,6 +13,7 @@ import { UserRepository } from '../repositories/user.repository';
 import { User, Prisma } from '@prisma/client';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 import { auditLogService } from './auditLog.service';
+import { prisma } from '../config/db';
 
 export class UserService {
   private userRepository = new UserRepository();
@@ -55,6 +56,56 @@ export class UserService {
     // Exclude password from the returned object
     const { password, otpHash, otpExpiry, ...userWithoutPassword } = user;
     return userWithoutPassword;
+  }
+
+  /**
+   * Bulk registers new system user profiles, hashes passwords, and log operations transactionally.
+   * Only accessible by SUPER_ADMIN.
+   * 
+   * @param adminId User ID of the administrator provisioning the profiles
+   * @param usersData Array of user creation properties
+   * @returns Array of created user profiles
+   */
+  async bulkCreateUsers(
+    adminId: string,
+    usersData: Prisma.UserCreateInput[]
+  ): Promise<Omit<User, 'password' | 'otpHash' | 'otpExpiry'>[]> {
+    const emails = usersData.map(u => u.email);
+    // Find if any emails are already registered
+    const existing = await prisma.user.findMany({
+      where: { email: { in: emails } }
+    });
+    if (existing.length > 0) {
+      const dupeEmails = existing.map((e: any) => e.email).join(', ');
+      throw new BadRequestError(`The following email address(es) are already registered: ${dupeEmails}`);
+    }
+
+    const createdUsers: Omit<User, 'password' | 'otpHash' | 'otpExpiry'>[] = [];
+
+    await prisma.$transaction(async (tx: any) => {
+      for (const u of usersData) {
+        const hashedPassword = await bcrypt.hash(u.password, 10);
+        const user = await tx.user.create({
+          data: {
+            ...u,
+            password: hashedPassword,
+          }
+        });
+
+        await tx.auditLog.create({
+          data: {
+            userId: adminId,
+            action: 'USER_CREATION',
+            details: `Bulk created user account for ${user.email} with role ${user.role}.`
+          }
+        });
+
+        const { password, otpHash, otpExpiry, ...userWithoutPassword } = user;
+        createdUsers.push(userWithoutPassword);
+      }
+    });
+
+    return createdUsers;
   }
 
   /**

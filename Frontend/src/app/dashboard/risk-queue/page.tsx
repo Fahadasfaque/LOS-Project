@@ -176,6 +176,8 @@ export default function RiskQueuePage() {
                 <option value="SUBMITTED">Submitted (Pending Action)</option>
                 <option value="UNDER_REVIEW">Under Review</option>
                 <option value="APPROVED">Approved</option>
+                <option value="OFFER_GENERATED">Awaiting Customer</option>
+                <option value="OFFER_ACCEPTED">Offer Accepted</option>
                 <option value="REJECTED">Rejected</option>
                 <option value="DISBURSED">Disbursed</option>
               </select>

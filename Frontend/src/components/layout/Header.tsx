@@ -5,20 +5,19 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from 'next-themes';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
-  Search,
+  MagnifyingGlass,
   Bell,
   Moon,
   Sun,
-  LogOut,
+  SignOut,
   User,
-  ChevronRight,
+  CaretRight,
   FilePlus,
-  FileSearch,
+  FileMagnifyingGlass,
   CheckSquare,
   UserPlus
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -57,29 +57,29 @@ export function Header() {
     switch (user.role) {
       case 'LOAN_OFFICER':
         return (
-          <Button onClick={() => router.push('/dashboard/create-application')} size="lg" className="hidden sm:flex gap-2 cursor-pointer">
-            <FilePlus className="h-4 w-4" />
+          <Button onClick={() => router.push('/dashboard/create-application')} size="sm" className="hidden sm:flex gap-2 cursor-pointer">
+            <FilePlus className="h-4 w-4" weight="bold" />
             New Application
           </Button>
         );
       case 'CREDIT_ANALYST':
         return (
           <Button onClick={() => router.push('/dashboard/risk-queue')} size="sm" className="hidden sm:flex gap-2 cursor-pointer">
-            <FileSearch className="h-4 w-4" />
+            <FileMagnifyingGlass className="h-4 w-4" weight="bold" />
             New Assessment
           </Button>
         );
       case 'APPROVER':
         return (
           <Button onClick={() => router.push('/dashboard/approval-queue')} size="sm" className="hidden sm:flex gap-2 cursor-pointer">
-            <CheckSquare className="h-4 w-4" />
+            <CheckSquare className="h-4 w-4" weight="bold" />
             Generate Offer
           </Button>
         );
       case 'SUPER_ADMIN':
         return (
           <Button onClick={() => router.push('/dashboard/users')} size="sm" className="hidden sm:flex gap-2 cursor-pointer">
-            <UserPlus className="h-4 w-4" />
+            <UserPlus className="h-4 w-4" weight="bold" />
             Create User
           </Button>
         );
@@ -89,18 +89,19 @@ export function Header() {
   };
 
   return (
-    <header className="flex items-center justify-between bg-surface/95 backdrop-blur-md border-b border-border px-6 h-16 shrink-0 transition-colors duration-200 sticky top-0 z-30 shadow-sm">
-
-      {/* Left Section: Breadcrumbs */}
-      <div className="flex items-center gap-6">
+    <header className="flex items-center justify-between bg-card border-b border-border px-6 h-16 shrink-0 transition-colors duration-200 sticky top-0 z-30 shadow-sm text-card-foreground">
+      {/* Left Section: Sidebar Trigger & Breadcrumbs */}
+      <div className="flex items-center gap-4">
+        {/* Sidebar Trigger */}
+        <SidebarTrigger className="h-9 w-9 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer rounded" />
 
         {/* Breadcrumbs */}
-        <nav className="hidden md:flex items-center gap-1 text-sm font-medium text-muted-foreground">
+        <nav className="hidden md:flex items-center gap-1 text-sm font-semibold text-muted-foreground select-none">
           {breadcrumbs.map((crumb, idx) => (
             <React.Fragment key={crumb.href}>
-              {idx > 0 && <ChevronRight className="h-4 w-4 mx-1 opacity-50" />}
+              {idx > 0 && <CaretRight className="h-3.5 w-3.5 mx-1 opacity-55 text-muted-foreground" weight="bold" />}
               {crumb.isLast ? (
-                <span className="text-foreground capitalize font-semibold">{crumb.title}</span>
+                <span className="text-foreground capitalize font-bold">{crumb.title}</span>
               ) : (
                 <Link href={crumb.href} className="hover:text-foreground capitalize transition-colors">
                   {crumb.title}
@@ -113,14 +114,13 @@ export function Header() {
 
       {/* Right Section: Actions & Profile */}
       <div className="flex items-center gap-4">
-
         {/* Global Search */}
         <div className="hidden lg:flex relative items-center">
-          <Search className="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search applications..."
-            className="h-8 w-64 bg-muted/50 border border-border rounded-md pl-9 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background transition-all text-foreground"
+            className="h-9 w-64 bg-background border border-border rounded pl-9 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background transition-all text-foreground font-medium"
           />
         </div>
 
@@ -132,11 +132,11 @@ export function Header() {
         {/* Theme Toggle */}
         <button
           onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-          className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-full transition-colors cursor-pointer"
+          className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded transition-colors cursor-pointer"
           title="Toggle theme"
         >
           {mounted ? (
-            resolvedTheme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />
+            resolvedTheme === 'dark' ? <Sun className="h-5 w-5" weight="bold" /> : <Moon className="h-5 w-5" weight="bold" />
           ) : (
             <Moon className="h-5 w-5 opacity-0" />
           )}
@@ -146,27 +146,26 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-muted transition-colors cursor-pointer outline-none">
             <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0 text-primary">
-              <User className="h-4 w-4" />
+              <User className="h-4.5 w-4.5" weight="bold" />
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-52">
             <DropdownMenuGroup>
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none text-foreground">{user.firstName} {user.lastName}</p>
+                  <p className="text-sm font-bold leading-none text-foreground">{user.firstName} {user.lastName}</p>
                   <p className="text-xs text-muted-foreground leading-none mt-1">{user.role.replace('_', ' ')}</p>
                 </div>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             
-            <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10" onClick={logout}>
-              <LogOut className="mr-2 h-4 w-4" />
+            <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10 font-medium" onClick={logout}>
+              <SignOut className="mr-2 h-4 w-4" weight="bold" />
               <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
       </div>
     </header>
   );

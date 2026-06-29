@@ -11,6 +11,7 @@ enum Role {
   LOAN_OFFICER
   CREDIT_ANALYST
   APPROVER
+  CUSTOMER
 }
 
 enum LoanStatus {
@@ -51,28 +52,80 @@ enum DocumentType {
   BANK_STATEMENT
 }
 
+enum InviteStatus {
+  INVITED
+  ACTIVE
+}
+
+enum NotificationType {
+  APPLICATION_RECEIVED
+  DOCUMENTS_REQUIRED
+  DOCUMENT_UPLOADED
+  UNDER_REVIEW
+  OFFER_GENERATED
+  OFFER_ACCEPTED
+  OFFER_DECLINED
+  LOAN_APPROVED
+  LOAN_DISBURSED
+}
+
 model User {
-  id               String            @id @default(uuid())
-  email            String            @unique
-  password         String
-  firstName        String
-  lastName         String
-  phone            String?
-  department       String?
-  role             Role              @default(LOAN_OFFICER)
-  isActive         Boolean           @default(true)
-  otpHash          String?
-  otpExpiry        DateTime?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  auditLogs        AuditLog[]
-  loanApplications LoanApplication[]
-  statusChanges    StatusHistory[]
-  assessments      Assessment[]
-  disbursements    Disbursement[]
-  documents        Document[]
+  id                    String                    @id @default(uuid())
+  email                 String                    @unique
+  password              String
+  firstName             String
+  lastName              String
+  phone                 String?
+  department            String?
+  role                  Role                      @default(LOAN_OFFICER)
+  isActive              Boolean                   @default(true)
+  inviteStatus          InviteStatus?             // CUSTOMER role only
+  otpHash               String?
+  otpExpiry             DateTime?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  auditLogs             AuditLog[]
+  loanApplications      LoanApplication[]
+  statusChanges         StatusHistory[]
+  assessments           Assessment[]
+  disbursements         Disbursement[]
+  documents             Document[]
+  customerProfile       CustomerProfile?
+  customerNotifications CustomerNotification[]
+  customerApplications  LoanApplication[]         @relation("CustomerApplications")
 
   @@map("users")
+}
+
+model CustomerProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address      String?
+  city         String?
+  state        String?
+  postalCode   String?
+  nomineeName  String?
+  nomineePhone String?
+  occupation   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("customer_profiles")
+}
+
+model CustomerNotification {
+  id            String           @id @default(uuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String
+  type          NotificationType
+  title         String
+  message       String
+  isRead        Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+
+  @@map("customer_notifications")
 }
 
 model AuditLog {
@@ -101,6 +154,8 @@ model LoanApplication {
   status            LoanStatus      @default(DRAFT)
   userId            String
   user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customerUserId    String?
+  customerUser      User?           @relation("CustomerApplications", fields: [customerUserId], references: [id], onDelete: SetNull)
   documents         Document[]
   statusHistory     StatusHistory[]
   assessment        Assessment?
@@ -215,4 +270,3 @@ model Disbursement {
 
   @@map("disbursements")
 }
-

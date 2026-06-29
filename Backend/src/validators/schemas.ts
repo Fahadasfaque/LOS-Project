@@ -14,6 +14,7 @@ export const loginSchema = z.object({
 export const requestOtpSchema = z.object({
   body: z.object({
     email: z.string().email('Must be a valid email address.'),
+    forceNew: z.boolean().optional(),
   }),
 });
 
@@ -151,4 +152,38 @@ export const disburseLoanSchema = z.object({
     applicationId: z.string().uuid('Application ID must be a valid UUID.'),
   }),
 });
+
+export const bulkCreateUserSchema = z.object({
+  body: z.array(
+    z.object({
+      email: z.string().email('Must be a valid email address.'),
+      password: z.string().min(6, 'Password must be at least 6 characters long.'),
+      firstName: z.string().min(1, 'First name is required.'),
+      lastName: z.string().min(1, 'Last name is required.'),
+      role: z.nativeEnum(Role, {
+        message: 'Role must be SUPER_ADMIN, LOAN_OFFICER, CREDIT_ANALYST, or APPROVER.',
+      }),
+    })
+  ).min(1, 'At least one user must be provided.'),
+});
+
+export const bulkCreateApplicationSchema = z.object({
+  body: z.array(
+    z.object({
+      applicantName: z.string().min(1, 'Applicant name is required.'),
+      email: z.string().email('Must be a valid email address.'),
+      phone: z.string().min(10, 'Phone number must be at least 10 digits.'),
+      pan: z.string().length(10, 'PAN card number must be exactly 10 characters.').regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i, 'Invalid PAN card format (expected: ABCDE1234F).'),
+      loanType: z.nativeEnum(LoanType, {
+        message: 'LoanType must be PERSONAL, HOME, AUTO, BUSINESS, or EDUCATION.',
+      }),
+      loanAmount: z.number().positive('Loan amount must be a positive number.'),
+      monthlyIncome: z.number().positive('Monthly income must be a positive number.'),
+      employmentType: z.nativeEnum(EmploymentType, {
+        message: 'EmploymentType must be SALARIED, SELF_EMPLOYED, or BUSINESS_OWNER.',
+      }),
+    })
+  ).min(1, 'At least one application must be provided.'),
+});
+
 

@@ -17,7 +17,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '../services/api';
 
-export type UserRole = 'SUPER_ADMIN' | 'LOAN_OFFICER' | 'CREDIT_ANALYST' | 'APPROVER';
+export type UserRole = 'SUPER_ADMIN' | 'LOAN_OFFICER' | 'CREDIT_ANALYST' | 'APPROVER' | 'CUSTOMER';
 
 export interface UserProfile {
   id: string;
@@ -25,6 +25,7 @@ export interface UserProfile {
   role: UserRole;
   firstName: string;
   lastName: string;
+  inviteStatus?: 'INVITED' | 'ACTIVE' | null;
 }
 
 interface AuthContextType {
@@ -35,6 +36,7 @@ interface AuthContextType {
   requestOtp: (email: string) => Promise<void>;
   verifyOtpLogin: (email: string, code: string) => Promise<void>;
   logout: () => void;
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,6 +46,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const refreshSession = async () => {
+    try {
+      const response = await api.get('/auth/me');
+      if (response.success && response.data?.user) {
+        setUser(response.data.user);
+      }
+    } catch {
+      // non-fatal
+    }
+  };
 
   useEffect(() => {
     async function loadUser() {
@@ -81,7 +94,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('los_token', userToken);
       setToken(userToken);
       setUser(userProfile);
-      router.push('/dashboard');
+      
+      if (userProfile.role === 'CUSTOMER') {
+        if (userProfile.inviteStatus === 'INVITED') {
+          router.push('/customer/set-password');
+        } else {
+          router.push('/customer/dashboard');
+        }
+      } else {
+        router.push('/dashboard');
+      }
     }
   };
 
@@ -99,21 +121,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('los_token', userToken);
       setToken(userToken);
       setUser(userProfile);
-      router.push('/dashboard');
+
+      if (userProfile.role === 'CUSTOMER') {
+        if (userProfile.inviteStatus === 'INVITED') {
+          router.push('/customer/set-password');
+        } else {
+          router.push('/customer/dashboard');
+        }
+      } else {
+        router.push('/dashboard');
+      }
     } else {
       throw new Error(response.message || 'Failed to verify OTP.');
     }
   };
 
   const logout = () => {
+    const isCustomer = user?.role === 'CUSTOMER';
     localStorage.removeItem('los_token');
     setToken(null);
     setUser(null);
-    router.push('/login');
+    if (isCustomer) {
+      router.push('/customer/login');
+    } else {
+      router.push('/login');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, token, login, requestOtp, verifyOtpLogin, logout }}>
+    <AuthContext.Provider value={{ user, loading, token, login, requestOtp, verifyOtpLogin, logout, refreshSession }}>
       {children}
     </AuthContext.Provider>
   );

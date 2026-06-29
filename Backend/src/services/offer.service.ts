@@ -6,8 +6,10 @@
 import { offerRepository } from '../repositories/offer.repository';
 import { LoanApplicationRepository } from '../repositories/loanApplication.repository';
 import { auditLogService } from './auditLog.service';
+import { notificationService } from './notification.service';
 import { NotFoundError, BadRequestError, ForbiddenError } from '../utils/errors';
 import { Offer, OfferStatus, Role } from '@prisma/client';
+import { prisma } from '../config/db';
 
 export class OfferService {
   private repository = offerRepository;
@@ -85,6 +87,17 @@ export class OfferService {
       'OFFER_GENERATED',
       `Generated loan offer for application ${app.applicationNumber}: Amount ${P}, Rate ${data.interestRate}%, Tenure ${n} months, EMI ${emiAmount}.`
     );
+
+    // 9. Notify Customer (Phase 6) — non-blocking
+    if (app.customerUserId) {
+      notificationService.createCustomerNotification(
+        app.customerUserId,
+        data.applicationId,
+        'OFFER_GENERATED',
+        'Your Loan Offer is Ready',
+        `A loan offer has been generated for your application ${app.applicationNumber}. Please log in to review and accept or decline your offer before it expires.`
+      ).catch((e) => console.warn('[OfferService] Customer notification failed:', e));
+    }
 
     return offer;
   }

@@ -55,3 +55,14 @@ To protect sensitive personally identifiable information (PII) like PAN, Aadhaar
 - **Service Layer**: All API communication is abstracted in `/src/services/api.ts`, which configures standard fetch headers (including the Authorization Bearer header).
 - **Authentication Context (`AuthContext`)**: A React Context that manages login states, caches the current user profile, and exposes helpers for signing in and out.
 - **Role-Aware Sidebar**: Reads the logged-in user's role from the context and dynamically constructs navigation links.
+
+---
+
+## 5. Phase 6 Customer Self-Service Portal Architecture
+To isolate customer interactions from internal banking operations, we implement a strict sandboxed architecture:
+- **Folder Isolation**:
+  - Backend: `Backend/src/repositories/customer.repository.ts`, `Backend/src/services/customer.service.ts`, `Backend/src/controllers/customer.controller.ts`.
+  - Frontend: `Frontend/src/app/customer/*` layout, login, dashboard, detail, documents, offers, notifications, and profile pages.
+- **Data Access Boundary**: Every service-layer method queries the database using `customerUserId` in the where-clause of the query. Sensitive internal underwriting fields (risk category, credit score calculation, recommendation) are completely omitted from selects returned to customers.
+- **Communication Flow**: Actions taken by customers (like document upload or offer acceptance) emit non-blocking `CustomerNotification` records, trigger real-time email alerts to the assigned Loan Officer, and update employee dashboards with pending badge indicators.
+

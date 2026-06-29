@@ -18,6 +18,8 @@ erDiagram
   loan_applications ||--o| assessments : "assessed"
   loan_applications ||--o| offers : "offered"
   loan_applications ||--o| disbursements : "disbursed"
+  users ||--o| customer_profiles : "has"
+  users ||--o{ customer_notifications : "receives"
 ```
 
 ---
@@ -34,7 +36,10 @@ Stores user profiles and role credentials.
 | `password` | String | Not Null | Bcrypt-hashed password. |
 | `firstName` | String | Not Null | User's first name. |
 | `lastName` | String | Not Null | User's last name. |
-| `role` | Role (Enum) | Default `LOAN_OFFICER` | Role matching `SUPER_ADMIN`, `LOAN_OFFICER`, `CREDIT_ANALYST`, `APPROVER`. |
+| `role` | Role (Enum) | Default `LOAN_OFFICER` | Role matching `SUPER_ADMIN`, `LOAN_OFFICER`, `CREDIT_ANALYST`, `APPROVER`, `CUSTOMER`. |
+| `inviteStatus` | InviteStatus (Enum) | Nullable | State matching `INVITED`, `ACTIVE` for customer portal users. |
+| `otpHash` | String | Nullable | Temp OTP verification code hash. |
+| `otpExpiry` | DateTime | Nullable | Verification code expiration. |
 | `isActive` | Boolean | Default `true` | System access toggle. |
 | `createdAt` | DateTime | Default `now()` | Record creation timestamp. |
 | `updatedAt` | DateTime | Auto Update | Last modification timestamp. |
@@ -71,7 +76,8 @@ Contains customer profile details and loan financial figures.
 | `monthlyIncome` | Float | Not Null | Net monthly income. |
 | `employmentType` | EmploymentType (Enum) | Not Null | `SALARIED`, `SELF_EMPLOYED`, `BUSINESS_OWNER`. |
 | `status` | LoanStatus (Enum) | Default `DRAFT` | `DRAFT`, `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `OFFER_GENERATED`, `OFFER_ACCEPTED`, `REJECTED`, `DISBURSED`. |
-| `userId` | UUID (String) | Foreign Key -> `users.id`, Cascade on delete | Loan Officer who created the application. |
+| `userId` | UUID (String) | Foreign Key -> `users.id` | Loan Officer who created the application. |
+| `customerUserId` | UUID (String) | Foreign Key -> `users.id` | Customer portal user owning the application. |
 | `createdAt` | DateTime | Default `now()` | Record creation timestamp. |
 | `updatedAt` | DateTime | Auto Update | Last modification timestamp. |
 
@@ -155,3 +161,39 @@ Payment releases and transaction clearing references.
 | `status` | DisbursementStatus (Enum) | Default `SUCCESS` | State matching `PENDING`, `SUCCESS`, `FAILED`. |
 | `disbursedById` | UUID (String) | Foreign Key -> `users.id`, Cascade | Authorized approver releasing funds. |
 | `disbursedAt` | DateTime | Default `now()` | Payout execution timestamp. |
+
+---
+
+### 2.9 Customer Profiles (`customer_profiles`)
+Stores detailed demographic and nominee metadata for Customer accounts.
+
+| Field | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID (String) | Primary Key, Default UUID | Unique identifier. |
+| `userId` | UUID (String) | Unique, Foreign Key -> `users.id` | Customer user ID. |
+| `address` | String | Nullable | Street address. |
+| `city` | String | Nullable | Current city. |
+| `state` | String | Nullable | Current state. |
+| `postalCode` | String | Nullable | Pin code. |
+| `nomineeName` | String | Nullable | Nominee details. |
+| `nomineePhone` | String | Nullable | Nominee phone number. |
+| `occupation` | String | Nullable | Job / profession. |
+| `createdAt` | DateTime | Default `now()` | Record creation timestamp. |
+| `updatedAt` | DateTime | Auto Update | Last modification timestamp. |
+
+---
+
+### 2.10 Customer Notifications (`customer_notifications`)
+Stores notifications dispatched to portal users.
+
+| Field | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID (String) | Primary Key, Default UUID | Unique identifier. |
+| `userId` | UUID (String) | Foreign Key -> `users.id` | Targeted customer user. |
+| `applicationId` | UUID (String) | Foreign Key -> `loan_applications.id` | Related application. |
+| `type` | NotificationType (Enum) | Not Null | Types matching `APPLICATION_RECEIVED`, `OFFER_GENERATED`, `OFFER_ACCEPTED`, `OFFER_DECLINED`, `DOCUMENT_UPLOADED`, `LOAN_DISBURSED`. |
+| `title` | String | Not Null | Display title. |
+| `message` | String | Not Null | Display details. |
+| `isRead` | Boolean | Default `false` | Read flag. |
+| `createdAt` | DateTime | Default `now()` | Timestamp of generation. |
+

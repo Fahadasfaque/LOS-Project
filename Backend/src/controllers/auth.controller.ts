@@ -52,10 +52,10 @@ export async function requestOtp(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { email } = req.body;
+    const { email, forceNew } = req.body;
     const ipAddress = req.ip || req.socket.remoteAddress;
 
-    await authService.requestOtp(email, ipAddress);
+    await authService.requestOtp(email, ipAddress, !!forceNew);
     sendSuccess(res, 'OTP sent to your email.');
   } catch (error) {
     next(error);

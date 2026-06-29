@@ -14,10 +14,13 @@ import { encrypt, decrypt } from '../utils/encryption';
 import { maskPan } from '../utils/masking';
 import { isValidTransition } from '../utils/workflow';
 import { auditLogService } from './auditLog.service';
+import { emailService } from './email.service';
+import { notificationService } from './notification.service';
 import { BadRequestError, NotFoundError, ForbiddenError } from '../utils/errors';
 import { LoanApplication, LoanStatus, LoanType, EmploymentType, Role } from '@prisma/client';
 import { prisma } from '../config/db';
 import { assessmentService } from './assessment.service';
+import bcrypt from 'bcryptjs';
 
 export interface CreateAppInput {
   applicantName: string;
@@ -90,7 +93,184 @@ export class LoanApplicationService {
       `Created loan application ${app.applicationNumber} in DRAFT status for ${app.applicantName}.`
     );
 
+    // ─── Phase 6: Auto-provision Customer Portal Account ─────────────────────
+    // Runs after application is saved. Non-blocking — errors are logged, not thrown.
+    this.provisionCustomerPortalAccount(
+      userId,
+      app.id,
+      app.applicationNumber,
+      data.applicantName,
+      data.email,
+      data.phone
+    ).catch((err) =>
+      console.warn('[LoanApplicationService] Customer provisioning warning:', err?.message)
+    );
+
     return app;
+  }
+
+  /**
+   * Auto-provisions a Customer Portal account for the loan applicant.
+   * Called after application creation. Creates or links an existing CUSTOMER user.
+   *
+   * Workflow:
+   *   1. Check if CUSTOMER user with this email already exists.
+   *   2. If not: create CUSTOMER user with INVITED status and a locked bcrypt-hashed random UUID password.
+   *   3. Generate OTP for first-login.
+   *   4. Link customerUserId on the LoanApplication.
+   *   5. Send invitation email with OTP to the applicant.
+   */
+  private async provisionCustomerPortalAccount(
+    officerId: string,
+    applicationId: string,
+    applicationNumber: string,
+    applicantName: string,
+    email: string,
+    phone: string
+  ): Promise<void> {
+    // 1. Check if CUSTOMER account already exists for this email
+    let customerUser = await prisma.user.findFirst({
+      where: { email, role: 'CUSTOMER' },
+    });
+
+    if (!customerUser) {
+      // 2. Create new CUSTOMER user with INVITED status
+      //    Password is a locked random UUID hash — cannot be used to log in directly.
+      //    The customer MUST set their own password via the invitation flow.
+      const lockedPasswordHash = await bcrypt.hash(require('crypto').randomUUID(), 10);
+
+      customerUser = await prisma.user.create({
+        data: {
+          email,
+          password: lockedPasswordHash,
+          firstName: applicantName.split(' ')[0] || applicantName,
+          lastName: applicantName.split(' ').slice(1).join(' ') || '',
+          phone,
+          role: 'CUSTOMER',
+          inviteStatus: 'INVITED',
+          isActive: true,
+        },
+      });
+
+      await auditLogService.logAction(
+        officerId,
+        'CUSTOMER_ACCOUNT_PROVISIONED',
+        `Provisioned customer portal account for ${email} (Application: ${applicationNumber}).`
+      );
+    }
+
+    // 3. Generate OTP for first-login invitation
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await bcrypt.hash(otpCode, 10);
+    const otpExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours for invitation OTP
+
+    await prisma.user.update({
+      where: { id: customerUser.id },
+      data: { otpHash, otpExpiry },
+    });
+
+    // 4. Link customerUserId on the LoanApplication
+    await prisma.loanApplication.update({
+      where: { id: applicationId },
+      data: { customerUserId: customerUser.id },
+    });
+
+    // 5. Send invitation email
+    await emailService.sendNotification({
+      to: email,
+      subject: `Welcome to Fortress Banking Customer Portal — Application ${applicationNumber}`,
+      type: 'CUSTOMER_INVITATION',
+      firstName: customerUser.firstName,
+      otpCode,
+      userId: customerUser.id,
+      applicationNumber,
+      portalLink: 'http://localhost:3000/customer/login',
+    });
+
+    // 6. Create welcome notification
+    await notificationService.createCustomerNotification(
+      customerUser.id,
+      applicationId,
+      'APPLICATION_RECEIVED',
+      'Application Received',
+      `Your loan application ${applicationNumber} has been received and is being processed. Welcome to the Fortress Banking Customer Portal.`
+    );
+  }
+
+  /**
+   * Bulk initializes new LoanApplications, generates serial numbers, encrypts PANs,
+   * sets status to DRAFT, and creates initial status histories transactionally.
+   * 
+   * @param userId Loan officer user ID creating the applications
+   * @param appsData Array of application form fields
+   * @returns Array of created LoanApplication database objects
+   */
+  async bulkCreateApplications(userId: string, appsData: CreateAppInput[]): Promise<any[]> {
+    const currentYear = new Date().getFullYear();
+    const prefix = `LOS-${currentYear}-`;
+
+    const latest = await prisma.loanApplication.findFirst({
+      where: {
+        applicationNumber: { startsWith: prefix },
+      },
+      orderBy: { applicationNumber: 'desc' },
+    });
+
+    let sequence = 1;
+    if (latest) {
+      const parts = latest.applicationNumber.split('-');
+      const lastSeq = parseInt(parts[2], 10);
+      if (!isNaN(lastSeq)) {
+        sequence = lastSeq + 1;
+      }
+    }
+
+    const createdApps: any[] = [];
+
+    await prisma.$transaction(async (tx) => {
+      for (let i = 0; i < appsData.length; i++) {
+        const data = appsData[i];
+        const applicationNumber = `${prefix}${String(sequence + i).padStart(6, '0')}`;
+        const panEncrypted = encrypt(data.pan.toUpperCase());
+
+        const app = await tx.loanApplication.create({
+          data: {
+            applicationNumber,
+            applicantName: data.applicantName,
+            email: data.email,
+            phone: data.phone,
+            panEncrypted,
+            loanType: data.loanType,
+            loanAmount: data.loanAmount,
+            monthlyIncome: data.monthlyIncome,
+            employmentType: data.employmentType,
+            status: 'DRAFT',
+            userId,
+          },
+        });
+
+        await tx.statusHistory.create({
+          data: {
+            applicationId: app.id,
+            oldStatus: null,
+            newStatus: 'DRAFT',
+            changedById: userId,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            userId,
+            action: 'LOAN_APPLICATION_CREATE',
+            details: `Bulk created loan application ${app.applicationNumber} in DRAFT status for ${app.applicantName}.`
+          }
+        });
+
+        createdApps.push(app);
+      }
+    });
+
+    return createdApps;
   }
 
   /**

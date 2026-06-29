@@ -26,6 +26,20 @@ export async function createUser(
   }
 }
 
+export async function bulkCreateUsers(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const adminId = req.user!.id;
+    const users = await userService.bulkCreateUsers(adminId, req.body);
+    sendSuccess(res, 'Bulk user profiles created successfully.', users, 201);
+  } catch (error) {
+    next(error);
+  }
+}
+
 /**
  * Retrieves all user profiles.
  * Restricted to SUPER_ADMIN roles.

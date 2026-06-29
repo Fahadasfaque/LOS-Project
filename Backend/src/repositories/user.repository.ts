@@ -43,6 +43,7 @@ export class UserRepository {
         department: true,
         role: true,
         isActive: true,
+        inviteStatus: true,
         createdAt: true,
         updatedAt: true,
       },

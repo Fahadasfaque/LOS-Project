@@ -6,8 +6,10 @@
 import { disbursementRepository } from '../repositories/disbursement.repository';
 import { LoanApplicationRepository } from '../repositories/loanApplication.repository';
 import { auditLogService } from './auditLog.service';
+import { notificationService } from './notification.service';
 import { NotFoundError, BadRequestError, ForbiddenError } from '../utils/errors';
 import { Disbursement, DisbursementStatus, Role } from '@prisma/client';
+import { prisma } from '../config/db';
 
 export class DisbursementService {
   private repository = disbursementRepository;
@@ -73,6 +75,17 @@ export class DisbursementService {
       'LOAN_DISBURSED',
       `Disbursed loan amount ${app.loanAmount} for application ${app.applicationNumber}. Ref: ${referenceNumber}.`
     );
+
+    // 8. Notify Customer (Phase 6) — non-blocking
+    if (app.customerUserId) {
+      notificationService.createCustomerNotification(
+        app.customerUserId,
+        data.applicationId,
+        'LOAN_DISBURSED',
+        'Funds Disbursed',
+        `Congratulations! Your loan of ₹${app.loanAmount.toLocaleString('en-IN')} has been disbursed. Reference: ${referenceNumber}. Funds will be reflected in your account within 1–2 business days.`
+      ).catch((e) => console.warn('[DisbursementService] Customer notification failed:', e));
+    }
 
     return disbursement;
   }

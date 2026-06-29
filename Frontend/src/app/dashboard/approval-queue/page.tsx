@@ -89,6 +89,10 @@ export default function ApprovalQueuePage() {
         return <span className="inline-flex items-center rounded-md bg-emerald-500/10 text-emerald-600 px-2.5 py-1 text-xs font-semibold border border-emerald-500/20 dark:text-emerald-500">Approved</span>;
       case 'REJECTED':
         return <span className="inline-flex items-center rounded-md bg-rose-500/10 text-rose-600 px-2.5 py-1 text-xs font-semibold border border-rose-500/20 dark:text-rose-500">Rejected</span>;
+      case 'OFFER_GENERATED':
+        return <span className="inline-flex items-center rounded-md bg-purple-500/10 text-purple-600 px-2.5 py-1 text-xs font-semibold border border-purple-500/20 animate-pulse dark:text-purple-400">Awaiting Customer</span>;
+      case 'OFFER_ACCEPTED':
+        return <span className="inline-flex items-center rounded-md bg-emerald-500/10 text-emerald-600 px-2.5 py-1 text-xs font-semibold border border-emerald-500/20 dark:text-emerald-500">Offer Accepted</span>;
       case 'DISBURSED':
         return <span className="inline-flex items-center rounded-md bg-purple-500/10 text-purple-600 px-2.5 py-1 text-xs font-semibold border border-purple-500/20 dark:text-purple-400">Disbursed</span>;
       default:
@@ -175,6 +179,8 @@ export default function ApprovalQueuePage() {
                 <option value="">All Statuses</option>
                 <option value="UNDER_REVIEW">Under Review (Recommended)</option>
                 <option value="APPROVED">Approved</option>
+                <option value="OFFER_GENERATED">Awaiting Customer</option>
+                <option value="OFFER_ACCEPTED">Offer Accepted</option>
                 <option value="REJECTED">Rejected</option>
                 <option value="DISBURSED">Disbursed</option>
               </select>

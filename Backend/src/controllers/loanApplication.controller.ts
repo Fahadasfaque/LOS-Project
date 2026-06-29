@@ -29,6 +29,20 @@ export async function createApplication(
   }
 }
 
+export async function bulkCreateApplications(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = req.user!.id;
+    const result = await loanApplicationService.bulkCreateApplications(userId, req.body);
+    sendSuccess(res, 'Bulk loan applications created successfully in DRAFT status.', result, 201);
+  } catch (error) {
+    next(error);
+  }
+}
+
 /**
  * Handle updates to draft applications.
  * 

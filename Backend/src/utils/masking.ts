@@ -17,7 +17,11 @@ import { Role } from '@prisma/client';
 export function maskPan(pan: string, role: Role): string {
   if (!pan) return '';
 
-  if (role === Role.SUPER_ADMIN || role === Role.LOAN_OFFICER) {
+  if (
+    role === Role.SUPER_ADMIN ||
+    role === Role.LOAN_OFFICER ||
+    role === Role.CREDIT_ANALYST
+  ) {
     return pan;
   }
 

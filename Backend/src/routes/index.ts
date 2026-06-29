@@ -8,6 +8,7 @@ import * as documentController from '../controllers/document.controller';
 import * as assessmentController from '../controllers/assessment.controller';
 import * as offerController from '../controllers/offer.controller';
 import * as disbursementController from '../controllers/disbursement.controller';
+import { customerController } from '../controllers/customer.controller';
 import { authenticate, requireRole } from '../middlewares/auth';
 import { upload } from '../middlewares/upload';
 import { validateRequest } from '../middlewares/validation';
@@ -25,6 +26,8 @@ import {
   generateOfferSchema,
   acceptOfferSchema,
   disburseLoanSchema,
+  bulkCreateUserSchema,
+  bulkCreateApplicationSchema,
 } from '../validators/schemas';
 
 const router = Router();
@@ -46,6 +49,13 @@ router.post(
   requireRole([Role.SUPER_ADMIN]),
   validateRequest(createUserSchema),
   userController.createUser
+);
+router.post(
+  '/users/bulk',
+  authenticate,
+  requireRole([Role.SUPER_ADMIN]),
+  validateRequest(bulkCreateUserSchema),
+  userController.bulkCreateUsers
 );
 router.get(
   '/users',
@@ -108,6 +118,13 @@ router.post(
   requireRole([Role.LOAN_OFFICER, Role.SUPER_ADMIN]),
   validateRequest(createApplicationSchema),
   loanApplicationController.createApplication
+);
+router.post(
+  '/applications/bulk',
+  authenticate,
+  requireRole([Role.LOAN_OFFICER, Role.SUPER_ADMIN]),
+  validateRequest(bulkCreateApplicationSchema),
+  loanApplicationController.bulkCreateApplications
 );
 
 router.get(
@@ -203,7 +220,7 @@ router.post(
 router.post(
   '/offers/accept',
   authenticate,
-  requireRole([Role.LOAN_OFFICER, Role.SUPER_ADMIN]),
+  requireRole([Role.SUPER_ADMIN]),  // Customers use /customer/applications/:id/offer/accept
   validateRequest(acceptOfferSchema),
   offerController.acceptOffer
 );
@@ -211,7 +228,7 @@ router.post(
 router.post(
   '/offers/decline',
   authenticate,
-  requireRole([Role.LOAN_OFFICER, Role.SUPER_ADMIN]),
+  requireRole([Role.SUPER_ADMIN]),  // Customers use /customer/applications/:id/offer/decline
   validateRequest(acceptOfferSchema),
   offerController.declineOffer
 );
@@ -225,6 +242,93 @@ router.post(
   requireRole([Role.APPROVER, Role.SUPER_ADMIN]),
   validateRequest(disburseLoanSchema),
   disbursementController.disburseLoan
+);
+/**
+ * Customer Self-Service Portal Endpoints
+ * RBAC: Role.CUSTOMER only (completely isolated from employee routes)
+ */
+
+// ─── Auth & Profile ────────────────────────────────────────────────────────
+router.get(
+  '/customer/me',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.getMyProfile.bind(customerController)
+);
+
+router.patch(
+  '/customer/me',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.updateMyProfile.bind(customerController)
+);
+
+router.post(
+  '/customer/set-password',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.setPassword.bind(customerController)
+);
+
+// ─── Applications ──────────────────────────────────────────────────────────
+router.get(
+  '/customer/applications',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.getMyApplications.bind(customerController)
+);
+
+router.get(
+  '/customer/applications/:id',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.getMyApplicationById.bind(customerController)
+);
+
+// ─── Offers ─────────────────────────────────────────────────────────────────
+router.get(
+  '/customer/applications/:id/offer',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.getMyOffer.bind(customerController)
+);
+
+router.post(
+  '/customer/applications/:id/offer/accept',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.acceptMyOffer.bind(customerController)
+);
+
+router.post(
+  '/customer/applications/:id/offer/decline',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.declineMyOffer.bind(customerController)
+);
+
+// ─── Documents ──────────────────────────────────────────────────────────────
+router.post(
+  '/customer/documents',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  upload.single('file'),
+  customerController.uploadDocument.bind(customerController)
+);
+
+// ─── Notifications ──────────────────────────────────────────────────────────
+router.get(
+  '/customer/notifications',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.getMyNotifications.bind(customerController)
+);
+
+router.patch(
+  '/customer/notifications/read',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.markNotificationsRead.bind(customerController)
 );
 
 export default router;

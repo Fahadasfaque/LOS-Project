@@ -135,13 +135,20 @@ sequenceDiagram
   BE->>BE: Updates status APPROVED -> OFFER_GENERATED
   BE->>BE: Writes StatusHistory & Audit Log (OFFER_GENERATED)
   BE->>BE: Dispatches 'Loan Offer Generated' Email via Nodemailer (async)
+  BE->>BE: Creates customer portal notification (Your Loan Offer is Ready)
   
-  Note over LO, FE: 4. Customer Acceptance Phase
-  LO->>FE: Contacts applicant, then clicks "Record Customer Acceptance"
-  FE->>BE: POST /api/v1/offers/accept {applicationId}
+  Note over User, FE: 4. Customer Self-Service & Offer Acceptance
+  User->>FE: Receives invitation email, logs in with temp code/OTP
+  FE->>FE: Detects inviteStatus = INVITED, prompts password setup
+  User->>FE: Submits password, transitions inviteStatus -> ACTIVE
+  User->>FE: Reviews status tracker and next actions in Action Center
+  User->>FE: Goes to "My Offer" tab/page, reviews interest rate and EMI
+  User->>FE: Downloads Sanction Letter text/PDF
+  User->>FE: Clicks "Accept & Agree" (or Decline)
+  FE->>BE: POST /api/v1/customer/applications/:id/offer/accept
   BE->>BE: Checks offer expiry
-  BE->>BE: Updates status OFFER_GENERATED -> OFFER_ACCEPTED
-  BE->>BE: Writes StatusHistory & Audit Log (OFFER_ACCEPTED)
+  BE->>BE: Transactional: updates offer status to ACCEPTED, loan status to OFFER_ACCEPTED, status history
+  BE->>BE: Writes Audit Log (CUSTOMER_OFFER_ACCEPTED) and customer notification
   
   Note over AP, FE: 5. Fund Disbursement Phase
   AP->>FE: Selects application in status OFFER_ACCEPTED
@@ -152,5 +159,42 @@ sequenceDiagram
   BE->>BE: Updates status OFFER_ACCEPTED -> DISBURSED
   BE->>BE: Writes StatusHistory & Audit Log (LOAN_DISBURSED)
   BE->>BE: Dispatches 'Loan Disbursed' Email via Nodemailer (async)
+  BE->>BE: Creates customer portal notification (Funds Disbursed)
   FE->>AP: Shows disbursement transaction details and status badge
+  
+  Note over User, FE: 6. Repayment Tracking
+  User->>FE: Refreshes portal dashboard or tracks application detail
+  FE->>FE: Sees status "Funds Disbursed", accesses "Repayment" tab
+  FE->>FE: Renders interactive repayment schedule (due dates, principal, interest)
+```
+
+---
+
+## 4. Customer Portal Login & Password Setup Flow
+A detailed view of the customer verification login flow:
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Customer
+  participant FE as Next.js Customer Portal
+  participant BE as Express Backend
+  
+  Customer->>FE: Accesses "/customer/login"
+  Customer->>FE: Enters email and requests code
+  FE->>BE: POST /api/v1/auth/otp/request {email}
+  BE->>Customer: Dispatches email with 6-digit OTP
+  Customer->>FE: Enters 6-digit OTP code
+  FE->>BE: POST /api/v1/auth/otp/verify {email, code}
+  BE-->>FE: Returns JWT Token + User Object (inviteStatus)
+  alt inviteStatus == INVITED
+    FE->>Customer: Redirects to "/customer/set-password"
+    Customer->>FE: Enters secure 8+ character password
+    FE->>BE: POST /api/v1/customer/set-password {newPassword}
+    BE->>BE: Hashes password, sets inviteStatus -> ACTIVE, logs audit event
+    BE-->>FE: Success response
+    FE->>Customer: Redirects to "/customer/dashboard"
+  else inviteStatus == ACTIVE
+    FE->>Customer: Redirects to "/customer/dashboard" directly
+  end
 ```

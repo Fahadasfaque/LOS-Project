@@ -434,21 +434,41 @@
       <div class="content">
 
         <h1 class="greeting">Hello, {{firstName}}</h1>
-        <p class="instructions">Please use the verification code below to sign into your Fortress Banking account. This
-          code is unique to your session and cannot be reused.</p>
+        {{#if isInvitation}}
+        <p class="instructions">
+          Welcome to the Fortress Banking Customer Portal. You have been invited to securely interact with your loan application <strong>{{applicationNumber}}</strong>.
+          Please use the temporary verification code below to complete your first sign-in and set your account password.
+        </p>
+        {{else}}
+        <p class="instructions">
+          Please use the verification code below to sign into your Fortress Banking account. This code is unique to your session and cannot be reused.
+        </p>
+        {{/if}}
 
         <!-- OTP Block -->
         <div class="otp-block">
           <p class="otp-eyebrow">Verification Code</p>
           <p class="otp-code">{{otpCode}}</p>
           <div class="otp-divider"></div>
+          {{#if isInvitation}}
+          <p class="otp-expiry">This temporary code is valid for &nbsp;<strong>48 hours</strong></p>
+          {{else}}
           <p class="otp-expiry">Expires in &nbsp;<strong>10 minutes</strong></p>
+          {{/if}}
         </div>
 
+        {{#if isInvitation}}
+        <div style="text-align: center; margin-bottom: 28px;">
+          <a href="{{portalLink}}" style="display: inline-block; background-color: #C9A84C; color: #001F4E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; padding: 12px 24px; border-radius: 4px; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(201, 168, 76, 0.3);">
+            ACCESS CUSTOMER PORTAL
+          </a>
+        </div>
+        {{else}}
         <!-- Warning Pill -->
         <span class="warning-pill">
           ⚠ &nbsp; Do not share this code with anyone, including Fortress Banking staff
         </span>
+        {{/if}}
 
         <!-- Security Notice -->
         <div class="security-block">

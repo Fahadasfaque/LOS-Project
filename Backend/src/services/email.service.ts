@@ -7,7 +7,7 @@ import { prisma } from '../config/db';
 export interface EmailPayload {
   to: string;
   subject: string;
-  type?: 'NOTIFICATION' | 'OTP';
+  type?: 'NOTIFICATION' | 'OTP' | 'GENERIC' | 'CUSTOMER_INVITATION';
   title?: string;
   customerName?: string;
   applicationNumber?: string;
@@ -17,6 +17,8 @@ export interface EmailPayload {
   otpCode?: string;
   firstName?: string;
   userId?: string;
+  customMessage?: string;    // For GENERIC type: freeform message body
+  portalLink?: string;       // For CUSTOMER_INVITATION type: link to portal
 }
 
 class EmailService {
@@ -80,6 +82,25 @@ class EmailService {
             firstName: payload.firstName,
             otpCode: payload.otpCode,
             year: new Date().getFullYear(),
+          });
+        } else if (payload.type === 'GENERIC') {
+          // Generic notification email using notification template with custom message
+          html = this.notificationTemplate({
+            title: payload.title || payload.subject,
+            customerName: payload.firstName || 'Team Member',
+            applicationNumber: payload.applicationNumber || '',
+            status: payload.status || '',
+            actionTaken: payload.customMessage || '',
+            transactionId: payload.transactionId || '',
+          });
+        } else if (payload.type === 'CUSTOMER_INVITATION') {
+          // Customer invitation: reuse OTP template (same OTP-style layout)
+          html = this.otpTemplate({
+            firstName: payload.firstName,
+            otpCode: payload.otpCode,
+            year: new Date().getFullYear(),
+            portalLink: payload.portalLink || 'http://localhost:3000/customer/login',
+            isInvitation: true,
           });
         } else {
           html = this.notificationTemplate({

@@ -578,3 +578,247 @@ Releases approved principal limit and logs payout txn clearance ref. Restricted 
     }
   }
   ```
+
+---
+
+## 6. Customer Portal Endpoints (Phase 6)
+All customer endpoints require `Authorization: Bearer <token>` where the JWT payload contains the `Role.CUSTOMER`.
+
+### 6.1 Get Customer Profile
+Retrieves the customer user profile and their associated CustomerProfile demographic record.
+- **URL**: `/api/v1/customer/me`
+- **Method**: `GET`
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Profile retrieved successfully.",
+    "data": {
+      "id": "c-user-uuid",
+      "email": "customer@gmail.com",
+      "firstName": "Rahul",
+      "lastName": "Sharma",
+      "phone": "9876543210",
+      "role": "CUSTOMER",
+      "inviteStatus": "ACTIVE",
+      "customerProfile": {
+        "address": "123 Main St",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "postalCode": "400001",
+        "nomineeName": "Pooja Sharma",
+        "nomineePhone": "9876543211",
+        "occupation": "Software Engineer"
+      }
+    }
+  }
+  ```
+
+---
+
+### 6.2 Update Customer Profile
+Updates demographic details.
+- **URL**: `/api/v1/customer/me`
+- **Method**: `PATCH`
+- **Payload**:
+  ```json
+  {
+    "address": "456 Park Ave",
+    "city": "Mumbai",
+    "occupation": "Senior Software Engineer"
+  }
+  ```
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Profile updated successfully.",
+    "data": {
+      "userId": "c-user-uuid",
+      "address": "456 Park Ave",
+      "city": "Mumbai"
+    }
+  }
+  ```
+
+---
+
+### 6.3 Set Customer Password
+Sets a secure password for first-login activation (or password reset).
+- **URL**: `/api/v1/customer/set-password`
+- **Method**: `POST`
+- **Payload**:
+  ```json
+  {
+    "newPassword": "SecurePassword@123"
+  }
+  ```
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Password set successfully. Your account is now active."
+  }
+  ```
+
+---
+
+### 6.4 List My Applications
+Lists all applications belonging to the authenticated customer. Sensitive underwriting fields are omitted.
+- **URL**: `/api/v1/customer/applications`
+- **Method**: `GET`
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Applications retrieved successfully.",
+    "data": [
+      {
+        "id": "app-uuid",
+        "applicationNumber": "LOS-2026-000001",
+        "applicantName": "Rahul Sharma",
+        "loanType": "PERSONAL",
+        "loanAmount": 500000,
+        "status": "OFFER_GENERATED",
+        "createdAt": "2026-06-25T10:00:00.000Z"
+      }
+    ]
+  }
+  ```
+
+---
+
+### 6.5 Get Application Details
+Retrieves detailed timeline, documents, offer and disbursement for an application owned by the customer.
+- **URL**: `/api/v1/customer/applications/:id`
+- **Method**: `GET`
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Application retrieved successfully.",
+    "data": {
+      "id": "app-uuid",
+      "applicationNumber": "LOS-2026-000001",
+      "applicantName": "Rahul Sharma",
+      "loanType": "PERSONAL",
+      "loanAmount": 500000,
+      "status": "OFFER_GENERATED",
+      "documents": [],
+      "statusHistory": [],
+      "offer": {
+        "loanAmount": 500000,
+        "interestRate": 10.5,
+        "tenureMonths": 36,
+        "emiAmount": 16251.27,
+        "offerStatus": "GENERATED",
+        "expiresAt": "2026-07-02T10:11:00.000Z"
+      }
+    }
+  }
+  ```
+
+---
+
+### 6.6 Upload Application Document
+Uploads a new document to the application.
+- **URL**: `/api/v1/customer/documents`
+- **Method**: `POST`
+- **Content-Type**: `multipart/form-data`
+- **Payload** (FormData):
+  - `applicationId`: string
+  - `documentType`: string (`PAN` | `AADHAAR` | `SALARY_SLIP` | `BANK_STATEMENT`)
+  - `file`: File scan (pdf, png, jpg)
+- **Response (201 Created)**:
+  ```json
+  {
+    "success": true,
+    "message": "Document uploaded successfully.",
+    "data": {
+      "id": "doc-uuid",
+      "documentType": "PAN",
+      "originalName": "pan_scan.pdf",
+      "secureUrl": "https://cloudinary.com/..."
+    }
+  }
+  ```
+
+---
+
+### 6.7 Accept Offer
+Directly accepts the generated loan offer.
+- **URL**: `/api/v1/customer/applications/:id/offer/accept`
+- **Method**: `POST`
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Offer accepted successfully.",
+    "data": {
+      "id": "offer-uuid",
+      "offerStatus": "ACCEPTED",
+      "acceptedAt": "2026-06-29T10:15:00.000Z"
+    }
+  }
+  ```
+
+---
+
+### 6.8 Decline Offer
+Declines the generated loan offer.
+- **URL**: `/api/v1/customer/applications/:id/offer/decline`
+- **Method**: `POST`
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Offer declined.",
+    "data": {
+      "declinedAt": "2026-06-29T10:20:00.000Z"
+    }
+  }
+  ```
+
+---
+
+### 6.9 List Notifications
+Retrieves notifications for the authenticated customer.
+- **URL**: `/api/v1/customer/notifications`
+- **Method**: `GET`
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Notifications retrieved successfully.",
+    "data": [
+      {
+        "id": "notif-uuid",
+        "title": "Your Loan Offer is Ready",
+        "message": "A loan offer has been generated...",
+        "isRead": false,
+        "createdAt": "2026-06-29T10:00:00.000Z"
+      }
+    ]
+  }
+  ```
+
+---
+
+### 6.10 Mark Notifications Read
+Marks notifications as read.
+- **URL**: `/api/v1/customer/notifications/read`
+- **Method**: `PATCH`
+- **Payload**:
+  ```json
+  {
+    "notificationIds": ["notif-uuid-1"]
+  }
+  ```
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Notifications marked as read."
+  }
+  ```
+
