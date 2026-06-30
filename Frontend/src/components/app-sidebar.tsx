@@ -174,18 +174,18 @@ export function AppSidebar() {
         })}
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-sidebar-border bg-sidebar">
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-card border border-border shadow-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+      <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-2 border-t border-sidebar-border bg-sidebar">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-card border border-border shadow-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:shadow-none group-data-[collapsible=icon]:justify-center">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-sm">
               {user.firstName.charAt(0)}{user.lastName ? user.lastName.charAt(0) : ''}
             </div>
-            <div className="flex flex-col text-left">
+            <div className="flex flex-col text-left group-data-[collapsible=icon]:hidden">
               <span className="text-xs font-bold text-foreground leading-none">{user.firstName} {user.lastName}</span>
               <span className="text-[9px] text-muted-foreground font-semibold mt-1 uppercase tracking-wider leading-none">{user.role.replace('_', ' ')}</span>
             </div>
           </div>
-          <CaretDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" weight="bold" />
+          <CaretDown className="h-3.5 w-3.5 text-muted-foreground shrink-0 group-data-[collapsible=icon]:hidden" weight="bold" />
         </div>
       </SidebarFooter>
 

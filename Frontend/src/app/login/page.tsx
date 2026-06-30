@@ -64,6 +64,48 @@ export default function LoginPage() {
   const watchedEmail = watch('email');
   const watchedOtp = watch('otp');
 
+  // Dashboard card metrics animation states
+  const [metricTime, setMetricTime] = useState(0);
+  const [disbursedVal, setDisbursedVal] = useState(12.30);
+  const [activeAppsVal, setActiveAppsVal] = useState(1200);
+  const [approvalRateVal, setApprovalRateVal] = useState(77.0);
+  const [scramblePercent, setScramblePercent] = useState('24.6%');
+  const [scrambleRate, setScrambleRate] = useState('+8.2%');
+
+  useEffect(() => {
+    const cycleTime = 5000; // 5 seconds per cycle
+    const intervalMs = 30;  // Update every 30ms for smooth animations
+    let elapsed = 0;
+
+    const timer = setInterval(() => {
+      elapsed = (elapsed + intervalMs) % cycleTime;
+      setMetricTime(elapsed);
+
+      if (elapsed <= 2500) {
+        // Count-up phase
+        const progress = elapsed / 2500;
+        setDisbursedVal(12.30 + progress * 0.15);
+        setActiveAppsVal(Math.floor(1200 + progress * 48));
+        setApprovalRateVal(77.0 + progress * 1.4);
+
+        // Scramble phase (rapid update of digits)
+        const randPerc = (Math.random() * 30 + 10).toFixed(1) + '%';
+        const randRate = '+' + (Math.random() * 8 + 2).toFixed(1) + '%';
+        setScramblePercent(randPerc);
+        setScrambleRate(randRate);
+      } else {
+        // Pause phase
+        setDisbursedVal(12.45);
+        setActiveAppsVal(1248);
+        setApprovalRateVal(78.4);
+        setScramblePercent('24.6%');
+        setScrambleRate('+8.2%');
+      }
+    }, intervalMs);
+
+    return () => clearInterval(timer);
+  }, []);
+
   // Cooldown timer interval
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -437,49 +479,86 @@ export default function LoginPage() {
             {/* Glassmorphic Overlapping Dashboard Cards */}
             <div className="relative h-[250px] w-full mt-8">
               
+              {/* Custom embedded animations style */}
+              <style dangerouslySetInnerHTML={{ __html: `
+                @keyframes pulse-blue-glow {
+                  0%, 100% {
+                    box-shadow: 0 0 15px rgba(37, 99, 235, 0.4), 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+                    border-color: rgba(255, 255, 255, 0.1);
+                  }
+                  50% {
+                    box-shadow: 0 0 35px rgba(37, 99, 235, 0.8), 0 20px 25px -5px rgba(37, 99, 235, 0.2);
+                    border-color: rgba(255, 255, 255, 0.35);
+                  }
+                }
+                @keyframes soft-pulse-opacity {
+                  0%, 100% { opacity: 0.65; }
+                  50% { opacity: 1; }
+                }
+                @keyframes soft-pulse-scale {
+                  0%, 100% { transform: scale(1); }
+                  50% { transform: scale(1.08); }
+                }
+                @keyframes float-card-1 {
+                  0%, 100% { transform: translate(0px, 0px); }
+                  50% { transform: translate(4px, -6px); }
+                }
+                @keyframes float-card-2 {
+                  0%, 100% { transform: translate(0px, 0px); }
+                  50% { transform: translate(-6px, -3px); }
+                }
+                @keyframes float-card-3 {
+                  0%, 100% { transform: translate(0px, 0px); }
+                  50% { transform: translate(3px, 6px); }
+                }
+              ` }} />
+
               {/* Card 1: Key Insights (Total Disbursed) */}
-              <div className="absolute top-0 left-0 w-[240px] bg-slate-900/60 hover:bg-slate-900/70 border border-white/10 backdrop-blur-md text-white rounded-xl p-4 shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:scale-[1.02] cursor-default">
+              <div className="absolute top-0 left-0 w-[240px] bg-slate-900/60 hover:bg-slate-900/70 border border-white/10 backdrop-blur-md text-white rounded-xl p-4 shadow-2xl transition-all duration-300 hover:border-white/20 hover:scale-[1.02] cursor-default animate-[float-card-1_8s_ease-in-out_infinite]">
                 <div className="flex justify-between items-center">
                   <span className="text-[9px] font-bold text-white/50 tracking-wider uppercase">Key Insights</span>
                   <DotsThree className="h-5 w-5 text-white/40 hover:text-white cursor-pointer" weight="bold" />
                 </div>
                 <span className="text-[10px] text-white/40 block mt-2 font-medium">Total Disbursed</span>
                 <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-xl font-bold tracking-tight">₹12.45 Cr</span>
+                  <span className="text-xl font-bold tracking-tight">₹{disbursedVal.toFixed(2)} Cr</span>
                   <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    <TrendUp className="h-2.5 w-2.5" /> 24.6%
+                    <TrendUp className={`h-2.5 w-2.5 transition-all duration-300 ${metricTime <= 2500 ? 'scale-110 text-emerald-450 drop-shadow-[0_0_4px_rgba(52,211,153,0.5)]' : ''}`} /> {scramblePercent}
                   </span>
                 </div>
                 <div className="mt-3">
                   <div className="w-full bg-white/10 rounded-full h-1 overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-400 to-emerald-400 h-1 rounded-full w-[70%]" />
+                    <div 
+                      className="bg-gradient-to-r from-blue-400 to-emerald-400 h-1 rounded-full transition-all duration-100 ease-out" 
+                      style={{ width: `${metricTime <= 2500 ? (metricTime / 2500) * 70 : 70}%` }}
+                    />
                   </div>
                   <span className="text-[8px] text-white/30 mt-1.5 block">vs last month</span>
                 </div>
               </div>
 
               {/* Card 2: Active Applications */}
-              <div className="absolute top-10 right-0 w-[210px] bg-blue-600/80 hover:bg-blue-600/90 border border-white/10 backdrop-blur-md text-white rounded-xl p-4 shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:scale-[1.02] z-10 flex items-start gap-3 cursor-default">
+              <div className="absolute top-10 right-0 w-[210px] bg-blue-600/80 hover:bg-blue-600/90 border border-white/10 backdrop-blur-md text-white rounded-xl p-4 shadow-2xl transition-all duration-300 hover:border-white/20 hover:scale-[1.02] z-10 flex items-start gap-3 cursor-default animate-[pulse-blue-glow_4s_ease-in-out_infinite,float-card-2_10s_ease-in-out_infinite]">
                 <div className="p-2 bg-white/10 rounded-lg border border-white/10 text-white shadow-inner">
                   <FileText className="h-5 w-5 text-white" weight="fill" />
                 </div>
                 <div>
                   <span className="text-[9px] font-bold text-blue-100/70 tracking-wider uppercase">Active Applications</span>
-                  <div className="text-xl font-bold tracking-tight mt-0.5">1,248</div>
-                  <span className="text-[8px] bg-white/20 text-white px-2 py-0.5 rounded-full font-bold mt-1 inline-block">Under Review</span>
+                  <div className="text-xl font-bold tracking-tight mt-0.5">{activeAppsVal.toLocaleString()}</div>
+                  <span className="text-[8px] bg-white/20 text-white px-2 py-0.5 rounded-full font-bold mt-1 inline-block animate-[soft-pulse-opacity_2s_infinite]">Under Review</span>
                 </div>
               </div>
 
               {/* Card 3: Approval Rate */}
-              <div className="absolute bottom-0 left-6 w-[210px] bg-slate-900/60 hover:bg-slate-900/70 border border-white/10 backdrop-blur-md text-white rounded-xl p-4 shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:scale-[1.02] flex items-start gap-3 cursor-default">
-                <div className="p-2 bg-emerald-500/25 rounded-lg border border-emerald-500/30 text-emerald-400">
+              <div className="absolute bottom-0 left-6 w-[210px] bg-slate-900/60 hover:bg-slate-900/70 border border-white/10 backdrop-blur-md text-white rounded-xl p-4 shadow-2xl transition-all duration-300 hover:border-white/20 hover:scale-[1.02] flex items-start gap-3 cursor-default animate-[float-card-3_9s_ease-in-out_infinite]">
+                <div className={`p-2 rounded-lg border text-emerald-450 transition-all duration-300 ${metricTime <= 2500 ? 'bg-emerald-500/35 border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.4)] animate-[soft-pulse-scale_0.8s_infinite]' : 'bg-emerald-500/25 border-emerald-500/30'}`}>
                   <TrendUp className="h-5 w-5" weight="bold" />
                 </div>
                 <div className="flex-1">
                   <span className="text-[9px] font-bold text-white/50 tracking-wider uppercase block">Approval Rate</span>
                   <div className="flex items-baseline gap-1.5 mt-0.5">
-                    <span className="text-xl font-bold tracking-tight">78.4%</span>
-                    <span className="text-[9px] text-emerald-400 font-bold">+8.2%</span>
+                    <span className="text-xl font-bold tracking-tight">{approvalRateVal.toFixed(1)}%</span>
+                    <span className="text-[9px] text-emerald-400 font-bold">{scrambleRate}</span>
                   </div>
                   <span className="text-[8px] text-white/30 block">vs last month</span>
                 </div>

@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
+import { AIShell } from "@/components/ai/AIShell";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -36,7 +37,9 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-            {children}
+            <AIShell>
+              {children}
+            </AIShell>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>
@@ -44,3 +47,4 @@ export default function RootLayout({
     </html>
   );
 }
+

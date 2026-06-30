@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '@/services/api';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   FilePlus,
@@ -26,7 +26,8 @@ import {
   House,
   Car,
   Briefcase,
-  GraduationCap
+  GraduationCap,
+  CaretDown
 } from '@phosphor-icons/react';
 import { BulkUpload } from '@/components/ui/bulk-upload';
 import { toast } from 'sonner';
@@ -56,6 +57,7 @@ export default function MyApplicationsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [error, setError] = useState('');
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
 
   const getInitials = (name: string) => {
     const parts = name.trim().split(/\s+/);
@@ -68,11 +70,11 @@ export default function MyApplicationsPage() {
   const getAvatarBg = (name: string) => {
     const char = name.charCodeAt(0) || 0;
     const colors = [
-      'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300',
-      'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
-      'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
-      'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
-      'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
+      'bg-indigo-50 text-indigo-650 dark:bg-indigo-950/40 dark:text-indigo-400',
+      'bg-emerald-50 text-emerald-650 dark:bg-emerald-950/40 dark:text-emerald-400',
+      'bg-amber-50 text-amber-650 dark:bg-amber-950/40 dark:text-amber-450',
+      'bg-rose-50 text-rose-650 dark:bg-rose-950/40 dark:text-rose-400',
+      'bg-purple-50 text-purple-650 dark:bg-purple-950/40 dark:text-purple-400',
     ];
     return colors[char % colors.length];
   };
@@ -93,7 +95,6 @@ export default function MyApplicationsPage() {
         return null;
     }
   };
-  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
 
   const fetchApplications = async () => {
     setLoading(true);
@@ -140,23 +141,23 @@ export default function MyApplicationsPage() {
   const getStatusBadge = (statusStr: string) => {
     switch (statusStr) {
       case 'DRAFT':
-        return <span className="inline-flex items-center rounded bg-muted text-muted-foreground px-2.5 py-1 text-xs font-bold border border-border uppercase font-mono">Draft</span>;
+        return <span className="inline-flex items-center rounded px-2.5 py-0.5 text-[10px] font-extrabold border bg-slate-500/10 text-slate-600 border-slate-500/20 uppercase">Draft</span>;
       case 'SUBMITTED':
-        return <span className="inline-flex items-center rounded bg-primary/10 text-primary px-2.5 py-1 text-xs font-bold border border-primary/20 animate-pulse uppercase font-mono">Submitted</span>;
+        return <span className="inline-flex items-center rounded px-2.5 py-0.5 text-[10px] font-extrabold border bg-blue-500/10 text-blue-600 border-blue-500/20 uppercase">Submitted</span>;
       case 'UNDER_REVIEW':
-        return <span className="inline-flex items-center rounded bg-amber-500/10 text-amber-600 px-2.5 py-1 text-xs font-bold border border-amber-500/20 uppercase font-mono">Reviewing</span>;
+        return <span className="inline-flex items-center rounded px-2.5 py-0.5 text-[10px] font-extrabold border bg-amber-500/10 text-amber-600 border-amber-500/20 uppercase">Reviewing</span>;
       case 'APPROVED':
-        return <span className="inline-flex items-center rounded bg-emerald-500/10 text-emerald-600 px-2.5 py-1 text-xs font-bold border border-emerald-500/20 uppercase font-mono">Approved</span>;
+        return <span className="inline-flex items-center rounded px-2.5 py-0.5 text-[10px] font-extrabold border bg-emerald-500/10 text-emerald-600 border-emerald-500/20 uppercase">Approved</span>;
       case 'REJECTED':
-        return <span className="inline-flex items-center rounded bg-destructive/10 text-destructive px-2.5 py-1 text-xs font-bold border border-destructive/20 uppercase font-mono">Rejected</span>;
+        return <span className="inline-flex items-center rounded px-2.5 py-0.5 text-[10px] font-extrabold border bg-rose-500/10 text-rose-600 border-rose-500/20 uppercase">Rejected</span>;
       case 'OFFER_GENERATED':
-        return <span className="inline-flex items-center rounded bg-purple-500/10 text-purple-600 px-2.5 py-1 text-xs font-bold border border-purple-500/20 animate-pulse uppercase font-mono">Awaiting Customer</span>;
+        return <span className="inline-flex items-center rounded px-2.5 py-0.5 text-[10px] font-extrabold border bg-purple-500/10 text-purple-650 border-purple-500/20 uppercase">Awaiting Customer</span>;
       case 'OFFER_ACCEPTED':
-        return <span className="inline-flex items-center rounded bg-emerald-500/10 text-emerald-600 px-2.5 py-1 text-xs font-bold border border-emerald-500/20 uppercase font-mono">Offer Accepted</span>;
+        return <span className="inline-flex items-center rounded px-2.5 py-0.5 text-[10px] font-extrabold border bg-emerald-500/10 text-emerald-600 border-emerald-500/20 uppercase">Offer Accepted</span>;
       case 'DISBURSED':
-        return <span className="inline-flex items-center rounded bg-violet-500/10 text-violet-600 px-2.5 py-1 text-xs font-bold border border-violet-500/20 uppercase font-mono">Disbursed</span>;
+        return <span className="inline-flex items-center rounded px-2.5 py-0.5 text-[10px] font-extrabold border bg-purple-500/10 text-purple-600 border-purple-500/20 uppercase">Disbursed</span>;
       default:
-        return <span className="inline-flex items-center rounded bg-muted text-muted-foreground px-2.5 py-1 text-xs font-bold border border-border uppercase font-mono">{statusStr}</span>;
+        return <span className="inline-flex items-center rounded px-2.5 py-0.5 text-[10px] font-extrabold border bg-slate-500/10 text-slate-650 border-slate-500/20 uppercase">{statusStr}</span>;
     }
   };
 
@@ -166,6 +167,17 @@ export default function MyApplicationsPage() {
       currency: 'INR',
       maximumFractionDigits: 0,
     }).format(val);
+  };
+
+  // Date formatter matching exact layout structure e.g. "29 Jun 2026"
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    const day = date.getDate();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
   };
 
   const downloadCSV = () => {
@@ -194,21 +206,24 @@ export default function MyApplicationsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-extrabold text-foreground tracking-tight flex items-center gap-2">
-            <FilePlus className="h-6.5 w-6.5 text-primary" weight="bold" />
-            My Applications
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1 font-medium">Manage and track your initiated loan cases.</p>
+      {/* Page Header Header Row */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 select-none">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 shadow-sm border border-blue-500/15">
+            <FilePlus className="h-6 w-6" weight="bold" />
+          </div>
+          <div className="text-left">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">My Applications</h2>
+            <p className="text-xs text-muted-foreground mt-0.5 font-medium">Manage and track your initiated loan cases.</p>
+          </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="border-border bg-card text-foreground cursor-pointer shadow-sm h-10 px-4 transition-all duration-150 font-bold" onClick={downloadCSV}>
+          <Button variant="outline" className="border-border bg-card text-foreground cursor-pointer shadow-sm h-10 px-4 transition-all duration-150 font-bold text-xs" onClick={downloadCSV}>
             <DownloadSimple className="h-4 w-4 mr-2" weight="bold" />
             Export CSV
           </Button>
           <Link href="/dashboard/create-application">
-            <Button className="bg-primary hover:bg-primary/95 hover:text-primary-foreground text-primary-foreground font-bold flex items-center gap-2 cursor-pointer h-10 px-4 rounded shadow transition-all duration-150">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-2 cursor-pointer h-10 px-4 rounded-lg shadow-sm transition-all duration-150 text-xs">
               <Plus className="h-4 w-4" weight="bold" />
               New Application
             </Button>
@@ -219,65 +234,78 @@ export default function MyApplicationsPage() {
       {/* Bulk Upload Component */}
       <BulkUpload type="applications" onSuccess={fetchApplications} open={bulkDialogOpen} onOpenChange={setBulkDialogOpen} />
 
-      <Card className="border-border bg-card text-foreground shadow-sm transition-colors duration-200 overflow-hidden">
-        <CardHeader className=" border-b border-border bg-muted/20">
+      {/* Card Replacement container */}
+      <div className="border border-border bg-card text-foreground rounded-xl shadow-sm overflow-hidden">
+        
+        {/* Filters Panel header matching reference */}
+        <div className="p-5 border-b border-border bg-muted/5">
           <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row gap-4 items-end">
-            <div className="flex-1 w-full space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Search Records</label>
+            <div className="flex-1 w-full space-y-1.5 text-left">
+              <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-350">Search Records</Label>
               <div className="relative">
                 <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                 <Input
                   placeholder="Applicant name, application number, email..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-9 bg-background border-border focus-visible:ring-primary text-foreground placeholder-muted-foreground shadow-sm"
+                  className="pl-9 h-9 bg-background border-border focus-visible:ring-primary text-foreground placeholder-muted-foreground shadow-sm text-xs rounded-lg"
                 />
               </div>
             </div>
 
-            <div className="w-full lg:w-48 space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</label>
-              <select
-                value={status}
-                onChange={(e) => {
-                  setStatus(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full h-9 px-3 rounded border border-border bg-background text-sm font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm"
-              >
-                <option value="">All Statuses</option>
-                <option value="DRAFT">Draft</option>
-                <option value="SUBMITTED">Submitted</option>
-                <option value="UNDER_REVIEW">Under Review</option>
-                <option value="APPROVED">Approved</option>
-                <option value="OFFER_GENERATED">Awaiting Customer</option>
-                <option value="OFFER_ACCEPTED">Offer Accepted</option>
-                <option value="REJECTED">Rejected</option>
-                <option value="DISBURSED">Disbursed</option>
-              </select>
+            <div className="w-full lg:w-48 space-y-1.5 text-left">
+              <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-350">Status</Label>
+              <div className="relative">
+                <select
+                  value={status}
+                  onChange={(e) => {
+                    setStatus(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full h-9 px-3 rounded-lg border border-border bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm appearance-none"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="DRAFT">Draft</option>
+                  <option value="SUBMITTED">Submitted</option>
+                  <option value="UNDER_REVIEW">Under Review</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="OFFER_GENERATED">Awaiting Customer</option>
+                  <option value="OFFER_ACCEPTED">Offer Accepted</option>
+                  <option value="REJECTED">Rejected</option>
+                  <option value="DISBURSED">Disbursed</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                  <CaretDown className="h-3.5 w-3.5" />
+                </div>
+              </div>
             </div>
 
-            <div className="w-full lg:w-48 space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Loan Type</label>
-              <select
-                value={loanType}
-                onChange={(e) => {
-                  setLoanType(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full h-9 px-3 rounded border border-border bg-background text-sm font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm"
-              >
-                <option value="">All Types</option>
-                <option value="PERSONAL">Personal</option>
-                <option value="HOME">Home</option>
-                <option value="AUTO">Auto</option>
-                <option value="BUSINESS">Business</option>
-                <option value="EDUCATION">Education</option>
-              </select>
+            <div className="w-full lg:w-48 space-y-1.5 text-left">
+              <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-350">Loan Type</Label>
+              <div className="relative">
+                <select
+                  value={loanType}
+                  onChange={(e) => {
+                    setLoanType(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full h-9 px-3 rounded-lg border border-border bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm appearance-none"
+                >
+                  <option value="">All Types</option>
+                  <option value="PERSONAL">Personal</option>
+                  <option value="HOME">Home</option>
+                  <option value="AUTO">Auto</option>
+                  <option value="BUSINESS">Business</option>
+                  <option value="EDUCATION">Education</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                  <CaretDown className="h-3.5 w-3.5" />
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-2 w-full lg:w-auto">
-              <Button type="submit" variant="outline" className="flex-1 lg:flex-none cursor-pointer h-9 shadow-sm font-bold border-border bg-card text-foreground hover:bg-muted">
+              <Button type="submit" variant="outline" className="flex-1 lg:flex-none cursor-pointer h-9 shadow-sm font-bold border-border bg-card text-foreground hover:bg-muted text-xs rounded-lg">
                 <Funnel className="h-4 w-4 mr-2" weight="bold" />
                 Filter
               </Button>
@@ -285,23 +313,26 @@ export default function MyApplicationsPage() {
                 type="button"
                 variant="outline"
                 onClick={resetFilters}
-                className="border-border text-foreground hover:bg-muted cursor-pointer h-9 shadow-sm font-bold"
+                className="border-border text-foreground hover:bg-muted cursor-pointer h-9 shadow-sm font-bold text-xs rounded-lg flex items-center"
               >
+                <ArrowsCounterClockwise className="h-4 w-4 mr-2" weight="bold" />
                 Reset
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setBulkDialogOpen(true)}
-                className="border-border text-foreground hover:bg-muted cursor-pointer h-9 shadow-sm font-bold flex items-center gap-1.5 animate-in duration-200"
+                className="border-border text-foreground hover:bg-muted cursor-pointer h-9 shadow-sm font-bold text-xs rounded-lg flex items-center gap-1.5 animate-in duration-200"
               >
                 <UploadSimple className="h-4 w-4" weight="bold" />
                 Bulk Import
               </Button>
             </div>
           </form>
-        </CardHeader>
-        <CardContent className="p-0">
+        </div>
+
+        {/* Table Content */}
+        <div className="p-0">
           {error && (
             <div className="p-4 text-sm text-destructive font-semibold text-center bg-destructive/10 border-b border-border flex items-center justify-center gap-2">
               <Warning className="h-4.5 w-4.5 text-destructive" weight="fill" />
@@ -309,21 +340,21 @@ export default function MyApplicationsPage() {
             </div>
           )}
 
-          <div className="overflow-x-auto min-h-[400px]">
+          <div className="overflow-x-auto min-h-[300px]">
             <Table>
-              <TableHeader className="bg-muted/50 border-b border-border sticky top-0 z-10 shadow-sm backdrop-blur-md">
-                <TableRow className="hover:bg-transparent">
+              <TableHeader className="bg-muted/30 border-b border-border sticky top-0 z-10">
+                <TableRow className="hover:bg-transparent border-b border-border">
                   <TableHead className="w-12 py-4 pl-4 select-none">
                     <input type="checkbox" className="h-4 w-4 rounded border-border cursor-pointer accent-black" />
                   </TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4">Application No.</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4">User</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4">Loan Type</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 text-right">Loan Amount</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 text-right">Monthly Income</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4">Status</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4">Created At</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 text-right">Actions</TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-[10px] uppercase tracking-wider py-4 text-left">Application No.</TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-[10px] uppercase tracking-wider py-4 text-left">User</TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-[10px] uppercase tracking-wider py-4 text-left">Loan Type</TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-[10px] uppercase tracking-wider py-4 text-left">Loan Amount</TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-[10px] uppercase tracking-wider py-4 text-left">Monthly Income</TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-[10px] uppercase tracking-wider py-4 text-left">Status</TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-[10px] uppercase tracking-wider py-4 text-left">Created At</TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-[10px] uppercase tracking-wider py-4 text-right pr-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -334,8 +365,8 @@ export default function MyApplicationsPage() {
                       <TableCell className="py-4"><div className="h-4 w-24 bg-muted rounded animate-pulse" /></TableCell>
                       <TableCell className="py-4"><div className="h-4 w-32 bg-muted rounded animate-pulse" /></TableCell>
                       <TableCell className="py-4"><div className="h-4 w-20 bg-muted rounded animate-pulse" /></TableCell>
-                      <TableCell className="py-4 flex justify-end"><div className="h-4 w-24 bg-muted rounded animate-pulse" /></TableCell>
-                      <TableCell className="py-4"><div className="h-4 w-24 bg-muted rounded animate-pulse ml-auto" /></TableCell>
+                      <TableCell className="py-4"><div className="h-4 w-24 bg-muted rounded animate-pulse" /></TableCell>
+                      <TableCell className="py-4"><div className="h-4 w-24 bg-muted rounded animate-pulse" /></TableCell>
                       <TableCell className="py-4"><div className="h-5 w-20 bg-muted rounded-full animate-pulse" /></TableCell>
                       <TableCell className="py-4"><div className="h-4 w-24 bg-muted rounded animate-pulse" /></TableCell>
                       <TableCell className="py-4"><div className="h-8 w-20 bg-muted rounded animate-pulse ml-auto" /></TableCell>
@@ -350,7 +381,7 @@ export default function MyApplicationsPage() {
                         <p className="text-sm mt-1 max-w-sm font-medium">There are no applications matching your current filter criteria. Try adjusting your search or start a new application.</p>
                         <Button 
                           variant="outline" 
-                          className="mt-4 border-border text-foreground cursor-pointer shadow-sm font-bold"
+                          className="mt-4 border-border text-foreground cursor-pointer shadow-sm font-bold text-xs"
                           onClick={resetFilters}
                         >
                           Clear Filters
@@ -364,28 +395,38 @@ export default function MyApplicationsPage() {
                       <TableCell className="w-12 py-4 pl-4 select-none">
                         <input type="checkbox" className="h-4 w-4 rounded border-border cursor-pointer accent-black" />
                       </TableCell>
-                      <TableCell className="font-mono text-xs font-bold text-primary py-4">{item.applicationNumber}</TableCell>
-                      <TableCell className="py-4">
+                      <TableCell className="font-mono text-xs font-bold text-blue-650 py-4 text-left">
+                        <Link href={`/dashboard/applications/${item.id}`} className="hover:underline">
+                          {item.applicationNumber}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="py-4 text-left">
                         <div className="flex items-center gap-3">
                           <div className={`h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${getAvatarBg(item.applicantName)}`}>
                             {getInitials(item.applicantName)}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-bold text-foreground text-sm truncate leading-snug">{item.applicantName}</p>
-                            <p className="text-[10px] text-muted-foreground truncate leading-none">{item.email}</p>
+                            <p className="font-bold text-slate-800 dark:text-slate-100 text-sm leading-snug">{item.applicantName}</p>
+                            <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{item.email}</p>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs tracking-wider uppercase font-bold text-muted-foreground py-4">
+                      <TableCell className="text-xs font-bold text-slate-700 dark:text-slate-350 py-4 text-left">
                         <span className="inline-flex items-center">
                           {getLoanTypeIcon(item.loanType)}
                           {item.loanType}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right font-extrabold text-foreground py-4">{formatCurrency(item.loanAmount)}</TableCell>
-                      <TableCell className="text-right text-muted-foreground py-4 font-semibold">{formatCurrency(item.monthlyIncome)}</TableCell>
-                      <TableCell className="py-4">{getStatusBadge(item.status)}</TableCell>
-                      <TableCell className="text-muted-foreground text-xs font-mono py-4 font-semibold">{new Date(item.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-left font-bold text-slate-800 dark:text-slate-100 py-4 text-xs">
+                        {formatCurrency(item.loanAmount)}
+                      </TableCell>
+                      <TableCell className="text-left text-slate-650 dark:text-slate-400 py-4 text-xs font-semibold">
+                        {formatCurrency(item.monthlyIncome)}
+                      </TableCell>
+                      <TableCell className="py-4 text-left">{getStatusBadge(item.status)}</TableCell>
+                      <TableCell className="text-slate-700 dark:text-slate-350 text-xs py-4 font-semibold text-left">
+                        {formatDate(item.createdAt)}
+                      </TableCell>
                       <TableCell className="text-right py-4 pr-4">
                         <div className="flex items-center justify-end gap-2">
                           <button
@@ -430,7 +471,7 @@ export default function MyApplicationsPage() {
                   setLimit(Number(e.target.value));
                   setPage(1);
                 }}
-                className="h-8 px-2 rounded border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm font-bold"
+                className="h-8 px-2 rounded-lg border border-border bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm font-bold"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -448,7 +489,7 @@ export default function MyApplicationsPage() {
                 variant="ghost"
                 disabled={page <= 1}
                 onClick={() => setPage((prev) => prev - 1)}
-                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer font-bold select-none h-8 px-2.5 flex items-center gap-1 border border-border/50 hover:bg-muted/50"
+                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer font-bold select-none h-8 px-2.5 flex items-center gap-1 border border-border/50 hover:bg-muted/50 rounded-lg"
               >
                 <CaretLeft className="h-3.5 w-3.5" weight="bold" />
                 Previous
@@ -462,9 +503,9 @@ export default function MyApplicationsPage() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`h-8 w-8 rounded text-xs font-extrabold flex items-center justify-center cursor-pointer transition-all ${
+                    className={`h-8 w-8 rounded-lg text-xs font-extrabold flex items-center justify-center cursor-pointer transition-all ${
                       isActive 
-                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow' 
+                        ? 'border border-blue-600 bg-blue-500/5 text-blue-600 shadow-sm' 
                         : 'bg-muted/30 text-foreground hover:bg-muted border border-border/30'
                     }`}
                   >
@@ -477,15 +518,15 @@ export default function MyApplicationsPage() {
                 variant="ghost"
                 disabled={page >= totalPages}
                 onClick={() => setPage((prev) => prev + 1)}
-                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer font-bold select-none h-8 px-2.5 flex items-center gap-1 border border-border/50 hover:bg-muted/50"
+                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer font-bold select-none h-8 px-2.5 flex items-center gap-1 border border-border/50 hover:bg-muted/50 rounded-lg"
               >
                 Next
                 <CaretRight className="h-3.5 w-3.5" weight="bold" />
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
