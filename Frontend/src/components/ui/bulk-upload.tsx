@@ -290,7 +290,7 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
                   <div className="bg-muted/40 px-3 py-2 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-wider select-none">
                     Parsed CSV Data Preview (First 5 Rows)
                   </div>
-                  <div className="overflow-x-auto max-h-[190px]">
+                  <div className="overflow-y-hidden overflow-x-auto max-h-[190px]">
                     <table className="w-full text-left border-collapse text-xs select-none">
                       <thead>
                         <tr className="bg-muted/10 border-b border-border text-muted-foreground">

@@ -166,7 +166,7 @@ export class AuthService {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user || !user.otpHash || !user.otpExpiry) {
-      throw new UnauthorizedError('Invalid or expired OTP.');
+      throw new UnauthorizedError('Invalid OTP.');
     }
 
     if (!user.isActive) {
@@ -185,7 +185,7 @@ export class AuthService {
         `Failed OTP verification for user: ${user.email}.`,
         ipAddress
       );
-      throw new UnauthorizedError('Invalid or expired OTP.');
+      throw new UnauthorizedError('Invalid OTP.');
     }
 
     // Clear OTP

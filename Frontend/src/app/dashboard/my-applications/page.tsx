@@ -19,9 +19,17 @@ import {
   Funnel,
   Warning,
   Plus,
-  UploadSimple
+  UploadSimple,
+  Trash,
+  DotsThreeVertical,
+  User,
+  House,
+  Car,
+  Briefcase,
+  GraduationCap
 } from '@phosphor-icons/react';
 import { BulkUpload } from '@/components/ui/bulk-upload';
+import { toast } from 'sonner';
 
 interface ApplicationItem {
   id: string;
@@ -48,6 +56,43 @@ export default function MyApplicationsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [error, setError] = useState('');
+
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return (name.trim()[0] || '').toUpperCase();
+  };
+
+  const getAvatarBg = (name: string) => {
+    const char = name.charCodeAt(0) || 0;
+    const colors = [
+      'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300',
+      'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+      'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+      'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
+      'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
+    ];
+    return colors[char % colors.length];
+  };
+
+  const getLoanTypeIcon = (type: string) => {
+    switch (type) {
+      case 'PERSONAL':
+        return <User className="h-3.5 w-3.5 text-sky-500 mr-1.5 inline" weight="bold" />;
+      case 'HOME':
+        return <House className="h-3.5 w-3.5 text-emerald-500 mr-1.5 inline" weight="bold" />;
+      case 'AUTO':
+        return <Car className="h-3.5 w-3.5 text-amber-500 mr-1.5 inline" weight="bold" />;
+      case 'BUSINESS':
+        return <Briefcase className="h-3.5 w-3.5 text-purple-500 mr-1.5 inline" weight="bold" />;
+      case 'EDUCATION':
+        return <GraduationCap className="h-3.5 w-3.5 text-indigo-500 mr-1.5 inline" weight="bold" />;
+      default:
+        return null;
+    }
+  };
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
 
   const fetchApplications = async () => {
@@ -268,8 +313,11 @@ export default function MyApplicationsPage() {
             <Table>
               <TableHeader className="bg-muted/50 border-b border-border sticky top-0 z-10 shadow-sm backdrop-blur-md">
                 <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-12 py-4 pl-4 select-none">
+                    <input type="checkbox" className="h-4 w-4 rounded border-border cursor-pointer accent-black" />
+                  </TableHead>
                   <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4">Application No.</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4">Applicant Name</TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4">User</TableHead>
                   <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4">Loan Type</TableHead>
                   <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 text-right">Loan Amount</TableHead>
                   <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 text-right">Monthly Income</TableHead>
@@ -282,6 +330,7 @@ export default function MyApplicationsPage() {
                 {loading ? (
                   Array.from({ length: limit }).map((_, i) => (
                     <TableRow key={`skeleton-${i}`} className="border-b border-border">
+                      <TableCell className="w-12 py-4 pl-4"><div className="h-4 w-4 bg-muted rounded animate-pulse" /></TableCell>
                       <TableCell className="py-4"><div className="h-4 w-24 bg-muted rounded animate-pulse" /></TableCell>
                       <TableCell className="py-4"><div className="h-4 w-32 bg-muted rounded animate-pulse" /></TableCell>
                       <TableCell className="py-4"><div className="h-4 w-20 bg-muted rounded animate-pulse" /></TableCell>
@@ -289,12 +338,12 @@ export default function MyApplicationsPage() {
                       <TableCell className="py-4"><div className="h-4 w-24 bg-muted rounded animate-pulse ml-auto" /></TableCell>
                       <TableCell className="py-4"><div className="h-5 w-20 bg-muted rounded-full animate-pulse" /></TableCell>
                       <TableCell className="py-4"><div className="h-4 w-24 bg-muted rounded animate-pulse" /></TableCell>
-                      <TableCell className="py-4"><div className="h-8 w-16 bg-muted rounded animate-pulse ml-auto" /></TableCell>
+                      <TableCell className="py-4"><div className="h-8 w-20 bg-muted rounded animate-pulse ml-auto" /></TableCell>
                     </TableRow>
                   ))
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-20 text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="py-20 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center">
                         <FilePlus className="h-10 w-10 text-muted-foreground/30 mb-4" />
                         <h3 className="text-lg font-bold text-foreground">No applications found</h3>
@@ -312,23 +361,55 @@ export default function MyApplicationsPage() {
                 ) : (
                   items.map((item) => (
                     <TableRow key={item.id} className="border-b border-border hover:bg-muted/30 transition-colors duration-150 group">
+                      <TableCell className="w-12 py-4 pl-4 select-none">
+                        <input type="checkbox" className="h-4 w-4 rounded border-border cursor-pointer accent-black" />
+                      </TableCell>
                       <TableCell className="font-mono text-xs font-bold text-primary py-4">{item.applicationNumber}</TableCell>
-                      <TableCell className="font-bold text-foreground py-4 text-sm">{item.applicantName}</TableCell>
-                      <TableCell className="text-xs tracking-wider uppercase font-bold text-muted-foreground py-4">{item.loanType}</TableCell>
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${getAvatarBg(item.applicantName)}`}>
+                            {getInitials(item.applicantName)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-foreground text-sm truncate leading-snug">{item.applicantName}</p>
+                            <p className="text-[10px] text-muted-foreground truncate leading-none">{item.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-xs tracking-wider uppercase font-bold text-muted-foreground py-4">
+                        <span className="inline-flex items-center">
+                          {getLoanTypeIcon(item.loanType)}
+                          {item.loanType}
+                        </span>
+                      </TableCell>
                       <TableCell className="text-right font-extrabold text-foreground py-4">{formatCurrency(item.loanAmount)}</TableCell>
                       <TableCell className="text-right text-muted-foreground py-4 font-semibold">{formatCurrency(item.monthlyIncome)}</TableCell>
                       <TableCell className="py-4">{getStatusBadge(item.status)}</TableCell>
                       <TableCell className="text-muted-foreground text-xs font-mono py-4 font-semibold">{new Date(item.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right py-4">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => router.push(`/dashboard/applications/${item.id}`)}
-                          className="h-8 px-3 border-border hover:bg-primary/10 hover:border-primary/20 hover:text-primary text-foreground cursor-pointer shadow-sm transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 font-bold"
-                        >
-                          <Eye className="h-3.5 w-3.5 mr-1.5" />
-                          View
-                        </Button>
+                      <TableCell className="text-right py-4 pr-4">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => router.push(`/dashboard/applications/${item.id}`)}
+                            title="View Details"
+                            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => toast.info("Compliance rules restrict deletion of active applications.")}
+                            title="Delete"
+                            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors cursor-pointer"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => toast.info("Audit log logged in compliance registry.")}
+                            title="More Actions"
+                            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+                          >
+                            <DotsThreeVertical className="h-4 w-4" weight="bold" />
+                          </button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -340,7 +421,7 @@ export default function MyApplicationsPage() {
           {/* Pagination & Limits */}
           <div className="p-4 border-t border-border bg-muted/10 flex flex-col sm:flex-row items-center justify-between gap-4 select-none">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground font-semibold">
+              <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider">
                 Rows per page
               </span>
               <select
@@ -349,7 +430,7 @@ export default function MyApplicationsPage() {
                   setLimit(Number(e.target.value));
                   setPage(1);
                 }}
-                className="h-8 px-2 rounded border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm font-semibold"
+                className="h-8 px-2 rounded border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm font-bold"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -357,32 +438,49 @@ export default function MyApplicationsPage() {
                 <option value={100}>100</option>
               </select>
             </div>
-            <div className="text-sm text-muted-foreground font-semibold">
-              Showing {total === 0 ? 0 : (page - 1) * limit + 1} to {Math.min(page * limit, total)} of {total} results
+            
+            <div className="text-xs text-muted-foreground font-bold">
+              Showing {total === 0 ? 0 : (page - 1) * limit + 1} to {Math.min(page * limit, total)} of {total} entries
             </div>
-            <div className="flex gap-2">
+            
+            <div className="flex items-center gap-1.5">
               <Button
-                variant="outline"
-                size="sm"
+                variant="ghost"
                 disabled={page <= 1}
                 onClick={() => setPage((prev) => prev - 1)}
-                className="border-border text-foreground hover:bg-muted cursor-pointer shadow-sm h-8 px-3 font-bold"
+                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer font-bold select-none h-8 px-2.5 flex items-center gap-1 border border-border/50 hover:bg-muted/50"
               >
-                <CaretLeft className="h-4 w-4 mr-1" weight="bold" />
+                <CaretLeft className="h-3.5 w-3.5" weight="bold" />
                 Previous
               </Button>
-              <div className="flex items-center justify-center px-3 text-sm font-bold border border-border rounded bg-background shadow-sm h-8">
-                {page} / {totalPages}
-              </div>
+              
+              {/* Dynamic numeric pages */}
+              {Array.from({ length: totalPages }).map((_, idx) => {
+                const p = idx + 1;
+                const isActive = p === page;
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`h-8 w-8 rounded text-xs font-extrabold flex items-center justify-center cursor-pointer transition-all ${
+                      isActive 
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow' 
+                        : 'bg-muted/30 text-foreground hover:bg-muted border border-border/30'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+
               <Button
-                variant="outline"
-                size="sm"
+                variant="ghost"
                 disabled={page >= totalPages}
                 onClick={() => setPage((prev) => prev + 1)}
-                className="border-border text-foreground hover:bg-muted cursor-pointer shadow-sm h-8 px-3 font-bold"
+                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer font-bold select-none h-8 px-2.5 flex items-center gap-1 border border-border/50 hover:bg-muted/50"
               >
                 Next
-                <CaretRight className="h-4 w-4 ml-1" weight="bold" />
+                <CaretRight className="h-3.5 w-3.5" weight="bold" />
               </Button>
             </div>
           </div>

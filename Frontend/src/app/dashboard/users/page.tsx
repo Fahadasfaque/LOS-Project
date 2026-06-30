@@ -39,10 +39,11 @@ import {
   DownloadSimple,
   CaretLeft,
   CaretRight,
-  Funnel,
   Warning,
   CaretDown,
-  UploadSimple
+  UploadSimple,
+  CaretUpDown,
+  ArrowsCounterClockwise
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { BulkUpload } from '@/components/ui/bulk-upload';
@@ -148,7 +149,8 @@ export default function UserManagementPage() {
       const matchesSearch = 
         u.email.toLowerCase().includes(search.toLowerCase()) ||
         u.firstName.toLowerCase().includes(search.toLowerCase()) ||
-        u.lastName.toLowerCase().includes(search.toLowerCase());
+        u.lastName.toLowerCase().includes(search.toLowerCase()) ||
+        u.role.toLowerCase().includes(search.toLowerCase());
       
       const matchesRole = roleFilter ? u.role === roleFilter : true;
       
@@ -190,12 +192,37 @@ export default function UserManagementPage() {
     setRoleFilter('');
   };
 
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const day = d.getDate();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
+  const getRoleBadge = (roleStr: string) => {
+    switch (roleStr) {
+      case 'CUSTOMER':
+        return <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/30 px-2.5 py-1 rounded font-mono font-bold tracking-wide uppercase">Customer</span>;
+      case 'APPROVER':
+        return <span className="text-[10px] bg-purple-50 text-purple-600 border border-purple-100 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/30 px-2.5 py-1 rounded font-mono font-bold tracking-wide uppercase">Approver</span>;
+      case 'CREDIT_ANALYST':
+        return <span className="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/30 px-2.5 py-1 rounded font-mono font-bold tracking-wide uppercase">Credit Analyst</span>;
+      case 'LOAN_OFFICER':
+        return <span className="text-[10px] bg-orange-50 text-orange-600 border border-orange-100 dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-900/30 px-2.5 py-1 rounded font-mono font-bold tracking-wide uppercase">Loan Officer</span>;
+      case 'SUPER_ADMIN':
+        return <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800/40 dark:text-slate-350 dark:border-slate-700/50 px-2.5 py-1 rounded font-mono font-bold tracking-wide uppercase">Super Admin</span>;
+      default:
+        return <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 rounded font-mono font-bold tracking-wide uppercase">{roleStr.replace('_', ' ')}</span>;
+    }
+  };
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-10">
+    <div className="space-y-6 w-full pb-10">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
+        <div className="text-left">
           <h1 className="font-extrabold text-2xl text-foreground leading-snug flex items-center gap-2 tracking-tight">
-            <Users className="h-6.5 w-6.5 text-primary" weight="bold" />
             User Administration
           </h1>
           <p className="text-muted-foreground text-sm mt-1 font-medium">
@@ -232,7 +259,7 @@ export default function UserManagementPage() {
                   <div className="h-12 w-12 rounded bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20 shadow-sm text-primary">
                     <UserPlus className="h-6 w-6" weight="bold" />
                   </div>
-                  <div>
+                  <div className="text-left">
                     <DialogTitle className="text-xl font-extrabold tracking-tight text-foreground">Create Terminal Account</DialogTitle>
                     <DialogDescription className="text-muted-foreground text-xs mt-1 leading-relaxed font-medium">
                       Register a new administrator, loan officer, risk analyst, or approver account.
@@ -243,7 +270,7 @@ export default function UserManagementPage() {
               <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="p-6 space-y-5">
                   <div className="grid grid-cols-2 gap-5">
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 text-left">
                       <Label htmlFor="firstName" className="text-xs font-bold text-foreground/90">First Name</Label>
                       <Input
                         id="firstName"
@@ -253,7 +280,7 @@ export default function UserManagementPage() {
                       />
                       {errors.firstName && <p className="text-xs text-destructive font-semibold">{errors.firstName.message}</p>}
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 text-left">
                       <Label htmlFor="lastName" className="text-xs font-bold text-foreground/90">Last Name</Label>
                       <Input
                         id="lastName"
@@ -265,7 +292,7 @@ export default function UserManagementPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 text-left">
                     <Label htmlFor="email" className="text-xs font-bold text-foreground/90">Email Address</Label>
                     <Input
                       id="email"
@@ -277,7 +304,7 @@ export default function UserManagementPage() {
                     {errors.email && <p className="text-xs text-destructive font-semibold">{errors.email.message}</p>}
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 text-left">
                     <Label htmlFor="password" className="text-xs font-bold text-foreground/90">Initial Password</Label>
                     <Input
                       id="password"
@@ -289,7 +316,7 @@ export default function UserManagementPage() {
                     {errors.password && <p className="text-xs text-destructive font-semibold">{errors.password.message}</p>}
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 text-left">
                     <Label htmlFor="role" className="text-xs font-bold text-foreground/90">Security Role</Label>
                     <div className="relative">
                       <select
@@ -335,95 +362,99 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      {/* KPI Stats Block */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* KPI Stats Block matching the exact layout of the screenshot */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {/* Card 1 */}
-        <div className="bg-card border border-border rounded-lg px-5 py-4 flex items-center gap-4 flex-1 transition-colors duration-200 shadow-sm select-none">
-          <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0">
-            <Users className="h-5.5 w-5.5" weight="bold" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
-              Total Users
+        <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3.5 shadow-sm transition-colors duration-200 select-none">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <Users className="h-6 w-6" weight="bold" />
             </div>
-            <div className="text-foreground text-2xl font-bold leading-tight mt-0.5">
-              {totalUsers}
+            <div className="flex flex-col text-left">
+              <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Total Users</span>
+              <span className="font-extrabold text-3xl text-foreground mt-0.5 leading-none">{totalUsers}</span>
             </div>
           </div>
+          <p className="text-[11px] text-muted-foreground font-medium text-left leading-normal">
+            All system users
+          </p>
         </div>
 
         {/* Card 2 */}
-        <div className="bg-card border border-border rounded-lg px-5 py-4 flex items-center gap-4 flex-1 transition-colors duration-200 shadow-sm select-none">
-          <div className="w-10 h-10 rounded bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500 shrink-0">
-            <ShieldCheck className="h-5.5 w-5.5" weight="bold" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
-              Active Users
+        <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3.5 shadow-sm transition-colors duration-200 select-none">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500 shrink-0">
+              <ShieldCheck className="h-6 w-6" weight="bold" />
             </div>
-            <div className="text-foreground text-2xl font-bold leading-tight mt-0.5">
-              {activeUsers}
+            <div className="flex flex-col text-left">
+              <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Active Users</span>
+              <span className="font-extrabold text-3xl text-emerald-605 mt-0.5 leading-none">{activeUsers}</span>
             </div>
           </div>
+          <p className="text-[11px] text-muted-foreground font-medium text-left leading-normal">
+            Currently active users
+          </p>
         </div>
 
         {/* Card 3 */}
-        <div className="bg-card border border-border rounded-lg px-5 py-4 flex items-center gap-4 flex-1 transition-colors duration-200 shadow-sm select-none">
-          <div className="w-10 h-10 rounded bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500 shrink-0">
-            <Key className="h-5.5 w-5.5" weight="bold" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
-              Roles Assigned
+        <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3.5 shadow-sm transition-colors duration-200 select-none">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500 shrink-0">
+              <Key className="h-6 w-6" weight="bold" />
             </div>
-            <div className="text-foreground text-2xl font-bold leading-tight mt-0.5">
-              {rolesAssigned}
+            <div className="flex flex-col text-left">
+              <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Roles Assigned</span>
+              <span className="font-extrabold text-3xl text-amber-600 mt-0.5 leading-none">{rolesAssigned}</span>
             </div>
           </div>
+          <p className="text-[11px] text-muted-foreground font-medium text-left leading-normal">
+            Total roles allocated
+          </p>
         </div>
 
         {/* Card 4 */}
-        <div className="bg-card border border-border rounded-lg px-5 py-4 flex items-center gap-4 flex-1 transition-colors duration-200 shadow-sm select-none">
-          <div className="w-10 h-10 rounded bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-500 shrink-0">
-            <UserMinus className="h-5.5 w-5.5" weight="bold" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
-              Inactive Users
+        <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3.5 shadow-sm transition-colors duration-200 select-none">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-500 shrink-0">
+              <UserMinus className="h-6 w-6" weight="bold" />
             </div>
-            <div className="text-foreground text-2xl font-bold leading-tight mt-0.5">
-              {inactiveUsers}
+            <div className="flex flex-col text-left">
+              <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Inactive Users</span>
+              <span className="font-extrabold text-3xl text-rose-600 mt-0.5 leading-none">{inactiveUsers}</span>
             </div>
           </div>
+          <p className="text-[11px] text-muted-foreground font-medium text-left leading-normal">
+            Disabled or inactive users
+          </p>
         </div>
       </div>
 
       {/* Bulk Upload Component */}
       <BulkUpload type="users" onSuccess={fetchUsers} open={bulkDialogOpen} onOpenChange={setBulkDialogOpen} />
 
-      {/* Table Card */}
+      {/* Table Card matching screenshot exactly */}
       <Card className="border-border bg-card text-foreground shadow-sm transition-colors duration-200 overflow-hidden">
         <CardHeader className="px-4 border-b border-border bg-muted/20">
           <div className="flex flex-col lg:flex-row gap-4 items-end">
-            <div className="flex-1 w-full space-y-1.5">
+            <div className="flex-1 w-full space-y-1.5 text-left">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Search</label>
               <div className="relative">
                 <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                 <Input
-                  placeholder="Search by name, email..."
+                  placeholder="Search by name, email or role..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-9 bg-background border-border focus-visible:ring-primary text-foreground placeholder-muted-foreground shadow-sm"
+                  className="pl-9 h-9 bg-background border-border focus-visible:ring-primary text-foreground placeholder-muted-foreground shadow-sm text-xs rounded-lg"
                 />
               </div>
             </div>
 
-            <div className="w-full lg:w-56 space-y-1.5">
+            <div className="w-full lg:w-56 space-y-1.5 text-left">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Role Filter</label>
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full h-9 px-3 rounded border border-border bg-background text-sm font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm"
+                className="w-full h-9 px-3 rounded-lg border border-border bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm"
               >
                 <option value="">All Roles</option>
                 <option value="SUPER_ADMIN">SUPER ADMIN</option>
@@ -438,15 +469,16 @@ export default function UserManagementPage() {
                 type="button"
                 variant="outline"
                 onClick={resetFilters}
-                className="border-border text-foreground hover:bg-muted cursor-pointer h-9 shadow-sm font-bold"
+                className="border-border text-slate-700 dark:text-slate-300 hover:bg-muted cursor-pointer h-9 shadow-sm font-bold flex items-center gap-1.5 rounded-lg px-4 text-xs"
               >
+                <ArrowsCounterClockwise className="h-4 w-4" weight="bold" />
                 Reset
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setBulkDialogOpen(true)}
-                className="border-border text-foreground hover:bg-muted cursor-pointer h-9 shadow-sm font-bold flex items-center gap-1.5"
+                className="border-border text-slate-700 dark:text-slate-300 hover:bg-muted cursor-pointer h-9 shadow-sm font-bold flex items-center gap-1.5 rounded-lg px-4 text-xs"
               >
                 <UploadSimple className="h-4 w-4" weight="bold" />
                 Bulk Import
@@ -454,7 +486,7 @@ export default function UserManagementPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
+        <div>
           {error && (
             <div className="p-4 text-sm text-destructive font-semibold text-center bg-destructive/10 border-b border-border flex items-center justify-center gap-2">
               <Warning className="h-4.5 w-4.5 text-destructive" weight="fill" />
@@ -466,12 +498,37 @@ export default function UserManagementPage() {
             <Table>
               <TableHeader className="bg-muted/50 border-b border-border sticky top-0 z-10 shadow-sm backdrop-blur-md">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 px-6">Name</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 px-6">Email</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 px-6">Role</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 px-6">Status</TableHead>
-                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 px-6">Created On</TableHead>
-                  <TableHead className="text-right text-muted-foreground font-bold text-xs uppercase tracking-wider py-4 px-6">Actions</TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-2.5 px-6">
+                    <div className="flex items-center gap-1">
+                      Name
+                      <CaretUpDown className="h-3.5 w-3.5 opacity-60" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-2.5 px-6">
+                    <div className="flex items-center gap-1">
+                      Email
+                      <CaretUpDown className="h-3.5 w-3.5 opacity-60" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-2.5 px-6">
+                    <div className="flex items-center gap-1">
+                      Role
+                      <CaretUpDown className="h-3.5 w-3.5 opacity-60" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-2.5 px-6">
+                    <div className="flex items-center gap-1">
+                      Status
+                      <CaretUpDown className="h-3.5 w-3.5 opacity-60" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-muted-foreground font-bold text-xs uppercase tracking-wider py-2.5 px-6">
+                    <div className="flex items-center gap-1">
+                      Created On
+                      <CaretUpDown className="h-3.5 w-3.5 opacity-60" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-right text-muted-foreground font-bold text-xs uppercase tracking-wider py-2.5 px-6">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -509,25 +566,24 @@ export default function UserManagementPage() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground font-mono text-xs py-4 px-6">{item.email}</TableCell>
-                      <TableCell className="py-4 px-6">
-                        <span className="text-[11px] bg-muted text-muted-foreground border border-border px-2.5 py-1 rounded font-mono font-bold tracking-wide">
-                          {item.role.replace('_', ' ')}
-                        </span>
+                      <TableCell className="text-muted-foreground font-mono text-xs py-4 px-6 text-left">{item.email}</TableCell>
+                      <TableCell className="py-4 px-6 text-left">
+                        {getRoleBadge(item.role)}
                       </TableCell>
-                      <TableCell className="py-4 px-6">
+                      <TableCell className="py-4 px-6 text-left">
                         <span
-                          className={`text-[11px] px-2.5 py-1 rounded font-bold border tracking-wide ${
+                          className={`inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full font-bold border tracking-wide ${
                             item.isActive
                               ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-500'
                               : 'bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-500'
                           }`}
                         >
+                          <span className={`w-1.5 h-1.5 rounded-full ${item.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
                           {item.isActive ? 'ACTIVE' : 'INACTIVE'}
                         </span>
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-xs font-mono py-4 px-6 font-medium">
-                        {new Date(item.createdAt).toLocaleDateString()}
+                      <TableCell className="text-muted-foreground text-xs font-mono py-4 px-6 font-medium text-left">
+                        {formatDate(item.createdAt)}
                       </TableCell>
                       <TableCell className="py-4 px-6 text-right">
                         <div className="flex justify-end">
@@ -544,7 +600,7 @@ export default function UserManagementPage() {
           {/* Pagination & Limits */}
           <div className="p-4 border-t border-border bg-muted/10 flex flex-col sm:flex-row items-center justify-between gap-4 select-none">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground font-semibold">
+              <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider">
                 Rows per page
               </span>
               <select
@@ -553,7 +609,7 @@ export default function UserManagementPage() {
                   setLimit(Number(e.target.value));
                   setPage(1);
                 }}
-                className="h-8 px-2 rounded border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm font-semibold"
+                className="h-8 px-2 rounded-lg border border-border bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm font-semibold"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -561,7 +617,7 @@ export default function UserManagementPage() {
                 <option value={100}>100</option>
               </select>
             </div>
-            <div className="text-sm text-muted-foreground font-semibold">
+            <div className="text-xs text-muted-foreground font-semibold">
               Showing {total === 0 ? 0 : (page - 1) * limit + 1} to {Math.min(page * limit, total)} of {total} results
             </div>
             <div className="flex gap-2">
@@ -570,27 +626,27 @@ export default function UserManagementPage() {
                 size="sm"
                 disabled={page <= 1}
                 onClick={() => setPage((prev) => prev - 1)}
-                className="border-border text-foreground hover:bg-muted cursor-pointer shadow-sm h-8 px-3 font-bold"
+                className="border-border text-foreground hover:bg-muted cursor-pointer shadow-sm h-8 px-3 font-bold text-xs rounded-lg"
               >
                 <CaretLeft className="h-4 w-4 mr-1" weight="bold" />
                 Previous
               </Button>
-              <div className="flex items-center justify-center px-3 text-sm font-bold border border-border rounded bg-background shadow-sm h-8">
-                {page} / {totalPages}
+              <div className="flex items-center justify-center px-3.5 text-xs font-bold border border-border rounded-lg bg-background shadow-sm h-8 min-w-[32px]">
+                {page}
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page >= totalPages}
                 onClick={() => setPage((prev) => prev + 1)}
-                className="border-border text-foreground hover:bg-muted cursor-pointer shadow-sm h-8 px-3 font-bold"
+                className="border-border text-foreground hover:bg-muted cursor-pointer shadow-sm h-8 px-3 font-bold text-xs rounded-lg"
               >
                 Next
                 <CaretRight className="h-4 w-4 ml-1" weight="bold" />
               </Button>
             </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );

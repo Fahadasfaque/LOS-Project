@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Database, Server, CheckCircle2 } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -27,16 +26,16 @@ export function Footer() {
         <div className="w-px h-3 bg-border hidden sm:block"></div>
 
         {/* Backend Status */}
-        <div className="flex items-center gap-1.5" title="Backend Connection: Healthy">
-          <Server className="h-3 w-3 text-success" />
+        <div className="flex items-center gap-1.5 font-semibold" title="Backend Connection: Healthy">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
           <span className="hidden lg:inline-block">API Online</span>
         </div>
 
         <div className="w-px h-3 bg-border hidden sm:block"></div>
 
         {/* Database Status */}
-        <div className="flex items-center gap-1.5" title="Database Connection: Connected">
-          <Database className="h-3 w-3 text-success" />
+        <div className="flex items-center gap-1.5 font-semibold" title="Database Connection: Connected">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
           <span className="hidden lg:inline-block">DB Connected</span>
         </div>
 
