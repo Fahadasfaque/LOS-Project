@@ -1,0 +1,272 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  SUPER_ADMIN
+  LOAN_OFFICER
+  CREDIT_ANALYST
+  APPROVER
+  CUSTOMER
+}
+
+enum LoanStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  OFFER_GENERATED
+  OFFER_ACCEPTED
+  REJECTED
+  DISBURSED
+}
+
+enum DocumentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum LoanType {
+  PERSONAL
+  HOME
+  AUTO
+  BUSINESS
+  EDUCATION
+}
+
+enum EmploymentType {
+  SALARIED
+  SELF_EMPLOYED
+  BUSINESS_OWNER
+}
+
+enum DocumentType {
+  PAN
+  AADHAAR
+  SALARY_SLIP
+  BANK_STATEMENT
+}
+
+enum InviteStatus {
+  INVITED
+  ACTIVE
+}
+
+enum NotificationType {
+  APPLICATION_RECEIVED
+  DOCUMENTS_REQUIRED
+  DOCUMENT_UPLOADED
+  UNDER_REVIEW
+  OFFER_GENERATED
+  OFFER_ACCEPTED
+  OFFER_DECLINED
+  LOAN_APPROVED
+  LOAN_DISBURSED
+}
+
+model User {
+  id                    String                    @id @default(uuid())
+  email                 String                    @unique
+  password              String
+  firstName             String
+  lastName              String
+  phone                 String?
+  department            String?
+  role                  Role                      @default(LOAN_OFFICER)
+  isActive              Boolean                   @default(true)
+  inviteStatus          InviteStatus?             // CUSTOMER role only
+  otpHash               String?
+  otpExpiry             DateTime?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  auditLogs             AuditLog[]
+  loanApplications      LoanApplication[]
+  statusChanges         StatusHistory[]
+  assessments           Assessment[]
+  disbursements         Disbursement[]
+  documents             Document[]
+  customerProfile       CustomerProfile?
+  customerNotifications CustomerNotification[]
+  customerApplications  LoanApplication[]         @relation("CustomerApplications")
+
+  @@map("users")
+}
+
+model CustomerProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address      String?
+  city         String?
+  state        String?
+  postalCode   String?
+  nomineeName  String?
+  nomineePhone String?
+  occupation   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("customer_profiles")
+}
+
+model CustomerNotification {
+  id            String           @id @default(uuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String
+  type          NotificationType
+  title         String
+  message       String
+  isRead        Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+
+  @@map("customer_notifications")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  details   String
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model LoanApplication {
+  id                String          @id @default(uuid())
+  applicationNumber String          @unique
+  applicantName     String
+  email             String
+  phone             String
+  panEncrypted      String
+  loanType          LoanType
+  loanAmount        Float
+  monthlyIncome     Float
+  employmentType    EmploymentType
+  status            LoanStatus      @default(DRAFT)
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customerUserId    String?
+  customerUser      User?           @relation("CustomerApplications", fields: [customerUserId], references: [id], onDelete: SetNull)
+  documents         Document[]
+  statusHistory     StatusHistory[]
+  assessment        Assessment?
+  offer             Offer?
+  disbursement      Disbursement?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("loan_applications")
+}
+
+model Document {
+  id                 String          @id @default(uuid())
+  applicationId      String
+  application        LoanApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  documentType       DocumentType
+  originalName       String
+  publicId           String
+  secureUrl          String
+  uploadedById       String
+  uploadedBy         User            @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  verificationStatus DocumentStatus  @default(PENDING)
+  uploadedAt         DateTime        @default(now())
+
+  @@map("documents")
+}
+
+model StatusHistory {
+  id            String          @id @default(uuid())
+  applicationId String
+  application   LoanApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  oldStatus     LoanStatus?
+  newStatus     LoanStatus
+  changedById   String
+  changedBy     User            @relation(fields: [changedById], references: [id], onDelete: Cascade)
+  changedAt     DateTime        @default(now())
+
+  @@map("status_histories")
+}
+
+enum AssessmentStatus {
+  PENDING
+  COMPLETED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Recommendation {
+  APPROVE
+  MANUAL_REVIEW
+  REJECT
+}
+
+model Assessment {
+  id              String           @id @default(uuid())
+  applicationId   String           @unique
+  application     LoanApplication  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  status          AssessmentStatus @default(PENDING)
+  creditScore     Int
+  riskLevel       RiskLevel
+  recommendation  Recommendation
+  assessmentNotes String
+  assessedById    String
+  assessedBy      User             @relation(fields: [assessedById], references: [id], onDelete: Cascade)
+  assessedAt      DateTime         @default(now())
+
+  @@map("assessments")
+}
+
+enum OfferStatus {
+  GENERATED
+  ACCEPTED
+  DECLINED
+}
+
+enum DisbursementStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Offer {
+  id            String          @id @default(uuid())
+  applicationId String          @unique
+  application   LoanApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  loanAmount    Float
+  interestRate  Float
+  tenureMonths  Int
+  emiAmount     Float
+  offerStatus   OfferStatus     @default(GENERATED)
+  generatedAt   DateTime        @default(now())
+  acceptedAt    DateTime?
+  expiresAt     DateTime
+
+  @@map("offers")
+}
+
+model Disbursement {
+  id              String             @id @default(uuid())
+  applicationId   String             @unique
+  application     LoanApplication    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  amount          Float
+  referenceNumber String             @unique
+  status          DisbursementStatus @default(SUCCESS)
+  disbursedById   String
+  disbursedBy     User               @relation(fields: [disbursedById], references: [id], onDelete: Cascade)
+  disbursedAt     DateTime           @default(now())
+
+  @@map("disbursements")
+}
