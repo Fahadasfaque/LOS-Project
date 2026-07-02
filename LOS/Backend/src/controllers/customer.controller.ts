@@ -10,6 +10,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { customerService } from '../services/customer.service';
+import { sanctionLetterService } from '../services/sanctionLetter.service';
 import { sendSuccess } from '../utils/response';
 import { DocumentType } from '@prisma/client';
 
@@ -53,6 +54,20 @@ export class CustomerController {
       const { newPassword } = req.body;
       await customerService.setPassword(req.user!.id, newPassword);
       return sendSuccess(res, 'Password set successfully. Your account is now active.');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /customer/change-password
+   * Changes password for an ACTIVE customer. Requires current password.
+   */
+  async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      await customerService.changePassword(req.user!.id, currentPassword, newPassword);
+      return sendSuccess(res, 'Password changed successfully.');
     } catch (error) {
       next(error);
     }
@@ -200,6 +215,31 @@ export class CustomerController {
       const { notificationIds } = req.body;
       await customerService.markNotificationsRead(req.user!.id, notificationIds);
       return sendSuccess(res, 'Notifications marked as read.');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // ─── Sanction Letter ──────────────────────────────────────────────────────
+
+  /**
+   * GET /customer/applications/:id/sanction-letter
+   * Generates and streams a PDF sanction letter for an accepted offer.
+   * Only available when offer.offerStatus === 'ACCEPTED'.
+   */
+  async downloadSanctionLetter(req: Request, res: Response, next: NextFunction) {
+    try {
+      const pdfBuffer = await sanctionLetterService.generatePdf(
+        String(req.params.id),
+        req.user!.id
+      );
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="SanctionLetter-${req.params.id}.pdf"`
+      );
+      res.setHeader('Content-Length', pdfBuffer.length);
+      return res.send(pdfBuffer);
     } catch (error) {
       next(error);
     }

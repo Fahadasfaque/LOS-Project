@@ -20,6 +20,7 @@ erDiagram
   loan_applications ||--o| disbursements : "disbursed"
   users ||--o| customer_profiles : "has"
   users ||--o{ customer_notifications : "receives"
+  users ||--o| user_notification_prefs : "configures"
 ```
 
 ---
@@ -197,3 +198,27 @@ Stores notifications dispatched to portal users.
 | `isRead` | Boolean | Default `false` | Read flag. |
 | `createdAt` | DateTime | Default `now()` | Timestamp of generation. |
 
+---
+
+### 2.11 User Notification Preferences (`user_notification_prefs`)
+Stores email notification preferences for users.
+
+| Field | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID (String) | Primary Key, Default UUID | Unique identifier. |
+| `userId` | UUID (String) | Unique, Foreign Key -> `users.id`, Cascade | User who owns the preferences. |
+| `emailNotifications` | Boolean | Default `true` | Toggle for email dispatch. |
+| `createdAt` | DateTime | Default `now()` | Record creation timestamp. |
+| `updatedAt` | DateTime | Auto Update | Last modification timestamp. |
+
+---
+
+### 2.12 System Configuration (`system_config`)
+Stores global system settings (e.g., global email toggle).
+
+| Field | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID (String) | Primary Key, Default UUID | Unique identifier. |
+| `key` | String | Unique | Setting key (e.g., `EMAIL_SERVICE_ENABLED`). |
+| `value` | String | Not Null | String representation of the setting value. |
+| `updatedAt` | DateTime | Auto Update | Last modification timestamp. |

@@ -9,6 +9,7 @@ import * as assessmentController from '../controllers/assessment.controller';
 import * as offerController from '../controllers/offer.controller';
 import * as disbursementController from '../controllers/disbursement.controller';
 import { customerController } from '../controllers/customer.controller';
+import * as settingsController from '../controllers/settings.controller';
 import { authenticate, requireRole } from '../middlewares/auth';
 import { upload } from '../middlewares/upload';
 import { validateRequest } from '../middlewares/validation';
@@ -28,6 +29,10 @@ import {
   disburseLoanSchema,
   bulkCreateUserSchema,
   bulkCreateApplicationSchema,
+  updateProfileSchema,
+  changePasswordSchema,
+  updateNotificationPrefsSchema,
+  setEmailServiceStatusSchema,
 } from '../validators/schemas';
 
 const router = Router();
@@ -270,6 +275,13 @@ router.post(
   customerController.setPassword.bind(customerController)
 );
 
+router.post(
+  '/customer/change-password',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.changePassword.bind(customerController)
+);
+
 // ─── Applications ──────────────────────────────────────────────────────────
 router.get(
   '/customer/applications',
@@ -307,6 +319,14 @@ router.post(
   customerController.declineMyOffer.bind(customerController)
 );
 
+// Sanction Letter download (PDF)
+router.get(
+  '/customer/applications/:id/sanction-letter',
+  authenticate,
+  requireRole([Role.CUSTOMER]),
+  customerController.downloadSanctionLetter.bind(customerController)
+);
+
 // ─── Documents ──────────────────────────────────────────────────────────────
 router.post(
   '/customer/documents',
@@ -329,6 +349,28 @@ router.patch(
   authenticate,
   requireRole([Role.CUSTOMER]),
   customerController.markNotificationsRead.bind(customerController)
+);
+
+/**
+ * Settings Endpoints (self-service for any authenticated user)
+ */
+router.get('/settings/profile', authenticate, settingsController.getProfile);
+router.patch('/settings/profile', authenticate, validateRequest(updateProfileSchema), settingsController.updateProfile);
+router.patch('/settings/security', authenticate, validateRequest(changePasswordSchema), settingsController.changePassword);
+router.get('/settings/notifications', authenticate, settingsController.getNotificationPrefs);
+router.patch('/settings/notifications', authenticate, validateRequest(updateNotificationPrefsSchema), settingsController.updateNotificationPrefs);
+router.get(
+  '/settings/email-service',
+  authenticate,
+  requireRole([Role.SUPER_ADMIN]),
+  settingsController.getEmailServiceStatus
+);
+router.patch(
+  '/settings/email-service',
+  authenticate,
+  requireRole([Role.SUPER_ADMIN]),
+  validateRequest(setEmailServiceStatusSchema),
+  settingsController.setEmailServiceStatus
 );
 
 export default router;

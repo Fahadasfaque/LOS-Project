@@ -822,3 +822,163 @@ Marks notifications as read.
   }
   ```
 
+---
+
+## 7. Settings Endpoints
+
+### 7.1 Get Profile
+Retrieves the profile of the authenticated user.
+- **URL**: `/api/v1/settings/profile`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Profile retrieved",
+    "data": {
+      "id": "e44d3208-8e6f-4c8d-8a6e-399d8b746c10",
+      "email": "user@los.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "role": "LOAN_OFFICER"
+    }
+  }
+  ```
+
+---
+
+### 7.2 Update Profile
+Updates first and last name of the authenticated user.
+- **URL**: `/api/v1/settings/profile`
+- **Method**: `PATCH`
+- **Headers**: `Authorization: Bearer <token>`
+- **Payload**:
+  ```json
+  {
+    "firstName": "Johnny",
+    "lastName": "Doe"
+  }
+  ```
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Profile updated",
+    "data": {
+      "id": "e44d3208-8e6f-4c8d-8a6e-399d8b746c10",
+      "email": "user@los.com",
+      "firstName": "Johnny",
+      "lastName": "Doe",
+      "role": "LOAN_OFFICER"
+    }
+  }
+  ```
+
+---
+
+### 7.3 Change Password
+Changes password for the authenticated user.
+- **URL**: `/api/v1/settings/security`
+- **Method**: `PATCH`
+- **Headers**: `Authorization: Bearer <token>`
+- **Payload**:
+  ```json
+  {
+    "currentPassword": "OldPassword123",
+    "newPassword": "NewPassword123"
+  }
+  ```
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Password changed successfully"
+  }
+  ```
+
+---
+
+### 7.4 Get Notification Preferences
+Retrieves email notification preferences for the user.
+- **URL**: `/api/v1/settings/notifications`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Notification preferences retrieved",
+    "data": {
+      "userId": "e44d3208-8e6f-4c8d-8a6e-399d8b746c10",
+      "emailNotifications": true
+    }
+  }
+  ```
+
+---
+
+### 7.5 Update Notification Preferences
+Updates email notification preferences.
+- **URL**: `/api/v1/settings/notifications`
+- **Method**: `PATCH`
+- **Headers**: `Authorization: Bearer <token>`
+- **Payload**:
+  ```json
+  {
+    "emailNotifications": false
+  }
+  ```
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Notification preferences updated",
+    "data": {
+      "userId": "e44d3208-8e6f-4c8d-8a6e-399d8b746c10",
+      "emailNotifications": false
+    }
+  }
+  ```
+
+---
+
+### 7.6 Get Global Email Service Status
+Retrieves global email service state. Restricted to `SUPER_ADMIN`.
+- **URL**: `/api/v1/settings/email-service`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Email service status retrieved",
+    "data": {
+      "enabled": true
+    }
+  }
+  ```
+
+---
+
+### 7.7 Update Global Email Service Status
+Updates global email service state. Restricted to `SUPER_ADMIN`.
+- **URL**: `/api/v1/settings/email-service`
+- **Method**: `PATCH`
+- **Headers**: `Authorization: Bearer <token>`
+- **Payload**:
+  ```json
+  {
+    "enabled": false
+  }
+  ```
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Email service status updated",
+    "data": {
+      "enabled": false
+    }
+  }
+  ```

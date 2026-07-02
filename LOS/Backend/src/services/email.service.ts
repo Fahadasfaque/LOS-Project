@@ -48,8 +48,32 @@ class EmailService {
 
   /**
    * Adds an email to the asynchronous dispatch queue.
+   * First checks if the global EMAIL_SERVICE_ENABLED flag allows sending.
    */
   async sendNotification(payload: EmailPayload) {
+    // ── Global service toggle check ──────────────────────────────────────────
+    try {
+      const config = await prisma.systemConfig.findUnique({
+        where: { key: 'EMAIL_SERVICE_ENABLED' },
+      });
+      const serviceEnabled = config ? config.value === 'true' : true;
+
+      if (!serviceEnabled) {
+        if (payload.userId) {
+          await prisma.auditLog.create({
+            data: {
+              userId: payload.userId,
+              action: 'EMAIL_SKIPPED',
+              details: `Email to ${payload.to} skipped — global email service is disabled.`,
+            },
+          });
+        }
+        return; // Silently abort
+      }
+    } catch {
+      // If we cannot read config (e.g. table not seeded yet), default to sending
+    }
+
     this.queue.push(payload);
     
     // Log QUEUED audit log
@@ -67,6 +91,7 @@ class EmailService {
       this.processQueue();
     }
   }
+
 
   private async processQueue() {
     this.isProcessing = true;

@@ -35,7 +35,7 @@ export const createUserSchema = z.object({
     firstName: z.string().min(1, 'First name is required.'),
     lastName: z.string().min(1, 'Last name is required.'),
     role: z.nativeEnum(Role, {
-      message: 'Role must be SUPER_ADMIN, LOAN_OFFICER, CREDIT_ANALYST, or APPROVER.',
+      message: 'Role must be SUPER_ADMIN, LOAN_OFFICER, CREDIT_ANALYST, APPROVER, or CUSTOMER.',
     }),
   }),
 });
@@ -161,7 +161,7 @@ export const bulkCreateUserSchema = z.object({
       firstName: z.string().min(1, 'First name is required.'),
       lastName: z.string().min(1, 'Last name is required.'),
       role: z.nativeEnum(Role, {
-        message: 'Role must be SUPER_ADMIN, LOAN_OFFICER, CREDIT_ANALYST, or APPROVER.',
+        message: 'Role must be SUPER_ADMIN, LOAN_OFFICER, CREDIT_ANALYST, APPROVER, or CUSTOMER.',
       }),
     })
   ).min(1, 'At least one user must be provided.'),
@@ -187,3 +187,63 @@ export const bulkCreateApplicationSchema = z.object({
 });
 
 
+// ─── Settings Schemas ────────────────────────────────────────────────────────
+
+/**
+ * Profile update — only firstName and lastName are editable; email is locked.
+ */
+export const updateProfileSchema = z.object({
+  body: z.object({
+    firstName: z
+      .string()
+      .min(1, 'First name is required.')
+      .max(50, 'First name must not exceed 50 characters.')
+      .regex(/^[a-zA-Z\s'-]+$/, 'First name can only contain letters, spaces, hyphens, and apostrophes.')
+      .optional(),
+    lastName: z
+      .string()
+      .max(50, 'Last name must not exceed 50 characters.')
+      .regex(/^[a-zA-Z\s'-]*$/, 'Last name can only contain letters, spaces, hyphens, and apostrophes.')
+      .optional(),
+  }).refine((data) => data.firstName !== undefined || data.lastName !== undefined, {
+    message: 'At least one of firstName or lastName must be provided.',
+  }),
+});
+
+/**
+ * Password change — requires current password, new password (min 8 chars, complexity rules).
+ * Confirm-password check is handled on the frontend; backend only needs the two values.
+ */
+export const changePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z.string().min(1, 'Current password is required.'),
+    newPassword: z
+      .string()
+      .min(8, 'New password must be at least 8 characters.')
+      .max(128, 'Password must not exceed 128 characters.')
+      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter.')
+      .regex(/[a-z]/, 'Password must contain at least one lowercase letter.')
+      .regex(/[0-9]/, 'Password must contain at least one number.'),
+  }).refine((data) => data.currentPassword !== data.newPassword, {
+    message: 'New password must be different from your current password.',
+    path: ['newPassword'],
+  }),
+});
+
+/**
+ * User notification preferences — only the emailNotifications boolean toggle.
+ */
+export const updateNotificationPrefsSchema = z.object({
+  body: z.object({
+    emailNotifications: z.boolean({ error: 'emailNotifications must be a boolean.' }),
+  }),
+});
+
+/**
+ * Global email service toggle — SUPER_ADMIN only; just a boolean enabled flag.
+ */
+export const setEmailServiceStatusSchema = z.object({
+  body: z.object({
+    enabled: z.boolean({ error: 'enabled must be a boolean.' }),
+  }),
+});

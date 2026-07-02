@@ -82,14 +82,21 @@ export class UserService {
 
     const createdUsers: Omit<User, 'password' | 'otpHash' | 'otpExpiry'>[] = [];
 
+    // Hash passwords sequentially outside the transaction. 
+    // Doing 200+ bcrypt hashes with Promise.all starves the Node.js thread pool, 
+    // causing Prisma to time out when acquiring a database connection.
+    const usersWithHashedPasswords: Prisma.UserCreateInput[] = [];
+    for (const u of usersData) {
+      usersWithHashedPasswords.push({
+        ...u,
+        password: await bcrypt.hash(u.password, 10)
+      });
+    }
+
     await prisma.$transaction(async (tx: any) => {
-      for (const u of usersData) {
-        const hashedPassword = await bcrypt.hash(u.password, 10);
+      for (const u of usersWithHashedPasswords) {
         const user = await tx.user.create({
-          data: {
-            ...u,
-            password: hashedPassword,
-          }
+          data: u
         });
 
         await tx.auditLog.create({
@@ -103,7 +110,7 @@ export class UserService {
         const { password, otpHash, otpExpiry, ...userWithoutPassword } = user;
         createdUsers.push(userWithoutPassword);
       }
-    });
+    }, { maxWait: 20000, timeout: 30000 }); // Increase maxWait and timeout for heavy bulk operations
 
     return createdUsers;
   }

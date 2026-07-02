@@ -51,95 +51,15 @@ import { PdfViewer } from '@/components/ui/PdfViewer';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 
+import { ApplicationHeader } from './components/ApplicationHeader';
+import { ApplicationTimeline } from './components/ApplicationTimeline';
+import { RoleLoanOfficer } from './components/RoleLoanOfficer';
+import { RoleCreditAnalyst } from './components/RoleCreditAnalyst';
+import { RoleApprover } from './components/RoleApprover';
+import { LockedAssessmentCard } from './components/LockedAssessmentCard';
+
 // ─── Type Definitions ──────────────────────────────────────────────────────────
-
-interface DocumentItem {
-  id: string;
-  documentType: 'PAN' | 'AADHAAR' | 'SALARY_SLIP' | 'BANK_STATEMENT';
-  originalName: string;
-  publicId: string;
-  secureUrl: string;
-  status: 'PENDING' | 'VERIFIED' | 'REJECTED';
-  uploadedAt: string;
-}
-
-interface StatusHistoryItem {
-  id: string;
-  oldStatus: string | null;
-  newStatus: string;
-  changedAt: string;
-  changedBy: {
-    firstName: string;
-    lastName: string;
-    role: string;
-  };
-}
-
-interface AssessmentDetails {
-  id: string;
-  status: 'PENDING' | 'COMPLETED';
-  creditScore: number;
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
-  recommendation: 'APPROVE' | 'MANUAL_REVIEW' | 'REJECT';
-  assessmentNotes: string;
-  assessedBy: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-  } | null;
-  assessedAt: string;
-}
-
-interface OfferDetails {
-  id: string;
-  applicationId: string;
-  loanAmount: number;
-  interestRate: number;
-  tenureMonths: number;
-  emiAmount: number;
-  offerStatus: 'GENERATED' | 'ACCEPTED' | 'DECLINED';
-  generatedAt: string;
-  acceptedAt: string | null;
-  expiresAt: string;
-}
-
-interface DisbursementDetails {
-  id: string;
-  applicationId: string;
-  amount: number;
-  referenceNumber: string;
-  status: 'PENDING' | 'SUCCESS' | 'FAILED';
-  disbursedBy: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-  } | null;
-  disbursedAt: string;
-}
-
-interface ApplicationDetails {
-  id: string;
-  applicationNumber: string;
-  applicantName: string;
-  email: string;
-  phone: string;
-  pan: string;
-  loanType: string;
-  loanAmount: number;
-  monthlyIncome: number;
-  employmentType: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  documents: DocumentItem[];
-  statusHistory: StatusHistoryItem[];
-  userId: string;
-  assessment?: AssessmentDetails | null;
-  offer?: OfferDetails | null;
-  disbursement?: DisbursementDetails | null;
-}
+import { DocumentItem, StatusHistoryItem, AssessmentDetails, OfferDetails, DisbursementDetails, ApplicationDetails } from './components/shared-types';
 
 // ─── Workflow Pipeline Config ──────────────────────────────────────────────────
 
@@ -1454,380 +1374,6 @@ export default function ApplicationDetailsPage() {
   // ROLE-SPECIFIC WORKSPACES
   // ══════════════════════════════════════════════════════════════════════════
 
-  // ── LOAN OFFICER Workspace ─────────────────────────────────────────────────
-  const renderLoanOfficerWorkspace = () => {
-    // Waiting states
-    if (app.status === 'SUBMITTED') {
-      return (
-        <Card className="border-blue-500/20 bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-blue-500/5 border-b border-blue-500/20 py-3.5 px-5">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-primary">
-              <Hourglass className="h-4 w-4 animate-pulse" weight="fill" />
-              Awaiting Credit Review
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-5 text-center space-y-3">
-            <div className="py-4 space-y-2">
-              <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto">
-                <MagnifyingGlass className="h-5 w-5 text-primary" weight="bold" />
-              </div>
-              <p className="text-xs font-semibold text-muted-foreground">Application submitted and pending Credit Analyst review.</p>
-              <p className="text-[10px] text-muted-foreground font-mono">Next step: Credit analyst starts UNDER_REVIEW</p>
-            </div>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    if (app.status === 'UNDER_REVIEW') {
-      return (
-        <Card className="border-amber-500/20 bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-amber-500/5 border-b border-amber-500/20 py-3.5 px-5">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-amber-700 dark:text-amber-400">
-              <Pulse className="h-4 w-4 animate-pulse" weight="bold" />
-              Credit Underwriting In Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-5 text-center space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground py-3">
-              Application is currently being assessed by the Credit Analysis team. You will be notified once the review is completed.
-            </p>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    if (app.status === 'APPROVED') {
-      return (
-        <Card className="border-emerald-500/20 bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-emerald-500/5 border-b border-emerald-500/20 py-3.5 px-5">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
-              <CheckCircle className="h-4 w-4" weight="fill" />
-              Loan Approved
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-5 text-center">
-            <p className="text-xs font-semibold text-muted-foreground py-3">Approved by the underwriting team. Awaiting offer generation by Approver.</p>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    // OFFER_GENERATED — Officer records customer acceptance/decline
-    if (app.status === 'OFFER_GENERATED' && app.offer) {
-      return (
-        <Card className="border-purple-500/20 bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-purple-500/5 border-b border-purple-500/20 py-3.5 px-5">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-purple-700 dark:text-purple-400">
-              <Sparkle className="h-4 w-4 animate-pulse" weight="fill" />
-              Customer Response Required
-            </CardTitle>
-            <CardDescription className="text-[10px] font-semibold text-purple-600/70 dark:text-purple-400/70 mt-0.5">
-              Record the customer&apos;s decision on the offer.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5 space-y-3">
-            <div className="bg-muted/10 border border-border rounded-lg p-3 text-xs text-left space-y-1.5">
-              <div className="flex justify-between"><span className="text-muted-foreground">Offer Amount</span><span className="font-bold text-foreground">{formatCurrency(app.offer.loanAmount)}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Monthly EMI</span><span className="font-bold text-primary">{formatCurrency(app.offer.emiAmount)}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Expires</span><span className="font-bold text-foreground">{new Date(app.offer.expiresAt).toLocaleDateString('en-IN')}</span></div>
-            </div>
-            <p className="text-[10px] text-muted-foreground font-semibold text-center">
-              Note: Customer acceptance/decline is handled by the customer portal. Contact the customer to confirm their decision.
-            </p>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    if (app.status === 'OFFER_ACCEPTED') {
-      return (
-        <Card className="border-emerald-500/20 bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-emerald-500/5 border-b border-emerald-500/20 py-3.5 px-5">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
-              <SealCheck className="h-4 w-4" weight="fill" />
-              Offer Accepted
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-5 text-center">
-            <p className="text-xs font-semibold text-muted-foreground py-3">Customer has accepted the offer. Awaiting disbursement authorization by the Approver.</p>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    if (app.status === 'DISBURSED') {
-      return (
-        <Card className="border-violet-500/20 bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-violet-500/5 border-b border-violet-500/20 py-3.5 px-5">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-violet-700 dark:text-violet-400">
-              <Confetti className="h-4 w-4" weight="fill" />
-              Case Closed — Funds Disbursed
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-5 text-center">
-            <p className="text-xs font-semibold text-muted-foreground py-3">Loan fully processed. Funds have been disbursed successfully.</p>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    return null;
-  };
-
-  // ── CREDIT ANALYST Workspace ───────────────────────────────────────────────
-  const renderCreditAnalystWorkspace = () => {
-    if (app.status === 'SUBMITTED') {
-      return (
-        <Card className="border-amber-500/20 bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-amber-500/5 border-b border-amber-500/20 py-3.5 px-5">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-amber-700 dark:text-amber-400">
-              <MagnifyingGlass className="h-4 w-4" weight="bold" />
-              Ready for Credit Review
-            </CardTitle>
-            <CardDescription className="text-[10px] font-semibold text-amber-600/70 dark:text-amber-400/70 mt-0.5">
-              Start underwriting assessment for this application.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5 space-y-4">
-            <div className="bg-muted/10 border border-border rounded-lg p-3 text-xs space-y-2">
-              <div className="flex justify-between"><span className="text-muted-foreground">Applicant</span><span className="font-bold text-foreground capitalize">{app.applicantName}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Loan Amount</span><span className="font-bold text-foreground">{formatCurrency(app.loanAmount)}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Monthly Income</span><span className="font-bold text-foreground">{formatCurrency(app.monthlyIncome)}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Documents</span><span className="font-bold text-foreground">{app.documents.length} uploaded</span></div>
-            </div>
-            <Button onClick={() => handleStatusTransition('UNDER_REVIEW')} disabled={actionLoading}
-              className="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold h-10 rounded-lg cursor-pointer text-xs gap-1.5 flex items-center justify-center">
-              <MagnifyingGlass className="h-4 w-4" weight="bold" />
-              {actionLoading ? 'Starting Review...' : 'Begin Credit Assessment'}
-            </Button>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    if (app.status === 'UNDER_REVIEW') {
-      // Assessment already done
-      if (app.assessment?.status === 'COMPLETED') {
-        return (
-          <div className="space-y-4">
-            {renderLockedAssessmentCard()}
-            <Card className="border-border bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center gap-2 text-xs font-semibold text-muted-foreground py-2">
-                  <Hourglass className="h-4 w-4 animate-pulse" weight="fill" />
-                  Awaiting Approver decision
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
-      }
-
-      // Assessment wizard
-      return (
-        <Card className="border-amber-500/20 bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-amber-500/5 border-b border-amber-500/20 py-3.5 px-5">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-amber-700 dark:text-amber-400">
-              <Pulse className="h-4 w-4 animate-pulse" weight="bold" />
-              Underwriting Assessment
-            </CardTitle>
-            <CardDescription className="text-[10px] font-semibold text-amber-600/70 dark:text-amber-400/70 mt-0.5">
-              Step {assessmentStep + 1} of 2 — {assessmentStep === 0 ? 'Enter decision notes' : 'Review & lock assessment'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5">
-            <AnimatePresence mode="wait">
-              {assessmentStep === 0 ? (
-                <motion.div key="step0" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-4">
-                  {/* Applicant financial snapshot */}
-                  <div className="bg-muted/10 border border-border rounded-lg p-3 text-xs space-y-2">
-                    <div className="flex justify-between border-b border-border pb-2">
-                      <span className="text-muted-foreground font-semibold">Monthly Income</span>
-                      <span className="font-extrabold text-foreground">{formatCurrency(app.monthlyIncome)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground font-semibold">Loan-to-Income</span>
-                      <span className={`font-bold ${app.loanAmount / (app.monthlyIncome * 12) > 0.5 ? 'text-rose-600' : app.loanAmount / (app.monthlyIncome * 12) > 0.3 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                        {((app.loanAmount / (app.monthlyIncome * 12)) * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5 text-left">
-                    <Label htmlFor="notes" className="text-xs font-bold text-foreground">Decision Analysis Notes <span className="text-rose-500">*</span></Label>
-                    <textarea id="notes" rows={4}
-                      placeholder="Enter analytical findings, risk arguments, income verification notes, credit history observations..."
-                      value={assessmentNotes} onChange={(e) => setAssessmentNotes(e.target.value)}
-                      className="w-full p-3 rounded-lg border border-border bg-background text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-amber-500 resize-y font-semibold" />
-                  </div>
-                  <Button onClick={handleRunAssessment} disabled={!assessmentNotes.trim()}
-                    className="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold h-10 rounded-lg cursor-pointer text-xs gap-1.5 flex items-center justify-center disabled:opacity-50">
-                    <Calculator className="h-4 w-4" />
-                    Run Credit Scoring Engine
-                  </Button>
-                </motion.div>
-              ) : (
-                previewAssessment && (
-                  <motion.div key="step1" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase">Credit Score</span>
-                        <span className="font-extrabold text-foreground text-sm">{previewAssessment.creditScore} / 900</span>
-                      </div>
-                      <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full ${previewAssessment.riskLevel === 'LOW' ? 'bg-emerald-500' : previewAssessment.riskLevel === 'MEDIUM' ? 'bg-amber-500' : 'bg-rose-500'}`}
-                          style={{ width: `${Math.min((previewAssessment.creditScore / 900) * 100, 100)}%` }} />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className="bg-muted/10 border border-border p-2.5 rounded-lg text-left">
-                        <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Risk Level</span>
-                        <p className={`font-extrabold mt-1 uppercase ${previewAssessment.riskLevel === 'LOW' ? 'text-emerald-600' : previewAssessment.riskLevel === 'MEDIUM' ? 'text-amber-600' : 'text-rose-600'}`}>
-                          {previewAssessment.riskLevel}
-                        </p>
-                      </div>
-                      <div className="bg-muted/10 border border-border p-2.5 rounded-lg text-left">
-                        <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Recommendation</span>
-                        <p className="font-bold mt-1 text-foreground text-xs">{previewAssessment.recommendation}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" onClick={() => setAssessmentStep(0)} disabled={saveLoading}
-                        className="flex-1 border-border bg-card text-foreground hover:bg-muted font-semibold h-9 rounded-lg cursor-pointer text-xs">
-                        <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Back
-                      </Button>
-                      <Button onClick={handleSaveAssessment} disabled={saveLoading}
-                        className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-9 rounded-lg cursor-pointer text-xs gap-1">
-                        <Lock className="h-3.5 w-3.5" weight="fill" />
-                        {saveLoading ? 'Locking...' : 'Lock Report'}
-                      </Button>
-                    </div>
-                  </motion.div>
-                )
-              )}
-            </AnimatePresence>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    // Post-review — show read-only locked report if available
-    if (['APPROVED', 'OFFER_GENERATED', 'OFFER_ACCEPTED', 'DISBURSED', 'REJECTED'].includes(app.status)) {
-      return (
-        <div className="space-y-4">
-          {app.assessment?.status === 'COMPLETED' && renderLockedAssessmentCard()}
-        </div>
-      );
-    }
-
-    return null;
-  };
-
-  // ── APPROVER Workspace ─────────────────────────────────────────────────────
-  const renderApproverWorkspace = () => (
-    <div className="space-y-4">
-      {/* Show locked assessment if available */}
-      {app.assessment && renderLockedAssessmentCard()}
-
-      {/* Offer generator — APPROVED status, no offer yet */}
-      {app.status === 'APPROVED' && !app.offer && (
-        <Card className="border-emerald-500/20 bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-emerald-500/5 border-b border-emerald-500/20 py-3.5 px-5">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
-              <Percent className="h-4 w-4" weight="bold" />
-              Configure Loan Offer
-            </CardTitle>
-            <CardDescription className="text-[10px] font-semibold text-emerald-600/70 dark:text-emerald-400/70 mt-0.5">
-              Step {offerStep + 1} of 2 — {offerStep === 0 ? 'Define terms' : 'Preview EMI & confirm'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5">
-            <form onSubmit={handleGenerateOffer}>
-              <AnimatePresence mode="wait">
-                {offerStep === 0 ? (
-                  <motion.div key="offer0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3 text-left">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="interestRate" className="text-xs font-bold text-foreground">Interest Rate <span className="text-muted-foreground font-normal">(% p.a.)</span></Label>
-                        <Input id="interestRate" type="number" step="0.01" min="1" max="50"
-                          value={interestRate} onChange={(e) => setInterestRate(parseFloat(e.target.value) || 0)}
-                          className="bg-background border-border focus-visible:ring-emerald-500 text-foreground h-9 font-bold text-xs rounded-lg" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="tenureMonths" className="text-xs font-bold text-foreground">Tenure <span className="text-muted-foreground font-normal">(months)</span></Label>
-                        <Input id="tenureMonths" type="number" min="1" max="360"
-                          value={tenureMonths} onChange={(e) => setTenureMonths(parseInt(e.target.value) || 0)}
-                          className="bg-background border-border focus-visible:ring-emerald-500 text-foreground h-9 font-bold text-xs rounded-lg" />
-                      </div>
-                    </div>
-                    <Button type="button" onClick={() => { if (interestRate > 0 && tenureMonths > 0) setOfferStep(1); else toast.error('Rate and tenure must be positive.'); }}
-                      className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-10 rounded-lg cursor-pointer text-xs gap-1.5 flex items-center justify-center">
-                      Calculate EMI <ArrowRight className="h-3.5 w-3.5" />
-                    </Button>
-                  </motion.div>
-                ) : (
-                  <motion.div key="offer1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-                    {/* EMI preview */}
-                    <div className="bg-emerald-500/5 border border-emerald-500/20 p-4 rounded-xl text-center">
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">Monthly EMI</span>
-                      <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">{formatCurrency(calculatedEmi)}</p>
-                    </div>
-                    <div className="bg-muted/10 border border-border rounded-lg p-3 text-xs space-y-2">
-                      <div className="flex justify-between"><span className="text-muted-foreground font-semibold">Principal</span><span className="font-bold text-foreground">{formatCurrency(app.loanAmount)}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground font-semibold">Interest @ {interestRate}% p.a.</span><span className="font-bold text-foreground">{tenureMonths} months</span></div>
-                      <div className="flex justify-between border-t border-border pt-2"><span className="text-muted-foreground font-semibold">Total Repayment</span><span className="font-extrabold text-foreground">{formatCurrency(calculatedTotalRepayment)}</span></div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" type="button" onClick={() => setOfferStep(0)} disabled={offerLoading}
-                        className="flex-1 border-border bg-card text-foreground hover:bg-muted font-semibold h-9 rounded-lg cursor-pointer text-xs">
-                        <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Back
-                      </Button>
-                      <Button type="submit" disabled={offerLoading}
-                        className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-9 rounded-lg cursor-pointer text-xs gap-1">
-                        <PaperPlaneTilt className="h-3.5 w-3.5" weight="bold" />
-                        {offerLoading ? 'Generating...' : 'Generate Offer'}
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Offer display */}
-      {app.offer && !app.disbursement && renderOfferCard()}
-
-      {/* Disburse button */}
-      {app.status === 'OFFER_ACCEPTED' && !app.disbursement && (
-        <Card className="border-violet-500/20 bg-card text-foreground shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-violet-500/5 border-b border-violet-500/20 py-3.5 px-5">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-violet-700 dark:text-violet-400">
-              <CurrencyInr className="h-4 w-4" weight="bold" />
-              Authorize Disbursement
-            </CardTitle>
-            <CardDescription className="text-[10px] font-semibold text-violet-600/70 dark:text-violet-400/70 mt-0.5">Customer has accepted the offer. Release funds now.</CardDescription>
-          </CardHeader>
-          <CardContent className="p-5 space-y-4">
-            <div className="bg-muted/10 border border-border rounded-lg p-3 text-xs space-y-2">
-              <div className="flex justify-between"><span className="text-muted-foreground font-semibold">Amount to Disburse</span><span className="font-extrabold text-foreground text-base">{formatCurrency(app.loanAmount)}</span></div>
-              {app.offer && <div className="flex justify-between"><span className="text-muted-foreground font-semibold">Monthly EMI</span><span className="font-bold text-primary">{formatCurrency(app.offer.emiAmount)}</span></div>}
-            </div>
-            <Button onClick={handleDisburseLoan} disabled={disburseLoading}
-              className="w-full bg-violet-600 hover:bg-violet-500 text-white font-semibold h-11 rounded-lg cursor-pointer shadow flex items-center justify-center gap-1.5 text-xs">
-              <CurrencyInr className="h-4.5 w-4.5" weight="bold" />
-              {disburseLoading ? 'Executing Transfer...' : 'Authorize Fund Release'}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Disbursement record */}
-      {app.disbursement && renderDisbursementCard()}
-    </div>
-  );
-
   // ── SUPER_ADMIN Workspace ──────────────────────────────────────────────────
   const renderSuperAdminWorkspace = () => (
     <div className="space-y-4">
@@ -1838,9 +1384,37 @@ export default function ApplicationDetailsPage() {
       </div>
 
       {/* Sequential workspaces */}
-      {renderLoanOfficerWorkspace()}
-      {renderCreditAnalystWorkspace()}
-      {app.status !== 'DRAFT' && app.status !== 'SUBMITTED' && renderApproverWorkspace()}
+      <RoleLoanOfficer app={app} formatCurrency={formatCurrency} />
+      <RoleCreditAnalyst 
+        app={app} 
+        formatCurrency={formatCurrency} 
+        actionLoading={actionLoading}
+        handleStatusTransition={handleStatusTransition}
+        assessmentStep={assessmentStep}
+        setAssessmentStep={setAssessmentStep}
+        assessmentNotes={assessmentNotes}
+        setAssessmentNotes={setAssessmentNotes}
+        handleRunAssessment={handleRunAssessment}
+        previewAssessment={previewAssessment}
+        handleSaveAssessment={handleSaveAssessment}
+        saveLoading={saveLoading}
+      />
+      {app.status !== 'DRAFT' && app.status !== 'SUBMITTED' && (
+        <RoleApprover 
+          app={app} 
+          formatCurrency={formatCurrency} 
+          offerStep={offerStep}
+          setOfferStep={setOfferStep}
+          handleGenerateOffer={handleGenerateOffer}
+          interestRate={interestRate}
+          setInterestRate={setInterestRate}
+          tenureMonths={tenureMonths}
+          setTenureMonths={setTenureMonths}
+          calculatedEmi={calculatedEmi}
+          calculatedTotalRepayment={calculatedTotalRepayment}
+          offerLoading={offerLoading}
+        />
+      )}
     </div>
   );
 
@@ -2075,9 +1649,39 @@ export default function ApplicationDetailsPage() {
           {!isRejected && (
             <AnimatePresence mode="wait">
               <motion.div key={`workspace-${role}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
-                {role === 'LOAN_OFFICER' && renderLoanOfficerWorkspace()}
-                {role === 'CREDIT_ANALYST' && renderCreditAnalystWorkspace()}
-                {role === 'APPROVER' && renderApproverWorkspace()}
+                {role === 'LOAN_OFFICER' && <RoleLoanOfficer app={app} formatCurrency={formatCurrency} />}
+                {role === 'CREDIT_ANALYST' && (
+                  <RoleCreditAnalyst
+                    app={app}
+                    formatCurrency={formatCurrency}
+                    actionLoading={actionLoading}
+                    handleStatusTransition={handleStatusTransition}
+                    assessmentStep={assessmentStep}
+                    setAssessmentStep={setAssessmentStep}
+                    assessmentNotes={assessmentNotes}
+                    setAssessmentNotes={setAssessmentNotes}
+                    handleRunAssessment={handleRunAssessment}
+                    previewAssessment={previewAssessment}
+                    handleSaveAssessment={handleSaveAssessment}
+                    saveLoading={saveLoading}
+                  />
+                )}
+                {role === 'APPROVER' && (
+                  <RoleApprover
+                    app={app}
+                    formatCurrency={formatCurrency}
+                    offerStep={offerStep}
+                    setOfferStep={setOfferStep}
+                    handleGenerateOffer={handleGenerateOffer}
+                    interestRate={interestRate}
+                    setInterestRate={setInterestRate}
+                    tenureMonths={tenureMonths}
+                    setTenureMonths={setTenureMonths}
+                    calculatedEmi={calculatedEmi}
+                    calculatedTotalRepayment={calculatedTotalRepayment}
+                    offerLoading={offerLoading}
+                  />
+                )}
                 {role === 'SUPER_ADMIN' && renderSuperAdminWorkspace()}
               </motion.div>
             </AnimatePresence>

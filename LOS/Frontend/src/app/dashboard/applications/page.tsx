@@ -33,7 +33,9 @@ import {
   Clock,
   CheckCircle,
   CurrencyInr,
-  FolderSimple
+  FolderSimple,
+  ArrowUp,
+  ArrowDown
 } from '@phosphor-icons/react';
 import { BulkUpload } from '@/components/ui/bulk-upload';
 import { toast } from 'sonner';
@@ -66,6 +68,8 @@ export default function ApplicationsPage() {
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<string>('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
 
   // Global KPI stats state
   const [stats, setStats] = useState({
@@ -177,6 +181,35 @@ export default function ApplicationsPage() {
     return `${day} ${month} ${year}`;
   };
 
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      if (sortOrder === 'asc') setSortOrder('desc');
+      else if (sortOrder === 'desc') {
+        setSortOrder('');
+        setSortField('');
+      } else setSortOrder('asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const renderSortableHead = (field: string, label: string, align: 'left' | 'right' | 'center' = 'left') => {
+    const isActive = sortField === field;
+    return (
+      <TableHead 
+        className={`text-xs py-3 px-4 cursor-pointer hover:bg-muted/30 select-none transition-colors ${isActive ? 'font-bold text-foreground' : 'text-muted-foreground font-semibold'} text-${align}`}
+        onClick={() => handleSort(field)}
+      >
+        <div className={`flex items-center gap-1 ${align === 'right' ? 'justify-end' : align === 'center' ? 'justify-center' : 'justify-start'}`}>
+          {label}
+          {isActive && sortOrder === 'asc' && <ArrowUp className="h-3.5 w-3.5" weight="bold" />}
+          {isActive && sortOrder === 'desc' && <ArrowDown className="h-3.5 w-3.5" weight="bold" />}
+        </div>
+      </TableHead>
+    );
+  };
+
   const fetchStats = async () => {
     try {
       const res = await api.get('/applications?limit=1000');
@@ -207,6 +240,8 @@ export default function ApplicationsPage() {
       if (loanType) queryParams.append('loanType', loanType);
       queryParams.append('page', String(page));
       queryParams.append('limit', String(limit));
+      if (sortField) queryParams.append('sortField', sortField);
+      if (sortOrder) queryParams.append('sortOrder', sortOrder);
 
       const res = await api.get(`/applications?${queryParams.toString()}`);
       if (res.success && res.data) {
@@ -227,7 +262,7 @@ export default function ApplicationsPage() {
   useEffect(() => {
     fetchApplications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit, status, loanType]);
+  }, [page, limit, status, loanType, sortField, sortOrder]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,6 +275,8 @@ export default function ApplicationsPage() {
     setStatus('');
     setLoanType('');
     setPage(1);
+    setSortField('');
+    setSortOrder('');
   };
 
   const downloadCSV = () => {
@@ -466,12 +503,12 @@ export default function ApplicationsPage() {
                       aria-label="Select all"
                     />
                   </TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-xs py-3 px-4 text-left">APPLICATION NO.</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-xs py-3 px-4 text-left">USER</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-xs py-3 px-4 text-left">LOAN TYPE</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-xs py-3 px-4 text-left">LOAN AMOUNT</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-xs py-3 px-4 text-left">STATUS</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-xs py-3 px-4 text-left">CREATED AT</TableHead>
+                  {renderSortableHead('applicationNumber', 'APPLICATION NO.')}
+                  {renderSortableHead('applicantName', 'USER')}
+                  {renderSortableHead('loanType', 'LOAN TYPE')}
+                  {renderSortableHead('loanAmount', 'LOAN AMOUNT')}
+                  {renderSortableHead('status', 'STATUS')}
+                  {renderSortableHead('createdAt', 'CREATED AT')}
                   <TableHead className="text-right text-muted-foreground font-semibold text-xs py-3 px-4">ACTIONS</TableHead>
                 </TableRow>
               </TableHeader>

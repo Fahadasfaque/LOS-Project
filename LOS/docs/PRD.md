@@ -78,6 +78,12 @@ Strict state transitions enforced by workflow rules:
 - **Repayment Preview**: Renders an illustrative amortization schedule showing the first 5 monthly EMI installments (due date, principal, interest, outstanding balance) once the loan status changes to `DISBURSED`.
 - **Grouped Notifications**: Customer notifications (bell icon / Activity log) are grouped by `Today`, `Yesterday`, and `Earlier` for a modern, clean inbox experience.
 
+### 3.7 Settings Management
+- **Profile Management**: Users can view and update their profile details (First Name, Last Name).
+- **Security**: Users can change their passwords securely, requiring current password validation.
+- **Notification Preferences**: Users can toggle their individual email notifications on or off.
+- **Global Email Service**: `SUPER_ADMIN` users can globally toggle the LOS email dispatch service on or off via a centralized system configuration.
+
 ---
 
 ## 4. Out of Scope for MVP

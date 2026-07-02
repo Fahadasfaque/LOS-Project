@@ -3,14 +3,14 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-  UploadSimple,
-  FileCsv,
-  WarningCircle,
-  CheckCircle,
-  CircleNotch,
-  DownloadSimple,
-  X
-} from '@phosphor-icons/react';
+  UploadIcon,
+  FileTextIcon,
+  AlertCircleIcon,
+  CheckCircle2Icon,
+  Loader2Icon,
+  DownloadIcon,
+  XIcon
+} from 'lucide-react';
 import { api } from '@/services/api';
 import {
   Dialog,
@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 interface BulkUploadProps {
   type: 'users' | 'applications';
@@ -37,8 +38,8 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const csvTemplate = type === 'users'
-    ? 'firstName,lastName,email,password,role\nJohn,Doe,john.doe@fortress.com,SecurePass123,LOAN_OFFICER\nJane,Smith,jane.smith@fortress.com,SecurePass123,CREDIT_ANALYST'
-    : 'applicantName,email,phone,pan,loanType,loanAmount,monthlyIncome,employmentType\nAlice Johnson,alice@example.com,9876543210,ABCDE1234F,PERSONAL,500000,60000,SALARIED\nBob Miller,bob@example.com,9123456789,XYZAB5678C,BUSINESS,1200000,85000,BUSINESS_OWNER';
+    ? 'First Name,Last Name,Email,Role\nJohn,Doe,john.doe@fortress.com,LOAN_OFFICER\nJane,Smith,jane.smith@fortress.com,CREDIT_ANALYST'
+    : 'Applicant Name,Email,Phone,PAN,Loan Type,Loan Amount,Monthly Income,Employment Type\nAlice Johnson,alice@example.com,9876543210,ABCDE1234F,PERSONAL,500000,60000,SALARIED\nBob Miller,bob@example.com,9123456789,XYZAB5678C,BUSINESS,1200000,85000,BUSINESS_OWNER';
 
   const downloadTemplate = () => {
     const blob = new Blob([csvTemplate], { type: 'text/csv;charset=utf-8;' });
@@ -69,26 +70,64 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
         throw new Error('CSV file is empty or missing data rows.');
       }
 
-      const headers = lines[0].split(',').map(h => h.trim());
+      const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+      const headers = rawHeaders.map(h => {
+        const lower = h.toLowerCase();
+        if (lower === 'first name') return 'firstName';
+        if (lower === 'last name') return 'lastName';
+        if (lower === 'email') return 'email';
+        if (lower === 'role') return 'role';
+        if (lower === 'password') return 'password';
+        if (lower === 'applicant name') return 'applicantName';
+        if (lower === 'phone') return 'phone';
+        if (lower === 'pan') return 'pan';
+        if (lower === 'loan type') return 'loanType';
+        if (lower === 'loan amount') return 'loanAmount';
+        if (lower === 'monthly income') return 'monthlyIncome';
+        if (lower === 'employment type') return 'employmentType';
+        return h; // fallback
+      });
+
       const dataRows = lines.slice(1);
 
       const parsed = dataRows.map((row, idx) => {
-        const values = row.split(',').map(v => v.trim());
-        if (values.length !== headers.length) {
-          throw new Error(`Data row ${idx + 1} does not match header column count.`);
-        }
-
+        // Simple CSV split (note: doesn't handle commas inside quotes well, but sufficient for this demo format)
+        const values = row.split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
+        
+        // Some rows might have empty trailing columns, but we just map up to headers length
         const obj: any = {};
         headers.forEach((header, index) => {
-          let value: any = values[index];
+          let value: any = values[index] !== undefined ? values[index] : '';
+          
           if (header === 'loanAmount' || header === 'monthlyIncome') {
             value = parseFloat(value);
             if (isNaN(value)) {
               throw new Error(`Row ${idx + 1}: ${header} must be a number.`);
             }
           }
+          if (header === 'role' && typeof value === 'string') {
+            value = value.toUpperCase().replace(/[\s-]+/g, '_'); // Normalize role to match backend enum
+            
+            // Map common variations to exact enum values
+            if (value.includes('ADMIN')) value = 'SUPER_ADMIN';
+            else if (value.includes('OFFICER') || value === 'RM') value = 'LOAN_OFFICER';
+            else if (value.includes('ANALYST') || value.includes('RISK') || value.includes('CREDIT')) value = 'CREDIT_ANALYST';
+            else if (value.includes('APPROVER') || value.includes('EXEC')) value = 'APPROVER';
+            else if (value === 'REQUESTER' || value === 'USER') value = 'CUSTOMER';
+            
+            // Fallback for completely unknown roles in dummy data
+            const validRoles = ['SUPER_ADMIN', 'LOAN_OFFICER', 'CREDIT_ANALYST', 'APPROVER', 'CUSTOMER'];
+            if (!validRoles.includes(value)) {
+              value = 'CUSTOMER';
+            }
+          }
           obj[header] = value;
         });
+
+        if (type === 'users' && !obj.password) {
+          obj.password = 'Welcome@123'; // Default password if omitted
+        }
+
         return obj;
       });
 
@@ -174,7 +213,11 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
         setErrorMsg(res.message || 'Bulk upload failed.');
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Bulk upload connection error.');
+      let msg = err.message || 'Bulk upload connection error.';
+      if (Array.isArray(err.errors) && err.errors.length > 0) {
+        msg += ': ' + err.errors.map((e: any) => `${e.field ? e.field + ' - ' : ''}${e.message}`).join(', ');
+      }
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -189,18 +232,18 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
 
   return (
     <Dialog open={!!open} onOpenChange={(v) => { if (!v) handleReset(); onOpenChange(v); }}>
-      <DialogContent className="p-0 gap-0 sm:max-w-2xl overflow-hidden border-border bg-card text-card-foreground shadow-2xl sm:rounded-lg">
+      <DialogContent className="p-0 gap-0 sm:max-w-2xl overflow-hidden border-border bg-card text-card-foreground sm:rounded-lg flex flex-col max-h-[90dvh]">
         {/* Header section */}
-        <div className="bg-muted/30 px-6 py-5 border-b border-border/50 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center border border-primary/20 text-primary shrink-0 shadow-sm">
-              <FileCsv className="h-5.5 w-5.5" weight="bold" />
+        <div className="px-6 py-5 border-b flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center border text-foreground shrink-0">
+              <FileTextIcon className="h-6 w-6" />
             </div>
-            <div>
-              <DialogTitle className="text-lg font-extrabold tracking-tight text-foreground">
+            <div className="space-y-1">
+              <DialogTitle className="text-lg font-semibold text-foreground">
                 Bulk Import {type === 'users' ? 'Users' : 'Applications'}
               </DialogTitle>
-              <DialogDescription className="text-muted-foreground text-xs mt-0.5 font-medium leading-relaxed">
+              <DialogDescription className="text-sm text-muted-foreground">
                 Upload a CSV file containing multiple records to import in batch.
               </DialogDescription>
             </div>
@@ -209,27 +252,27 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
             size="sm"
             variant="outline"
             onClick={downloadTemplate}
-            className="border-border hover:bg-muted text-foreground flex items-center gap-1.5 font-bold cursor-pointer h-9 px-3 shadow-sm shrink-0"
+            className="shrink-0 flex items-center gap-2"
           >
-            <DownloadSimple className="h-4 w-4" weight="bold" />
+            <DownloadIcon className="h-4 w-4" />
             Download Demo Template
           </Button>
         </div>
 
         {/* Content body */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto">
           {/* Error Banner */}
           {errorMsg && (
-            <div className="p-3 bg-destructive/10 border border-destructive/25 text-destructive rounded text-xs font-semibold flex items-start gap-2.5 animate-in fade-in duration-200">
-              <WarningCircle className="h-4.5 w-4.5 shrink-0 text-destructive mt-0.5" weight="fill" />
+            <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md text-sm font-medium flex items-start gap-2.5">
+              <AlertCircleIcon className="h-5 w-5 shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {/* Success Banner */}
           {successMsg && (
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 rounded text-xs font-semibold flex items-start gap-2.5 animate-in fade-in duration-200">
-              <CheckCircle className="h-4.5 w-4.5 shrink-0 text-emerald-600 mt-0.5" weight="fill" />
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-md text-sm font-medium flex items-start gap-2.5">
+              <CheckCircle2Icon className="h-5 w-5 shrink-0 mt-0.5" />
               <span>{successMsg}</span>
             </div>
           )}
@@ -242,9 +285,10 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
               onDragLeave={handleDrag}
               onDrop={handleDrop}
               onClick={onButtonClick}
-              className={`border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center gap-3.5 cursor-pointer transition-all ${
-                dragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 hover:bg-muted/30 bg-card'
-              }`}
+              className={cn(
+                'border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center gap-4 cursor-pointer transition-colors',
+                dragActive ? 'border-foreground bg-accent' : 'border-border hover:bg-accent/50'
+              )}
             >
               <input
                 ref={fileInputRef}
@@ -253,32 +297,32 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
                 accept=".csv"
                 onChange={handleChange}
               />
-              <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/15 shadow-sm">
-                <UploadSimple className="h-5.5 w-5.5" weight="bold" />
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center border text-foreground">
+                <UploadIcon className="h-6 w-6" />
               </div>
-              <div className="text-center select-none">
-                <p className="text-sm font-bold text-foreground">Drag and drop your file here, or click to browse</p>
-                <p className="text-xs text-muted-foreground mt-1 font-medium">Supports CSV files only up to 5MB</p>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-foreground">Drag and drop your file here, or click to browse</p>
+                <p className="text-sm text-muted-foreground mt-1">Supports CSV files only up to 5MB</p>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               {/* Selected File Box */}
-              <div className="border border-border rounded p-3 bg-muted/25 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
-                    <FileCsv className="h-5 w-5" weight="bold" />
+              <div className="border rounded-lg p-4 bg-muted/50 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-md bg-background flex items-center justify-center border text-foreground shrink-0">
+                    <FileTextIcon className="h-5 w-5" />
                   </div>
-                  <div className="text-left">
-                    <p className="text-sm font-bold text-foreground truncate max-w-[200px] sm:max-w-md">{file.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{(file.size / 1024).toFixed(1)} KB — {parsedData.length} records parsed</p>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground truncate max-w-[200px] sm:max-w-md">{file.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{(file.size / 1024).toFixed(1)} KB — {parsedData.length} records parsed</p>
                   </div>
                 </div>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={handleReset}
-                  className="text-xs border-border hover:bg-muted font-bold text-foreground cursor-pointer h-8 px-2.5"
+                  className="h-8 px-3"
                 >
                   Clear File
                 </Button>
@@ -286,24 +330,24 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
 
               {/* Data Preview Table */}
               {parsedData.length > 0 && (
-                <div className="border border-border rounded overflow-hidden shadow-sm">
-                  <div className="bg-muted/40 px-3 py-2 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-wider select-none">
-                    Parsed CSV Data Preview (First 5 Rows)
+                <div className="border rounded-lg overflow-hidden">
+                  <div className="bg-muted px-4 py-2 border-b text-xs font-medium text-muted-foreground">
+                    Data Preview (First 5 Rows)
                   </div>
-                  <div className="overflow-y-hidden overflow-x-auto max-h-[190px]">
-                    <table className="w-full text-left border-collapse text-xs select-none">
+                  <div className="overflow-auto max-h-[200px]">
+                    <table className="w-full text-left border-collapse text-sm">
                       <thead>
-                        <tr className="bg-muted/10 border-b border-border text-muted-foreground">
+                        <tr className="border-b bg-muted/50">
                           {Object.keys(parsedData[0]).map((key) => (
-                            <th key={key} className="px-3 py-2.5 font-bold uppercase tracking-wider">{key}</th>
+                            <th key={key} className="px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">{key}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {parsedData.slice(0, 5).map((row, idx) => (
-                          <tr key={idx} className="border-b border-border/50 text-foreground hover:bg-muted/5">
+                          <tr key={idx} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
                             {Object.values(row).map((val: any, cellIdx) => (
-                              <td key={cellIdx} className="px-3 py-2 font-semibold font-mono">{String(val)}</td>
+                              <td key={cellIdx} className="px-4 py-3 whitespace-nowrap">{String(val)}</td>
                             ))}
                           </tr>
                         ))}
@@ -317,12 +361,12 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
         </div>
 
         {/* Footer Actions */}
-        <div className="bg-muted/30 px-6 py-4 border-t border-border flex items-center justify-end gap-2">
+        <div className="px-6 py-4 border-t flex items-center justify-end gap-3 bg-muted/20">
           <Button
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="border-border text-foreground hover:bg-muted cursor-pointer font-bold h-10 px-4"
+            className="min-w-[100px]"
           >
             Cancel
           </Button>
@@ -330,13 +374,10 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
             type="button"
             disabled={loading || parsedData.length === 0}
             onClick={handleUpload}
-            className="bg-primary hover:bg-primary/95 text-primary-foreground font-bold flex items-center gap-1.5 cursor-pointer shadow h-10 px-6"
+            className="min-w-[140px]"
           >
             {loading ? (
-              <>
-                <CircleNotch className="h-4.5 w-4.5 animate-spin" />
-                Importing...
-              </>
+              <><Loader2Icon className="mr-2 h-4 w-4 animate-spin" />Importing...</>
             ) : (
               `Import ${parsedData.length} Records`
             )}
@@ -346,3 +387,4 @@ export function BulkUpload({ type, onSuccess, open, onOpenChange }: BulkUploadPr
     </Dialog>
   );
 }
+

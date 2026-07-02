@@ -1,23 +1,22 @@
 'use client';
 
-/**
- * @file page.tsx (/customer/offers)
- * @description Customer Loan Offers Page.
- *
- * Checks if the customer has an active application and displays its offer details.
- * Allows downloading the Sanction Letter PDF and accepting/declining the offer.
- */
-
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import api from '@/services/api';
+import { formatINR, formatLoanType, getDaysUntilExpiry } from '@/lib/customerStatusMap';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
-  getCustomerStatus,
-  formatINR,
-  formatLoanType,
-  getDaysUntilExpiry,
-} from '@/lib/customerStatusMap';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import {
   Gift,
   Spinner,
@@ -26,8 +25,11 @@ import {
   Clock,
   DownloadSimple,
   Warning,
-  ArrowRight,
-  Phone,
+  CircleWavyCheck,
+  CurrencyInr,
+  CalendarCheck,
+  Receipt,
+  TrendUp,
 } from '@phosphor-icons/react';
 
 interface Offer {
@@ -53,22 +55,18 @@ interface Application {
 }
 
 export default function CustomerOffersPage() {
-  const router = useRouter();
   const [app, setApp] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actingOffer, setActingOffer] = useState<'accept' | 'decline' | null>(null);
-  const [successMsg, setSuccessMsg] = useState('');
+  const [offerSuccessMsg, setOfferSuccessMsg] = useState('');
 
-  const fetchOffer = async () => {
+  const fetchData = async () => {
     try {
       const res = await api.get('/customer/applications');
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-        // Fetch detailed application to retrieve the linked offer object
         const detailRes = await api.get(`/customer/applications/${res.data[0].id}`);
-        if (detailRes.success) {
-          setApp(detailRes.data);
-        }
+        if (detailRes.success) setApp(detailRes.data);
       }
     } catch {
       setError('Failed to load offer details.');
@@ -77,9 +75,7 @@ export default function CustomerOffersPage() {
     }
   };
 
-  useEffect(() => {
-    fetchOffer();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleOfferAction = async (action: 'accept' | 'decline') => {
     if (!app) return;
@@ -88,12 +84,12 @@ export default function CustomerOffersPage() {
     try {
       const res = await api.post(`/customer/applications/${app.id}/offer/${action}`, {});
       if (res.success) {
-        if (action === 'accept') {
-          setSuccessMsg('Congratulations! Offer Accepted.');
-        } else {
-          setSuccessMsg('Offer declined successfully. Your application is now closed.');
-        }
-        await fetchOffer();
+        setOfferSuccessMsg(
+          action === 'accept'
+            ? 'Congratulations! You have accepted the loan offer. The bank will process your disbursement.'
+            : 'Offer declined. Your application is now closed. Please contact your Loan Officer if you have questions.'
+        );
+        await fetchData();
       } else {
         setError(res.message || `Failed to ${action} offer.`);
       }
@@ -104,47 +100,6 @@ export default function CustomerOffersPage() {
     }
   };
 
-  const downloadMockPDF = () => {
-    if (!app || !app.offer) return;
-    const offer = app.offer;
-
-    // Generate simple text representation simulating a Sanction Letter PDF
-    const content = `
-=========================================
-FORTRESS BANKING — SANCTION LETTER
-=========================================
-Application Number: ${app.applicationNumber}
-Applicant Name:     ${app.applicantName}
-Sanctioned Date:    ${new Date(offer.generatedAt).toLocaleDateString('en-IN')}
-Expiry Date:        ${new Date(offer.expiresAt).toLocaleDateString('en-IN')}
-
-LOAN SPECIFICATIONS:
-----------------------------
-Sanctioned Amount:  ₹${offer.loanAmount.toLocaleString('en-IN')}
-Interest Rate:      ${offer.interestRate}% p.a. (Fixed)
-Tenure Period:      ${offer.tenureMonths} Months
-Monthly EMI:        ₹${offer.emiAmount.toLocaleString('en-IN')}
-
-TERMS AND CONDITIONS:
-----------------------------
-1. The borrower agrees to repay the loan in monthly installments as stated above.
-2. The interest rate remains fixed for the entire tenure of the loan.
-3. Fortress Banking reserves the right to recall the facility under material adverse change.
-
-=========================================
-This is a computer generated document and does not require physical signature.
-=========================================
-    `;
-
-    const blob = new Blob([content.trim()], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Sanction_Letter_${app.applicationNumber}.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -153,194 +108,229 @@ This is a computer generated document and does not require physical signature.
     );
   }
 
-  if (!app || !app.offer) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-xl font-bold text-foreground">My Offer</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Review and sign your loan agreement sanction letter.
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-12 text-center shadow-sm">
-          <Gift className="h-16 w-16 text-muted-foreground/60 mx-auto mb-4" />
-          <h3 className="text-sm font-semibold text-foreground mb-1">No Sanctioned Offer Available</h3>
-          <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4">
-            If your application is currently under credit evaluation, your offer will appear here immediately after the approver signs off.
-          </p>
-          {app && (
-            <Link
-              href={`/customer/applications/${app.id}`}
-              className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold hover:underline"
-            >
-              Track Application Progress <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  const offer = app.offer;
-  const daysRemaining = getDaysUntilExpiry(offer.expiresAt);
-  const isPending = offer.offerStatus === 'GENERATED';
-  const isAccepted = offer.offerStatus === 'ACCEPTED';
-  const isDeclined = offer.offerStatus === 'DECLINED';
-  const isExpired = daysRemaining <= 0 && isPending;
+  const offer = app?.offer;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-foreground">My Offer</h1>
+        <h1 className="text-xl font-bold text-foreground tracking-tight">My Loan Offer</h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Review and respond to the sanctioned loan terms from Fortress Banking.
+          Review and respond to your customized loan offer from Fortress Banking.
         </p>
       </div>
 
+      {offerSuccessMsg && (
+        <Alert className="border-green-500/30 bg-green-500/10">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertTitle className="text-green-700 dark:text-green-400">Success</AlertTitle>
+          <AlertDescription className="text-green-600 dark:text-green-400">{offerSuccessMsg}</AlertDescription>
+        </Alert>
+      )}
       {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 flex items-center gap-2">
-          <Warning className="h-4 w-4 text-destructive flex-shrink-0" />
-          <p className="text-xs text-destructive">{error}</p>
-        </div>
+        <Alert variant="destructive">
+          <XCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      {successMsg && (
-        <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-5 flex items-start gap-3">
-          <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" weight="fill" />
-          <div>
-            <p className="text-xs font-bold text-foreground">{successMsg}</p>
-            {isAccepted && (
-              <div className="text-[11px] text-muted-foreground mt-1.5 space-y-1">
-                <p>Accepted Timestamp: <span className="font-medium text-foreground">{new Date(offer.acceptedAt || '').toLocaleString('en-IN')}</span></p>
-                <p>Estimated Disbursement: <span className="font-semibold text-foreground">1 to 2 business days</span></p>
-                <button
-                  onClick={() => router.push(`/customer/applications/${app.id}`)}
-                  className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground font-semibold px-2.5 py-1.5 rounded text-[10px] hover:bg-primary/95 transition-all mt-2 cursor-pointer"
-                >
-                  Track Disbursement
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-border/50 pb-4">
-          <div>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-              Application Number
+      {!app || !offer ? (
+        <Card className="border-border">
+          <CardContent className="p-12 text-center">
+            <Gift className="h-14 w-14 text-muted-foreground/50 mx-auto mb-4" />
+            <h3 className="text-sm font-semibold text-foreground mb-1">No Offer Available Yet</h3>
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              Your loan application is being reviewed. A customized offer will appear here once the credit assessment is complete.
             </p>
-            <p className="text-sm font-mono font-bold text-foreground">{app.applicationNumber}</p>
-          </div>
-          <div>
-            <span
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${
-                isAccepted
-                  ? 'bg-green-500/10 text-green-600 border-green-500/20'
-                  : isDeclined
-                  ? 'bg-destructive/10 text-destructive border-destructive/20'
-                  : isExpired
-                  ? 'bg-muted/10 text-muted-foreground border-muted-foreground/20'
-                  : 'bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400'
-              }`}
-            >
-              {isExpired ? 'EXPIRED' : offer.offerStatus}
-            </span>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+      ) : (() => {
+        const daysRemaining = getDaysUntilExpiry(offer.expiresAt);
+        const isPending = offer.offerStatus === 'GENERATED';
+        const isAccepted = offer.offerStatus === 'ACCEPTED';
+        const isDeclined = offer.offerStatus === 'DECLINED';
+        const isExpired = daysRemaining <= 0 && isPending;
 
-        {/* Offer Terms */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl border border-border/50 bg-muted/10">
-          <Field label="Sanctioned Amount" value={formatINR(offer.loanAmount)} />
-          <Field label="Interest Rate" value={`${offer.interestRate}% p.a.`} />
-          <Field label="Tenure Period" value={`${offer.tenureMonths} Months`} />
-          <Field label="Monthly EMI" value={formatINR(offer.emiAmount)} />
-        </div>
-
-        {/* Expiry Banner */}
-        {isPending && !isExpired && (
-          <div className="rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 py-2.5 flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400 font-semibold">
-            <Clock className="h-4 w-4" />
-            <span>
-              This offer is valid for {daysRemaining} more days. Please review and respond by{' '}
-              {new Date(offer.expiresAt).toLocaleDateString('en-IN')}.
-            </span>
-          </div>
-        )}
-
-        {/* Download Sanction Letter */}
-        <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/5">
-          <div className="flex items-center gap-2">
-            <DownloadSimple className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <p className="text-xs font-bold text-foreground">Sanction Letter (PDF)</p>
-              <p className="text-[10px] text-muted-foreground">Download the printable terms and loan agreement document.</p>
+        return (
+          <>
+            {/* Offer KPI Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { icon: <CurrencyInr className="h-4 w-4" />, label: 'Sanctioned Amount', value: formatINR(offer.loanAmount), color: 'blue' },
+                { icon: <TrendUp className="h-4 w-4" />, label: 'Interest Rate', value: `${offer.interestRate}% p.a.`, color: 'green' },
+                { icon: <CalendarCheck className="h-4 w-4" />, label: 'Tenure', value: `${offer.tenureMonths} months`, color: 'amber' },
+                { icon: <Receipt className="h-4 w-4" />, label: 'Monthly EMI', value: formatINR(offer.emiAmount), color: 'purple' },
+              ].map(({ icon, label, value, color }) => {
+                const colorMap: Record<string, string> = {
+                  blue: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+                  green: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
+                  amber: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                  purple: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+                };
+                return (
+                  <Card key={label} className="border-border">
+                    <CardContent className="p-4">
+                      <div className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border mb-2.5 ${colorMap[color]}`}>
+                        {icon}
+                      </div>
+                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
+                      <p className="text-sm font-bold text-foreground mt-0.5">{value}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
-          </div>
-          <button
-            onClick={downloadMockPDF}
-            className="flex h-8 px-3 items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-semibold text-foreground cursor-pointer transition-colors"
-          >
-            <span>Download</span>
-          </button>
-        </div>
 
-        {/* Action Panel */}
-        {isPending && !isExpired && (
-          <div className="pt-3 border-t border-border flex items-center gap-3 justify-end">
-            <button
-              onClick={() => handleOfferAction('decline')}
-              disabled={actingOffer !== null}
-              className="flex h-10 px-4 items-center justify-center rounded-lg border border-border bg-card hover:bg-destructive/10 hover:text-destructive text-xs font-semibold cursor-pointer transition-colors disabled:opacity-50"
-            >
-              {actingOffer === 'decline' ? <Spinner className="h-3.5 w-3.5 animate-spin" /> : 'Decline Offer'}
-            </button>
-            <button
-              onClick={() => handleOfferAction('accept')}
-              disabled={actingOffer !== null}
-              className="flex h-10 px-5 items-center justify-center rounded-lg bg-primary hover:bg-primary/95 text-xs font-bold text-primary-foreground shadow cursor-pointer transition-colors active:scale-95 disabled:opacity-50"
-            >
-              {actingOffer === 'accept' ? <Spinner className="h-3.5 w-3.5 animate-spin" /> : 'Accept & Agree'}
-            </button>
-          </div>
-        )}
+            {/* Main Offer Card */}
+            <Card className="border-border">
+              <CardHeader className="pb-3 pt-4 px-5">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-bold">Sanctioned Loan Offer</CardTitle>
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border ${
+                    isAccepted ? 'bg-green-500/10 text-green-700 border-green-500/30 dark:text-green-400'
+                    : isDeclined ? 'bg-destructive/10 text-destructive border-destructive/30'
+                    : isExpired ? 'bg-muted/10 text-muted-foreground border-muted-foreground/20'
+                    : 'bg-purple-500/10 text-purple-700 border-purple-500/30 dark:text-purple-400'
+                  }`}>
+                    {isExpired ? 'EXPIRED' : offer.offerStatus}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="px-5 pb-5 space-y-4">
+                {/* Expiry / Status Alert */}
+                {isPending && !isExpired && (
+                  <Alert className="border-amber-500/30 bg-amber-500/5">
+                    <Clock className="h-4 w-4 text-amber-600" weight="fill" />
+                    <AlertTitle className="text-amber-700 dark:text-amber-400">Offer Expires Soon</AlertTitle>
+                    <AlertDescription className="text-amber-600 dark:text-amber-400">
+                      This offer expires in <strong>{daysRemaining} day{daysRemaining !== 1 ? 's' : ''}</strong> — on {new Date(offer.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}.
+                      Please review and respond before it expires.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {isAccepted && (
+                  <Alert className="border-green-500/30 bg-green-500/5">
+                    <CheckCircle className="h-4 w-4 text-green-600" weight="fill" />
+                    <AlertTitle className="text-green-700 dark:text-green-400">Offer Accepted</AlertTitle>
+                    <AlertDescription className="text-green-600 dark:text-green-400">
+                      Accepted on {new Date(offer.acceptedAt || '').toLocaleString('en-IN')}. Disbursement is in progress.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {isDeclined && (
+                  <Alert variant="destructive">
+                    <XCircle className="h-4 w-4" weight="fill" />
+                    <AlertTitle>Offer Declined</AlertTitle>
+                    <AlertDescription>You have declined this offer. Please contact your Loan Officer if you wish to reconsider.</AlertDescription>
+                  </Alert>
+                )}
+                {isExpired && (
+                  <Alert variant="destructive">
+                    <Warning className="h-4 w-4" />
+                    <AlertTitle>Offer Expired</AlertTitle>
+                    <AlertDescription>This offer has expired. Please contact your Loan Officer to request a new offer.</AlertDescription>
+                  </Alert>
+                )}
 
-        {/* Declined Info */}
-        {isDeclined && (
-          <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2.5 flex items-center gap-2 text-xs text-destructive font-semibold">
-            <XCircle className="h-4 w-4" weight="fill" />
-            <span>You declined this loan offer. This application is now closed.</span>
-          </div>
-        )}
+                {/* Offer details */}
+                <div className="grid grid-cols-2 gap-x-8 gap-y-3 p-4 rounded-xl bg-muted/20 border border-border/50">
+                  {[
+                    { label: 'Application No.', value: app.applicationNumber },
+                    { label: 'Loan Type', value: formatLoanType(app.loanType) },
+                    { label: 'Offer Generated On', value: new Date(offer.generatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) },
+                    { label: 'Offer Expires On', value: new Date(offer.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) },
+                  ].map(({ label, value }) => (
+                    <div key={label}>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium mb-0.5">{label}</p>
+                      <p className="text-xs font-semibold text-foreground">{value}</p>
+                    </div>
+                  ))}
+                </div>
 
-        {/* Expired Info */}
-        {isExpired && (
-          <div className="rounded-lg border border-muted-foreground/20 bg-muted/5 px-3 py-2.5 flex items-center gap-2 text-xs text-muted-foreground font-semibold">
-            <Clock className="h-4 w-4" />
-            <span>This offer has expired. Contact your Loan Officer to re-evaluate your request.</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+                {/* Actions */}
+                {isPending && !isExpired && (
+                  <div className="flex items-center gap-3 justify-end pt-1 border-t border-border">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm" disabled={actingOffer !== null} className="gap-1.5">
+                          {actingOffer === 'decline' && <Spinner className="h-3.5 w-3.5 animate-spin" />}
+                          Decline Offer
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Decline This Offer?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Declining this offer will close it permanently. You will need to contact your Loan Officer to apply again. This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Go Back</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleOfferAction('decline')} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Yes, Decline
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
 
-function Field({
-  label,
-  value,
-  className = '',
-}: {
-  label: string;
-  value: string | number;
-  className?: string;
-}) {
-  return (
-    <div className="space-y-0.5">
-      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-        {label}
-      </p>
-      <p className={`text-xs font-semibold text-foreground ${className}`}>{value}</p>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" disabled={actingOffer !== null} className="gap-1.5">
+                          {actingOffer === 'accept' ? (
+                            <Spinner className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <CircleWavyCheck className="h-4 w-4" weight="fill" />
+                          )}
+                          Accept Sanction Letter
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirm Offer Acceptance</AlertDialogTitle>
+                          <AlertDialogDescription asChild>
+                            <div className="space-y-2">
+                              <p>You are accepting the following loan terms:</p>
+                              <div className="rounded-lg bg-muted p-3 space-y-1.5 text-sm">
+                                <div className="flex justify-between"><span className="text-muted-foreground">Loan Amount:</span><strong>{formatINR(offer.loanAmount)}</strong></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Interest Rate:</span><strong>{offer.interestRate}% p.a.</strong></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Tenure:</span><strong>{offer.tenureMonths} months</strong></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Monthly EMI:</span><strong>{formatINR(offer.emiAmount)}</strong></div>
+                              </div>
+                              <p className="text-xs text-muted-foreground">By confirming, you agree to the loan terms and conditions set by Fortress Banking.</p>
+                            </div>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Review Again</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleOfferAction('accept')}>
+                            Confirm & Accept
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                )}
+
+                {isAccepted && (
+                  <div className="flex justify-end pt-1 border-t border-border">
+                    <Button asChild size="sm" variant="outline" className="gap-1.5">
+                      <a
+                        href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/customer/applications/${app.id}/sanction-letter`}
+                        target="_blank"
+                        rel="noreferrer"
+                        download
+                      >
+                        <DownloadSimple className="h-4 w-4" />
+                        Download Sanction Letter (PDF)
+                      </a>
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </>
+        );
+      })()}
     </div>
   );
 }

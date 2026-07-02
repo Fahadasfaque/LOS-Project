@@ -14,6 +14,8 @@ export interface ApplicationQueryParams {
   loanType?: LoanType;
   skip: number;
   take: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export class LoanApplicationRepository {
@@ -172,7 +174,7 @@ export class LoanApplicationRepository {
       prisma.loanApplication.count({ where }),
       prisma.loanApplication.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: params.sortField ? { [params.sortField]: params.sortOrder || 'asc' } : { createdAt: 'desc' },
         skip: params.skip,
         take: params.take,
         include: {

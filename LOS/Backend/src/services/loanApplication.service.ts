@@ -9,6 +9,7 @@
  * 3. Enforces valid workflow transitions between statuses.
  */
 
+import { randomUUID } from 'crypto';
 import { LoanApplicationRepository } from '../repositories/loanApplication.repository';
 import { encrypt, decrypt } from '../utils/encryption';
 import { maskPan } from '../utils/masking';
@@ -227,48 +228,54 @@ export class LoanApplicationService {
 
     const createdApps: any[] = [];
 
+    const applicationsToCreate: any[] = [];
+    const statusHistoriesToCreate: any[] = [];
+    const auditLogsToCreate: any[] = [];
+
+    for (let i = 0; i < appsData.length; i++) {
+      const data = appsData[i];
+      const applicationNumber = `${prefix}${String(sequence + i).padStart(6, '0')}`;
+      const panEncrypted = encrypt(data.pan.toUpperCase());
+      const appId = randomUUID();
+
+      applicationsToCreate.push({
+        id: appId,
+        applicationNumber,
+        applicantName: data.applicantName,
+        email: data.email,
+        phone: data.phone,
+        panEncrypted,
+        loanType: data.loanType,
+        loanAmount: data.loanAmount,
+        monthlyIncome: data.monthlyIncome,
+        employmentType: data.employmentType,
+        status: 'DRAFT',
+        userId,
+      });
+
+      statusHistoriesToCreate.push({
+        applicationId: appId,
+        oldStatus: null,
+        newStatus: 'DRAFT',
+        changedById: userId,
+      });
+
+      auditLogsToCreate.push({
+        userId,
+        action: 'LOAN_APPLICATION_CREATE',
+        details: `Bulk created loan application ${applicationNumber} in DRAFT status for ${data.applicantName}.`
+      });
+    }
+
     await prisma.$transaction(async (tx) => {
-      for (let i = 0; i < appsData.length; i++) {
-        const data = appsData[i];
-        const applicationNumber = `${prefix}${String(sequence + i).padStart(6, '0')}`;
-        const panEncrypted = encrypt(data.pan.toUpperCase());
-
-        const app = await tx.loanApplication.create({
-          data: {
-            applicationNumber,
-            applicantName: data.applicantName,
-            email: data.email,
-            phone: data.phone,
-            panEncrypted,
-            loanType: data.loanType,
-            loanAmount: data.loanAmount,
-            monthlyIncome: data.monthlyIncome,
-            employmentType: data.employmentType,
-            status: 'DRAFT',
-            userId,
-          },
-        });
-
-        await tx.statusHistory.create({
-          data: {
-            applicationId: app.id,
-            oldStatus: null,
-            newStatus: 'DRAFT',
-            changedById: userId,
-          },
-        });
-
-        await tx.auditLog.create({
-          data: {
-            userId,
-            action: 'LOAN_APPLICATION_CREATE',
-            details: `Bulk created loan application ${app.applicationNumber} in DRAFT status for ${app.applicantName}.`
-          }
-        });
-
-        createdApps.push(app);
-      }
+      await tx.loanApplication.createMany({ data: applicationsToCreate });
+      await tx.statusHistory.createMany({ data: statusHistoriesToCreate });
+      await tx.auditLog.createMany({ data: auditLogsToCreate });
+    }, {
+      timeout: 30000
     });
+
+    createdApps.push(...applicationsToCreate);
 
     return createdApps;
   }
@@ -433,7 +440,7 @@ export class LoanApplicationService {
   async listApplications(
     role: Role,
     userId: string,
-    query: { search?: string; status?: LoanStatus; loanType?: LoanType; page?: string; limit?: string }
+    query: { search?: string; status?: LoanStatus; loanType?: LoanType; page?: string; limit?: string; sortField?: string; sortOrder?: 'asc' | 'desc' }
   ): Promise<any> {
     const page = parseInt(query.page || '1', 10);
     const limit = parseInt(query.limit || '10', 10);
@@ -447,6 +454,8 @@ export class LoanApplicationService {
       loanType: query.loanType,
       skip,
       take: limit,
+      sortField: query.sortField,
+      sortOrder: query.sortOrder,
     });
 
     const sanitizedItems = result.items.map((item) => {

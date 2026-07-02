@@ -66,3 +66,10 @@ To isolate customer interactions from internal banking operations, we implement 
 - **Data Access Boundary**: Every service-layer method queries the database using `customerUserId` in the where-clause of the query. Sensitive internal underwriting fields (risk category, credit score calculation, recommendation) are completely omitted from selects returned to customers.
 - **Communication Flow**: Actions taken by customers (like document upload or offer acceptance) emit non-blocking `CustomerNotification` records, trigger real-time email alerts to the assigned Loan Officer, and update employee dashboards with pending badge indicators.
 
+---
+
+## 6. Phase 7 Settings Management & Global Configuration
+To manage user preferences and central system behavior without requiring code changes:
+- **Individual Settings**: Profiles, password security, and personalized notification preferences are encapsulated in user-linked tables, isolated per authenticated user session.
+- **Global Toggles**: Critical operational systems like the Global Email Dispatcher are controlled by key-value pairs stored in the `SystemConfig` table, and restricted to `SUPER_ADMIN` manipulation.
+- **Auditing**: All sensitive settings alterations (e.g., password changes, global email toggles) write immutable audit trail records for compliance visibility.

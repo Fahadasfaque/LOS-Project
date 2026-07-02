@@ -19,6 +19,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import CustomerSidebar from '@/components/customer/CustomerSidebar';
 import CustomerHeader from '@/components/customer/CustomerHeader';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import api from '@/services/api';
 
 export default function CustomerPortalLayout({ children }: { children: React.ReactNode }) {
@@ -92,31 +93,24 @@ export default function CustomerPortalLayout({ children }: { children: React.Rea
   // While auth is loading or redirecting, show loading screen
   if (loading || !user || user.role !== 'CUSTOMER') {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <p className="text-xs text-muted-foreground">Loading your portal...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground transition-colors duration-200">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 rounded-full border-4 border-t-primary border-r-primary border-border animate-spin"></div>
+          <p className="text-sm font-medium text-muted-foreground">Loading your portal...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar */}
+    <SidebarProvider>
       <CustomerSidebar unreadCount={unreadCount} />
-
-      {/* Main content area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <SidebarInset>
         <CustomerHeader unreadCount={unreadCount} applicationNumber={latestAppNumber} />
-
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="px-4 py-5 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-            {children}
-          </div>
+        <main className="flex flex-1 flex-col p-4 md:p-6 w-full overflow-x-hidden">
+          {children}
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

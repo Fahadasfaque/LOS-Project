@@ -93,8 +93,29 @@ model User {
   customerProfile       CustomerProfile?
   customerNotifications CustomerNotification[]
   customerApplications  LoanApplication[]         @relation("CustomerApplications")
+  notificationPrefs     UserNotificationPrefs?
 
   @@map("users")
+}
+
+model UserNotificationPrefs {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailNotifications Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("user_notification_prefs")
+}
+
+model SystemConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt @default(now())
+
+  @@map("system_config")
 }
 
 model CustomerProfile {

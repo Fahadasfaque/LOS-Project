@@ -157,6 +157,51 @@ export class CustomerService {
     );
   }
 
+  /**
+   * Change password for an already ACTIVE customer.
+   * Requires current password verification.
+   */
+  async changePassword(
+    customerUserId: string,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> {
+    const user = await prisma.user.findUnique({
+      where: { id: customerUserId },
+      select: { password: true },
+    });
+
+    if (!user) {
+      throw new NotFoundError('Customer account not found.');
+    }
+
+    if (!user.password) {
+      throw new BadRequestError('No password set. Please use the set-password flow.');
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      throw new BadRequestError('Current password is incorrect.');
+    }
+
+    if (newPassword.length < 8) {
+      throw new BadRequestError('New password must be at least 8 characters.');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: customerUserId },
+      data: { password: hashedPassword },
+    });
+
+    await auditLogService.logAction(
+      customerUserId,
+      'CUSTOMER_PASSWORD_CHANGED',
+      'Customer changed their portal password.'
+    );
+  }
+
   // ─── Applications ─────────────────────────────────────────────────────────
 
   /**

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import api from '@/services/api';
+import { cn } from '@/lib/utils';
 import {
   Table,
   TableHeader,
@@ -44,6 +45,8 @@ import {
   UploadSimple,
   CaretUpDown,
   ArrowsCounterClockwise,
+  ArrowUp,
+  ArrowDown,
   X
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
@@ -51,6 +54,7 @@ import { BulkUpload } from '@/components/ui/bulk-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AnimatePresence, motion } from 'motion/react';
+import { UserPlusIcon, Loader2Icon, ChevronDownIcon } from 'lucide-react';
 
 const createUserSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -88,6 +92,8 @@ export default function UserManagementPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [sortField, setSortField] = useState<keyof UserData | ''>('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
 
   const {
     register,
@@ -183,7 +189,23 @@ export default function UserManagementPage() {
       
       return matchesSearch && matchesRole && matchesStatus;
     });
-  }, [users, search, roleFilter, statusFilter]);
+
+    if (sortField && sortOrder) {
+      filtered.sort((a, b) => {
+        let aVal = a[sortField];
+        let bVal = b[sortField];
+        
+        if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+        if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+        
+        if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [users, search, roleFilter, statusFilter, sortField, sortOrder]);
 
   const total = filteredUsers.length;
   const totalPages = Math.ceil(total / limit) || 1;
@@ -217,6 +239,38 @@ export default function UserManagementPage() {
   const resetFilters = () => {
     setSearch('');
     setRoleFilter('');
+    setStatusFilter('');
+    setSortField('');
+    setSortOrder('');
+  };
+
+  const handleSort = (field: keyof UserData) => {
+    if (sortField === field) {
+      if (sortOrder === 'asc') setSortOrder('desc');
+      else if (sortOrder === 'desc') {
+        setSortOrder('');
+        setSortField('');
+      } else setSortOrder('asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const renderSortableHead = (field: keyof UserData, label: string, align: 'left' | 'right' | 'center' = 'left') => {
+    const isActive = sortField === field;
+    return (
+      <TableHead 
+        className={`text-sm py-3 px-4 cursor-pointer hover:bg-muted/30 select-none transition-colors ${isActive ? 'font-bold text-foreground' : 'text-muted-foreground font-semibold'} text-${align}`}
+        onClick={() => handleSort(field)}
+      >
+        <div className={`flex items-center gap-1 ${align === 'right' ? 'justify-end' : align === 'center' ? 'justify-center' : 'justify-start'}`}>
+          {label}
+          {isActive && sortOrder === 'asc' && <ArrowUp className="h-3.5 w-3.5" weight="bold" />}
+          {isActive && sortOrder === 'desc' && <ArrowDown className="h-3.5 w-3.5" weight="bold" />}
+        </div>
+      </TableHead>
+    );
   };
 
   const formatDate = (dateStr: string) => {
@@ -272,75 +326,73 @@ export default function UserManagementPage() {
                 </Button>
               }
             />
-            <DialogContent className="p-0 gap-0 sm:max-w-lg overflow-hidden border-border bg-card shadow-2xl sm:rounded-lg">
-              <div className="bg-muted/30 px-6 py-6 border-b border-border/50">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20 shadow-sm text-primary">
-                    <UserPlus className="h-6 w-6" weight="bold" />
-                  </div>
-                  <div className="text-left">
-                    <DialogTitle className="text-xl font-extrabold tracking-tight text-foreground">Create Terminal Account</DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-xs mt-1 leading-relaxed font-medium">
-                      Register a new administrator, loan officer, risk analyst, or approver account.
-                    </DialogDescription>
-                  </div>
+            <DialogContent className="p-0 gap-0 sm:max-w-lg overflow-hidden border-border bg-card shadow-lg sm:rounded-lg">
+              <div className="px-6 py-5 border-b flex items-start gap-4">
+                <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center shrink-0 border text-foreground">
+                  <UserPlusIcon className="h-6 w-6" />
+                </div>
+                <div className="text-left space-y-1">
+                  <DialogTitle className="text-lg font-semibold text-foreground">Create Terminal Account</DialogTitle>
+                  <DialogDescription className="text-sm text-muted-foreground">
+                    Register a new administrator, loan officer, risk analyst, or approver account.
+                  </DialogDescription>
                 </div>
               </div>
               <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="p-6 space-y-5">
-                  <div className="grid grid-cols-2 gap-5">
+                <div className="p-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5 text-left">
-                      <Label htmlFor="firstName" className="text-xs font-bold text-foreground/90">First Name</Label>
+                      <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
                       <Input
                         id="firstName"
-                        className="h-10 bg-background border-border focus-visible:ring-primary text-foreground placeholder-muted-foreground transition-all rounded"
+                        className={cn("h-10 bg-background transition-all rounded", errors.firstName && "border-destructive focus-visible:ring-destructive")}
                         placeholder="John"
                         {...register('firstName')}
                       />
-                      {errors.firstName && <p className="text-xs text-destructive font-semibold">{errors.firstName.message}</p>}
+                      {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
                     </div>
                     <div className="space-y-1.5 text-left">
-                      <Label htmlFor="lastName" className="text-xs font-bold text-foreground/90">Last Name</Label>
+                      <Label htmlFor="lastName" className="text-sm font-medium">Last Name</Label>
                       <Input
                         id="lastName"
-                        className="h-10 bg-background border-border focus-visible:ring-primary text-foreground placeholder-muted-foreground transition-all rounded"
+                        className={cn("h-10 bg-background transition-all rounded", errors.lastName && "border-destructive focus-visible:ring-destructive")}
                         placeholder="Doe"
                         {...register('lastName')}
                       />
-                      {errors.lastName && <p className="text-xs text-destructive font-semibold">{errors.lastName.message}</p>}
+                      {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
                     </div>
                   </div>
 
                   <div className="space-y-1.5 text-left">
-                    <Label htmlFor="email" className="text-xs font-bold text-foreground/90">Email Address</Label>
+                    <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
                     <Input
                       id="email"
                       type="email"
-                      className="h-10 bg-background border-border focus-visible:ring-primary text-foreground placeholder-muted-foreground/60 transition-all rounded"
+                      className={cn("h-10 bg-background transition-all rounded", errors.email && "border-destructive focus-visible:ring-destructive")}
                       placeholder="user@los.com"
                       {...register('email')}
                     />
-                    {errors.email && <p className="text-xs text-destructive font-semibold">{errors.email.message}</p>}
+                    {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                   </div>
 
                   <div className="space-y-1.5 text-left">
-                    <Label htmlFor="password" className="text-xs font-bold text-foreground/90">Initial Password</Label>
+                    <Label htmlFor="password" className="text-sm font-medium">Initial Password</Label>
                     <Input
                       id="password"
                       type="password"
-                      className="h-10 bg-background border-border focus-visible:ring-primary text-foreground placeholder-muted-foreground transition-all rounded"
+                      className={cn("h-10 bg-background transition-all rounded", errors.password && "border-destructive focus-visible:ring-destructive")}
                       placeholder="••••••••"
                       {...register('password')}
                     />
-                    {errors.password && <p className="text-xs text-destructive font-semibold">{errors.password.message}</p>}
+                    {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                   </div>
 
                   <div className="space-y-1.5 text-left">
-                    <Label htmlFor="role" className="text-xs font-bold text-foreground/90">Security Role</Label>
+                    <Label htmlFor="role" className="text-sm font-medium">Security Role</Label>
                     <div className="relative">
                       <select
                         id="role"
-                        className="w-full h-10 px-3 rounded bg-background border border-border text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-sm font-semibold cursor-pointer shadow-sm transition-all appearance-none"
+                        className={cn("w-full h-10 px-3 rounded bg-background border border-border text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium cursor-pointer shadow-sm transition-all appearance-none", errors.role && "border-destructive focus:border-destructive focus:ring-destructive")}
                         {...register('role')}
                       >
                         <option value="SUPER_ADMIN">SUPER ADMIN</option>
@@ -349,29 +401,31 @@ export default function UserManagementPage() {
                         <option value="APPROVER">APPROVER (Executive)</option>
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
-                        <CaretDown className="h-4 w-4" />
+                        <ChevronDownIcon className="h-4 w-4" />
                       </div>
                     </div>
-                    {errors.role && <p className="text-xs text-destructive font-semibold">{errors.role.message}</p>}
+                    {errors.role && <p className="text-xs text-destructive">{errors.role.message}</p>}
                   </div>
                 </div>
 
-                <div className="bg-muted/30 px-6 py-4 border-t border-border flex items-center justify-end">
+                <div className="px-6 py-4 border-t flex items-center justify-end gap-3 bg-muted/20">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => { setDialogOpen(false); reset(); }}
+                    className="min-w-[100px]"
+                  >
+                    Cancel
+                  </Button>
                   <Button
                     type="submit"
                     disabled={submitting}
-                    className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-semibold flex items-center justify-center h-10 px-8 rounded shadow cursor-pointer transition-all duration-200"
+                    className="min-w-[140px]"
                   >
                     {submitting ? (
-                      <>
-                        <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
-                        Saving User...
-                      </>
+                      <><Loader2Icon className="mr-2 h-4 w-4 animate-spin" />Provisioning...</>
                     ) : (
-                      <>
-                        <UserPlus className="mr-2 h-4.5 w-4.5" weight="bold" />
-                        Provision Account
-                      </>
+                      'Provision Account'
                     )}
                   </Button>
                 </div>
@@ -511,11 +565,11 @@ export default function UserManagementPage() {
                       aria-label="Select all"
                     />
                   </TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-sm py-3 px-4">Name</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-sm py-3 px-4">Email</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-sm py-3 px-4">Role</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-sm py-3 px-4">Created On</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold text-xs py-3 px-4">Status</TableHead>
+                  {renderSortableHead('firstName', 'Name')}
+                  {renderSortableHead('email', 'Email')}
+                  {renderSortableHead('role', 'Role')}
+                  {renderSortableHead('createdAt', 'Created On')}
+                  {renderSortableHead('isActive', 'Status')}
                   <TableHead className="text-right text-muted-foreground font-semibold text-xs py-3 px-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>

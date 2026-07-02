@@ -1,16 +1,19 @@
 'use client';
 
-/**
- * @file page.tsx (/customer/documents)
- * @description Dedicated customer Document Vault.
- *
- * Provides a clean overview of all required documents for the customer's active loan application.
- * Shows upload/replace capability, verification status badges, and download links.
- */
-
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import api from '@/services/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   FolderOpen,
   Spinner,
@@ -20,7 +23,6 @@ import {
   UploadSimple,
   DownloadSimple,
   Warning,
-  ArrowRight,
 } from '@phosphor-icons/react';
 
 interface Document {
@@ -39,6 +41,8 @@ interface Application {
   documents: Document[];
 }
 
+const REQUIRED_DOC_TYPES = ['AADHAAR', 'PAN', 'INCOME_PROOF', 'BANK_STATEMENT'];
+
 export default function CustomerDocumentsPage() {
   const [app, setApp] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,11 +54,8 @@ export default function CustomerDocumentsPage() {
     try {
       const res = await api.get('/customer/applications');
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-        // Fetch detailed version which contains documents
         const detailRes = await api.get(`/customer/applications/${res.data[0].id}`);
-        if (detailRes.success) {
-          setApp(detailRes.data);
-        }
+        if (detailRes.success) setApp(detailRes.data);
       }
     } catch {
       setError('Failed to load documents.');
@@ -63,19 +64,22 @@ export default function CustomerDocumentsPage() {
     }
   };
 
-  useEffect(() => {
-    fetchDocs();
-  }, []);
+  useEffect(() => { fetchDocs(); }, []);
 
   const handleFileUpload = async (docType: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !app) return;
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('File size exceeds 5MB. Please choose a smaller file.');
+      return;
+    }
 
     setUploadingDocType(docType);
     setUploadError('');
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('applicationId', app.id);
+    formData.append('applicationId', app!.id);
     formData.append('documentType', docType);
 
     try {
@@ -83,7 +87,7 @@ export default function CustomerDocumentsPage() {
       if (res.success) {
         await fetchDocs();
       } else {
-        setUploadError(res.message || 'Upload failed.');
+        setUploadError(res.message || 'Upload failed. Please try again.');
       }
     } catch (err: any) {
       setUploadError(err?.message || 'Failed to upload document.');
@@ -100,142 +104,199 @@ export default function CustomerDocumentsPage() {
     );
   }
 
-  const requiredTypes = ['PAN', 'AADHAAR', 'SALARY_SLIP', 'BANK_STATEMENT'];
+  if (!app) {
+    return (
+      <Card className="border-border">
+        <CardContent className="p-12 text-center">
+          <FolderOpen className="h-14 w-14 text-muted-foreground/50 mx-auto mb-4" />
+          <h3 className="text-sm font-semibold text-foreground mb-1">No Active Application</h3>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+            Documents will appear here once your Loan Officer creates an application for you.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const rejectedDocs = app.documents.filter((d) => d.verificationStatus === 'REJECTED');
+  const verifiedCount = app.documents.filter((d) => d.verificationStatus === 'VERIFIED').length;
+  const uploadedCount = app.documents.length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-foreground">Document Vault</h1>
+        <h1 className="text-xl font-bold text-foreground tracking-tight">Document Vault</h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Upload and manage your required verification documents for loan processing.
+          Application <span className="font-mono font-semibold text-foreground">{app.applicationNumber}</span> · Max file size: 5MB per document
         </p>
       </div>
 
+      {/* Alerts */}
+      {rejectedDocs.length > 0 && (
+        <Alert variant="destructive">
+          <Warning className="h-4 w-4" />
+          <AlertTitle>Action Required</AlertTitle>
+          <AlertDescription>
+            {rejectedDocs.length} document{rejectedDocs.length > 1 ? 's have' : ' has'} been rejected.
+            Please re-upload to avoid delays in processing your application.
+          </AlertDescription>
+        </Alert>
+      )}
       {uploadError && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 flex items-center gap-2">
-          <Warning className="h-4 w-4 text-destructive flex-shrink-0" />
-          <p className="text-xs text-destructive">{uploadError}</p>
-        </div>
+        <Alert variant="destructive">
+          <XCircle className="h-4 w-4" />
+          <AlertDescription>{uploadError}</AlertDescription>
+        </Alert>
       )}
 
-      {!app ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <FolderOpen className="h-16 w-16 text-muted-foreground/60 mx-auto mb-4" />
-          <h3 className="text-sm font-semibold text-foreground mb-1">No Active Applications</h3>
-          <p className="text-xs text-muted-foreground">
-            You do not have any active applications. Document upload will be enabled once your application is initialized.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {/* Active Application Info */}
-          <div className="rounded-xl border border-border bg-card p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-            <div>
-              <p className="text-xs font-bold text-foreground">
-                Active Application: <span className="font-mono">{app.applicationNumber}</span>
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Ensure all four required documents are uploaded to avoid delays in review.
-              </p>
+      {/* KPI Strip */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="border-border">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <FolderOpen className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">Required</p>
+                <p className="text-lg font-bold text-foreground leading-tight">{REQUIRED_DOC_TYPES.length}</p>
+              </div>
             </div>
-            <Link
-              href={`/customer/applications/${app.id}`}
-              className="flex h-8 px-3 items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-semibold text-foreground cursor-pointer transition-colors w-fit"
-            >
-              <span>Track Application</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">Uploaded</p>
+                <p className="text-lg font-bold text-foreground leading-tight">{uploadedCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/10">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">Verified</p>
+                <p className="text-lg font-bold text-foreground leading-tight">{verifiedCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          {/* Document List */}
-          <div className="grid gap-3">
-            {requiredTypes.map((type) => {
-              const doc = app.documents.find((d) => d.documentType === type);
-              const isVerified = doc?.verificationStatus === 'VERIFIED';
-              const isPending = doc?.verificationStatus === 'PENDING';
-              const isRejected = doc?.verificationStatus === 'REJECTED';
+      {/* Documents Table */}
+      <Card className="border-border">
+        <CardHeader className="pb-3 pt-4 px-5">
+          <CardTitle className="text-sm font-bold">Required Documents</CardTitle>
+          <p className="text-xs text-muted-foreground">Accepted formats: PDF, JPG, JPEG, PNG. Max size: 5MB</p>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent border-border">
+                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide">Document Type</TableHead>
+                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide">File Name</TableHead>
+                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide">Uploaded On</TableHead>
+                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide">Status</TableHead>
+                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {REQUIRED_DOC_TYPES.map((type) => {
+                  const doc = app.documents.find((d) => d.documentType === type);
+                  const isVerified = doc?.verificationStatus === 'VERIFIED';
+                  const isRejected = doc?.verificationStatus === 'REJECTED';
+                  const isPending = doc && !isVerified && !isRejected;
 
-              return (
-                <div
-                  key={type}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-border bg-card"
-                >
-                  {/* Left info */}
-                  <div className="space-y-1 min-w-0">
-                    <p className="text-xs font-bold text-foreground">{type.replace(/_/g, ' ')} Card / Statement</p>
-                    {doc ? (
-                      <p className="text-[11px] text-muted-foreground truncate" title={doc.originalName}>
-                        File: {doc.originalName}
-                      </p>
-                    ) : (
-                      <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold">
-                        <Warning className="h-3.5 w-3.5" /> Awaiting upload
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-wrap items-center gap-3 self-end sm:self-center">
-                    {/* Status Badge */}
-                    {doc && (
-                      <span
-                        className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[9px] font-bold border ${
-                          isVerified
-                            ? 'bg-green-500/10 text-green-600 border-green-500/20'
-                            : isRejected
-                            ? 'bg-destructive/10 text-destructive border-destructive/20'
-                            : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
-                        }`}
-                      >
-                        {isVerified ? (
-                          <CheckCircle className="h-3 w-3" weight="fill" />
+                  return (
+                    <TableRow key={type} className="hover:bg-muted/30 border-border/50">
+                      <TableCell className="text-xs font-semibold text-foreground py-4">
+                        {type.replace(/_/g, ' ')}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground py-4 max-w-[200px]">
+                        {doc ? (
+                          <span className="truncate block" title={doc.originalName}>{doc.originalName}</span>
+                        ) : (
+                          <span className="italic text-muted-foreground/60">Not uploaded</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground py-4">
+                        {doc
+                          ? new Date(doc.uploadedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                          : '—'}
+                      </TableCell>
+                      <TableCell className="py-4">
+                        {!doc ? (
+                          <Badge variant="outline" className="text-[10px] border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                            Required
+                          </Badge>
+                        ) : isVerified ? (
+                          <Badge variant="outline" className="text-[10px] border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400">
+                            <CheckCircle className="h-3 w-3 mr-1" weight="fill" /> Verified
+                          </Badge>
                         ) : isRejected ? (
-                          <XCircle className="h-3 w-3" weight="fill" />
+                          <Badge variant="destructive" className="text-[10px]">
+                            <XCircle className="h-3 w-3 mr-1" weight="fill" /> Rejected
+                          </Badge>
                         ) : (
-                          <Clock className="h-3 w-3" weight="fill" />
+                          <Badge variant="outline" className="text-[10px] border-primary/30 bg-primary/10 text-primary">
+                            <Clock className="h-3 w-3 mr-1" weight="fill" /> Under Review
+                          </Badge>
                         )}
-                        {doc.verificationStatus}
-                      </span>
-                    )}
-
-                    {/* View File */}
-                    {doc && (
-                      <a
-                        href={doc.secureUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex h-8 px-2.5 items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs text-foreground cursor-pointer transition-colors"
-                      >
-                        <DownloadSimple className="h-3.5 w-3.5" />
-                        <span>View</span>
-                      </a>
-                    )}
-
-                    {/* Upload / Replace Action */}
-                    {!isVerified && (
-                      <label className="relative flex h-8 px-3 items-center justify-center gap-1.5 rounded-lg bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-semibold cursor-pointer select-none transition-colors active:scale-95">
-                        {uploadingDocType === type ? (
-                          <Spinner className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <UploadSimple className="h-3.5 w-3.5" />
-                        )}
-                        <span>{doc ? 'Replace' : 'Upload'}</span>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          onChange={(e) => handleFileUpload(type, e)}
-                          disabled={uploadingDocType !== null}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                      </TableCell>
+                      <TableCell className="py-4 text-right">
+                        <div className="flex items-center gap-2 justify-end">
+                          {doc && (
+                            <Button asChild size="sm" variant="outline" className="h-7 text-xs gap-1">
+                              <a href={doc.secureUrl} target="_blank" rel="noreferrer">
+                                <DownloadSimple className="h-3 w-3" /> View
+                              </a>
+                            </Button>
+                          )}
+                          {!isVerified && (
+                            <label className="relative inline-flex cursor-pointer">
+                              <Button
+                                size="sm"
+                                variant={isRejected ? 'destructive' : 'default'}
+                                className="h-7 text-xs gap-1 pointer-events-none"
+                                disabled={uploadingDocType !== null}
+                              >
+                                {uploadingDocType === type ? (
+                                  <Spinner className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <UploadSimple className="h-3 w-3" />
+                                )}
+                                {doc ? 'Replace' : 'Upload'}
+                              </Button>
+                              <input
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={(e) => handleFileUpload(type, e)}
+                                disabled={uploadingDocType !== null}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                              />
+                            </label>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
-        </div>
-      )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -198,3 +198,48 @@ sequenceDiagram
     FE->>Customer: Redirects to "/customer/dashboard" directly
   end
 ```
+
+---
+
+## 5. Settings & Profile Management Flow
+This flow details how users can manage their personal profiles, security, notifications, and how a SUPER_ADMIN can toggle the global email service.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor User as Authenticated User
+  actor Admin as SUPER_ADMIN
+  participant FE as Next.js Frontend
+  participant BE as Express Backend
+  
+  Note over User, BE: Profile & Security Management
+  User->>FE: Accesses "/dashboard/settings"
+  FE->>BE: GET /api/v1/settings/profile
+  BE-->>FE: Returns user profile details
+  User->>FE: Updates name and clicks "Save"
+  FE->>BE: PATCH /api/v1/settings/profile {firstName, lastName}
+  BE->>BE: Writes Audit Log (PROFILE_UPDATED)
+  BE-->>FE: Success response
+  
+  User->>FE: Updates password
+  FE->>BE: PATCH /api/v1/settings/security {currentPassword, newPassword}
+  BE->>BE: Validates current password and updates hash
+  BE->>BE: Writes Audit Log (PASSWORD_CHANGED)
+  BE-->>FE: Success response
+  
+  Note over User, BE: Notification Preferences
+  User->>FE: Toggles "Email Notifications"
+  FE->>BE: PATCH /api/v1/settings/notifications {emailNotifications}
+  BE->>BE: Upserts UserNotificationPrefs
+  BE-->>FE: Success response
+  
+  Note over Admin, BE: Global System Configuration
+  Admin->>FE: Accesses "/dashboard/settings" (System config visible to SUPER_ADMIN)
+  FE->>BE: GET /api/v1/settings/email-service
+  BE-->>FE: Returns { enabled: true/false }
+  Admin->>FE: Toggles "Global Email Service"
+  FE->>BE: PATCH /api/v1/settings/email-service {enabled}
+  BE->>BE: Upserts SystemConfig (key: EMAIL_SERVICE_ENABLED)
+  BE->>BE: Writes Audit Log (EMAIL_SERVICE_TOGGLED)
+  BE-->>FE: Success response
+```

@@ -1,57 +1,41 @@
-'use client';
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { Metadata } from "next";
+import Link from "next/link";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
-import { FileQuestion, Home, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+export const metadata: Metadata = {
+  title: "404 - Page not found | Fortress LOS",
+  description:
+    "Sorry, we couldn’t find the page you’re looking for in the Loan Origination System.",
+};
 
-export default function NotFound() {
-  const router = useRouter();
-
+export default function Error404() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background p-6 selection:bg-primary/10">
-      {/* Decorative Background Glows */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 rounded-full bg-violet-500/5 blur-3xl" />
+    <div className="grid h-screen items-center bg-background pb-8 lg:grid-cols-2 lg:pb-0">
+      <div className="text-center px-4">
+        <p className="text-base font-semibold text-muted-foreground">404</p>
+        <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-5xl lg:text-7xl">
+          Page not found
+        </h1>
+        <p className="mt-6 text-base leading-7 text-muted-foreground">
+          Sorry, we couldn’t find the page you’re looking for.
+        </p>
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <Link href="/">
+            <Button size="lg">Go back home</Button>
+          </Link>
+          <Button size="lg" variant="ghost">
+            Contact support <ArrowRight className="ms-2 h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
-      <div className="relative max-w-md w-full text-center space-y-6 bg-card/45 backdrop-blur-sm border border-border/60 p-8 rounded-2xl shadow-xl">
-        <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/15 shadow-inner">
-          <FileQuestion className="h-8 w-8" />
-        </div>
-
-        <div className="space-y-2">
-          <span className="font-mono text-xs font-extrabold tracking-widest text-primary uppercase bg-primary/5 border border-primary/10 px-3 py-1 rounded-full">
-            Error 404
-          </span>
-          <h1 className="text-2xl font-extrabold text-foreground tracking-tight mt-3">
-            Page Not Found
-          </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-            The page you are looking for doesn't exist, has been removed, or is temporarily unavailable.
-          </p>
-        </div>
-
-        <div className="border-t border-border/60 my-2"></div>
-
-        <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center">
-          <Button
-            variant="outline"
-            onClick={() => window.history.back()}
-            className="flex-1 h-10 font-bold border-border bg-background hover:bg-muted text-xs rounded-xl shadow-sm transition-all"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Go Back
-          </Button>
-          <Button
-            onClick={() => router.push('/')}
-            className="flex-1 h-10 font-bold bg-primary hover:bg-primary/95 text-primary-foreground text-xs rounded-xl shadow transition-all"
-          >
-            <Home className="mr-2 h-4 w-4" />
-            Return Home
-          </Button>
-        </div>
+      <div className="hidden lg:flex lg:justify-center lg:items-center p-8">
+        <img
+          src={`/images/404.svg`}
+          alt="404 visual"
+          className="object-contain max-h-[80vh]"
+        />
       </div>
     </div>
   );

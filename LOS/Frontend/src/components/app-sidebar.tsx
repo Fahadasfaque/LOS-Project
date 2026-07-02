@@ -111,7 +111,7 @@ const navigationGroups: SidebarGroupType[] = [
 ]
 
 const navSecondary = [
-  { title: "Settings", url: "/settings", icon: <SettingsIcon /> },
+  { title: "Settings", url: "/dashboard/settings", icon: <SettingsIcon /> },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

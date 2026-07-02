@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sanction Letter - {{applicationNumber}}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Arial', 'Helvetica Neue', sans-serif;
+      font-size: 11px;
+      color: #1a1a2e;
+      background: #fff;
+      padding: 40px;
+      line-height: 1.6;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #1a1a2e;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .bank-name {
+      font-size: 22px;
+      font-weight: 900;
+      color: #1a1a2e;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .bank-tagline {
+      font-size: 9px;
+      color: #64748b;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .doc-meta {
+      text-align: right;
+    }
+    .doc-meta .label {
+      font-size: 9px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .doc-meta .value {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    /* ── Title Banner ── */
+    .title-banner {
+      background: #1a1a2e;
+      color: #fff;
+      text-align: center;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .title-banner h1 {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    .title-banner p {
+      font-size: 9px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 1px;
+      margin-top: 3px;
+    }
+
+    /* ── Date + Reference ── */
+    .date-ref {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      font-size: 10px;
+      color: #475569;
+    }
+
+    /* ── Address Block ── */
+    .address-block {
+      margin-bottom: 18px;
+    }
+    .address-block p {
+      font-size: 10px;
+      color: #334155;
+      line-height: 1.7;
+    }
+    .address-block strong {
+      color: #1a1a2e;
+      font-weight: 700;
+    }
+
+    /* ── Subject ── */
+    .subject {
+      background: #f0f4ff;
+      border-left: 4px solid #1a1a2e;
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      border-radius: 0 6px 6px 0;
+    }
+    .subject p {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .subject span {
+      font-size: 10px;
+      color: #475569;
+    }
+
+    /* ── Body Text ── */
+    .body-text {
+      font-size: 10.5px;
+      color: #334155;
+      margin-bottom: 18px;
+      line-height: 1.75;
+      text-align: justify;
+    }
+
+    /* ── Loan Terms Table ── */
+    .terms-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .terms-header {
+      background: #1e293b;
+      color: #fff;
+      padding: 10px 14px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .terms-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .term-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      border-right: 1px solid #f1f5f9;
+    }
+    .term-item:nth-child(2n) {
+      border-right: none;
+    }
+    .term-item:last-child,
+    .term-item:nth-last-child(2) {
+      border-bottom: none;
+    }
+    .term-label {
+      font-size: 8.5px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 2px;
+    }
+    .term-value {
+      font-size: 12px;
+      font-weight: 900;
+      color: #1a1a2e;
+    }
+
+    /* ── Conditions ── */
+    .conditions {
+      margin-bottom: 20px;
+    }
+    .conditions h3 {
+      font-size: 10px;
+      font-weight: 700;
+      color: #1a1a2e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .conditions ol {
+      padding-left: 16px;
+      color: #475569;
+      font-size: 10px;
+    }
+    .conditions ol li {
+      margin-bottom: 4px;
+    }
+
+    /* ── Signature ── */
+    .signature-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .sig-block {
+      text-align: center;
+    }
+    .sig-line {
+      width: 160px;
+      border-top: 1px solid #94a3b8;
+      margin: 0 auto 4px;
+    }
+    .sig-label {
+      font-size: 9px;
+      color: #64748b;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 24px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      font-size: 8.5px;
+      color: #94a3b8;
+    }
+    .footer strong {
+      color: #64748b;
+    }
+
+    .highlight {
+      color: #1e40af;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="bank-name">⬡ FORTRESS BANKING</div>
+      <div class="bank-tagline">Trusted · Secure · Reliable · Since 1994</div>
+    </div>
+    <div class="doc-meta">
+      <div class="label">Document Ref.</div>
+      <div class="value">{{referenceNumber}}</div>
+      <div class="label" style="margin-top:6px">Issued On</div>
+      <div class="value">{{issueDate}}</div>
+    </div>
+  </div>
+
+  <!-- Title Banner -->
+  <div class="title-banner">
+    <h1>Official Sanction Letter</h1>
+    <p>Loan Origination System &nbsp;|&nbsp; Confidential Document</p>
+  </div>
+
+  <!-- Date + Ref -->
+  <div class="date-ref">
+    <span>Date: <strong>{{issueDate}}</strong></span>
+    <span>Application No.: <strong>{{applicationNumber}}</strong></span>
+  </div>
+
+  <!-- Address -->
+  <div class="address-block">
+    <p>To,</p>
+    <p><strong>{{applicantName}}</strong></p>
+    {{#if applicantAddress}}<p>{{applicantAddress}}</p>{{/if}}
+    {{#if applicantCity}}<p>{{applicantCity}}{{#if applicantState}}, {{applicantState}}{{/if}}{{#if applicantPostalCode}} - {{applicantPostalCode}}{{/if}}</p>{{/if}}
+    <p>Email: {{applicantEmail}}</p>
+    <p>Phone: {{applicantPhone}}</p>
+  </div>
+
+  <!-- Subject -->
+  <div class="subject">
+    <p>Subject: Sanction of {{loanTypeDisplay}} — Application No. {{applicationNumber}}</p>
+    <span>Dear {{applicantName}},</span>
+  </div>
+
+  <!-- Body -->
+  <p class="body-text">
+    We are pleased to inform you that your application for a <span class="highlight">{{loanTypeDisplay}}</span> has been
+    reviewed and <strong>duly sanctioned</strong> by the Credit Committee of Fortress Banking Limited, subject to the
+    terms and conditions detailed herein. This sanction is valid for a period of <strong>{{offerValidDays}} days</strong>
+    from the date of this letter.
+  </p>
+  <p class="body-text">
+    The sanction has been granted based on the information and documents provided by you. All details furnished by you
+    are deemed correct and complete. Any misrepresentation may lead to cancellation of this sanction.
+  </p>
+
+  <!-- Loan Terms -->
+  <div class="terms-card">
+    <div class="terms-header">Sanctioned Loan Terms</div>
+    <div class="terms-grid">
+      <div class="term-item">
+        <div class="term-label">Sanctioned Amount</div>
+        <div class="term-value">₹{{loanAmount}}</div>
+      </div>
+      <div class="term-item">
+        <div class="term-label">Rate of Interest</div>
+        <div class="term-value">{{interestRate}}% p.a.</div>
+      </div>
+      <div class="term-item">
+        <div class="term-label">Loan Tenure</div>
+        <div class="term-value">{{tenureMonths}} Months</div>
+      </div>
+      <div class="term-item">
+        <div class="term-label">Monthly EMI</div>
+        <div class="term-value">₹{{emiAmount}}</div>
+      </div>
+      <div class="term-item">
+        <div class="term-label">Loan Type</div>
+        <div class="term-value">{{loanTypeDisplay}}</div>
+      </div>
+      <div class="term-item">
+        <div class="term-label">Accepted On</div>
+        <div class="term-value">{{acceptedDate}}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conditions -->
+  <div class="conditions">
+    <h3>Terms &amp; Conditions</h3>
+    <ol>
+      <li>The loan will be disbursed upon completion of all documentation, KYC formalities, and agreement signing.</li>
+      <li>The EMI will be automatically debited from the registered bank account on the 5th of every month.</li>
+      <li>Any prepayment of the loan will attract a prepayment charge as per the bank's prevailing policy.</li>
+      <li>The sanctioned amount is non-transferable and must be used solely for the stated purpose.</li>
+      <li>Fortress Banking reserves the right to recall the loan if any misrepresentation is discovered.</li>
+      <li>This letter is subject to the execution of necessary loan agreements and mortgage deeds.</li>
+      <li>Rate of interest is subject to change as per the bank's Base Rate revision from time to time.</li>
+    </ol>
+  </div>
+
+  <p class="body-text">
+    We request you to visit your nearest Fortress Banking branch within <strong>{{offerValidDays}} days</strong> to
+    complete the disbursement formalities. Please carry this letter along with the original KYC documents for
+    verification.
+  </p>
+
+  <p class="body-text">
+    We thank you for choosing Fortress Banking Limited and look forward to a long and mutually beneficial relationship.
+  </p>
+
+  <!-- Signature -->
+  <div class="signature-section">
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-label">Applicant's Signature</div>
+      <div class="sig-label" style="margin-top:2px"><strong>{{applicantName}}</strong></div>
+    </div>
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-label">Authorized Signatory</div>
+      <div class="sig-label" style="margin-top:2px"><strong>Fortress Banking Limited</strong></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <strong>Fortress Banking Limited</strong> &nbsp;|&nbsp; CIN: L65191MH1994PLC081618 &nbsp;|&nbsp; RBI License: BANK/2024/FBL &nbsp;|&nbsp; IRDAI Reg: 123<br/>
+    Registered Office: Fortress Tower, BKC, Mumbai - 400 051 &nbsp;|&nbsp; support@fortressbanking.com &nbsp;|&nbsp; 1800-123-4567<br/>
+    <em>This is a computer-generated document. No signature is required on the digital copy.</em>
+  </div>
+
+</body>
+</html>
